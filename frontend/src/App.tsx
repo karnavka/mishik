@@ -74,7 +74,7 @@ export default function App() {
 
                 {/* Header */}
                 <header className="header">
-                    <span className="logo">🐾 PawFinder</span>
+                    <span className="logo">🐾 Mishik</span>
                     <button
                         className={'tab-btn' + (tab === 'animals' ? ' active' : '')}
                         onClick={() => handleTabSwitch('animals')}
