@@ -10,7 +10,7 @@ import java.util.Date;
 @Service
 public class JwtService {
 
-    private final String SECRET = "твій_секретний_ключ_мінімум_32_символи";
+    private final String SECRET = "super-super-super-super-secret-key-123super-secret-key-123";
 
     public String generateToken(String username, String role) {
         return Jwts.builder()
