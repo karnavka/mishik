@@ -5,6 +5,10 @@ import com.mishik.backend.repository.VolonteeringRepository;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
+import java.util.HashMap;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/volonteering")
 public class VolonteeringController {
@@ -16,25 +20,54 @@ public class VolonteeringController {
     }
 
     @GetMapping
-    public List<Volonteering> getVolonteering(
+    public List<Map<String, Object>> getVolonteering(
             @RequestParam(required = false) String city,
             @RequestParam(required = false) String region
     ) {
 
+        List<Volonteering> list;
+
         if (city != null && region != null) {
-            return repository.findByAddress_CityAndAddress_Region(city, region);
+            list = repository.findByAddress_CityAndAddress_Region(city, region);
+        }
+        else if (city != null) {
+            list = repository.findByAddress_City(city);
+        }
+        else if (region != null) {
+            list = repository.findByAddress_Region(region);
+        }
+        else {
+            list = repository.findAll();
         }
 
-        if (city != null) {
-            return repository.findByAddress_City(city);
+        return list.stream()
+                .map(this::toMap)
+                .toList();
+    }
+
+  
+    private Map<String, Object> toMap(Volonteering v) {
+
+        Map<String, Object> m = new HashMap<>();
+
+        m.put("id", v.getId());
+        m.put("name", v.getName());
+        m.put("description", v.getDescription());
+        m.put("dateOfEvent", v.getDateOfEvent());
+
+        if (v.getUser() != null) {
+            m.put("userId", v.getUser().getId());
+            m.put("userName", v.getUser().getFirstName());
         }
 
-        if (region != null) {
-            return repository.findByAddress_Region(region);
+        if (v.getAddress() != null) {
+            m.put("city", v.getAddress().getCity());
+            m.put("region", v.getAddress().getRegion());
+            m.put("street", v.getAddress().getStreet());
+            m.put("latitude", v.getAddress().getLatitude());
+            m.put("longitude", v.getAddress().getLongitude());
         }
 
-        return repository.findAll();
+        return m;
     }
 }
-//GET /volonteering?city=Kyiv
-//GET /volonteering?region=Kyivska

@@ -9,6 +9,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.mishik.backend.repository.ShelterRepository;
 
+import com.mishik.backend.entity.Shelter;
+
+import java.util.HashMap;
+
+import java.util.Map;
+
 @RestController
 @RequestMapping("/shelters")
 public class ShelterController {
@@ -20,24 +26,57 @@ public class ShelterController {
     }
 
     @GetMapping
-    public List<com.mishik.backend.entity.Shelter> getShelters(
+    public List<Map<String, Object>> getShelters(
             @RequestParam(required = false) String city,
             @RequestParam(required = false) String region
     ) {
 
+        List<Shelter> shelters;
+
         if (city != null && region != null) {
-            return repository.findByAddress_CityAndAddress_Region(city, region);
+            shelters = repository.findByAddress_CityAndAddress_Region(city, region);
+        }
+        else if (city != null) {
+            shelters = repository.findByAddress_City(city);
+        }
+        else if (region != null) {
+            shelters = repository.findByAddress_Region(region);
+        }
+        else {
+            shelters = repository.findAll();
         }
 
-        if (city != null) {
-            return repository.findByAddress_City(city);
+        return shelters.stream()
+                .map(this::toMap)
+                .toList();
+    }
+
+    // -----------------------------
+    // ENTITY -> MAP
+    // -----------------------------
+    private Map<String, Object> toMap(Shelter s) {
+        Map<String, Object> m = new HashMap<>();
+
+        m.put("id", s.getId());
+        m.put("name", s.getName());
+        m.put("phoneNumber", s.getPhoneNumber());
+        m.put("adoptionConditions", s.getAdoptionConditions());
+
+        if (s.getAccount() != null) {
+            m.put("login", s.getAccount().getLogin());
+            m.put("role", s.getAccount().getRole());
         }
 
-        if (region != null) {
-            return repository.findByAddress_Region(region);
+
+        if (s.getAddress() != null) {
+            m.put("city", s.getAddress().getCity());
+            m.put("region", s.getAddress().getRegion());
+            m.put("street", s.getAddress().getStreet());
+            m.put("latitude", s.getAddress().getLatitude());
+            m.put("longitude", s.getAddress().getLongitude());
         }
 
-        return repository.findAll();
+        return m;
     }
 }
 

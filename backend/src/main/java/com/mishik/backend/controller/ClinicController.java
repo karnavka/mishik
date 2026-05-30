@@ -10,6 +10,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.mishik.backend.entity.Clinic;
 import com.mishik.backend.repository.ClinicRepository;
 
+
+import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/clinics")
 public class ClinicController {
@@ -21,26 +27,53 @@ public class ClinicController {
     }
 
     @GetMapping
-    public List<Clinic> getClinics(
+    public List<Map<String, Object>> getClinics(
             @RequestParam(required = false) String city,
             @RequestParam(required = false) String region
     ) {
 
+        List<Clinic> clinics;
+
         if (city != null && region != null) {
-            return repository.findByAddress_CityAndAddress_Region(city, region);
+            clinics = repository.findByAddress_CityAndAddress_Region(city, region);
+        }
+        else if (city != null) {
+            clinics = repository.findByAddress_City(city);
+        }
+        else if (region != null) {
+            clinics = repository.findByAddress_Region(region);
+        }
+        else {
+            clinics = repository.findAll();
         }
 
-        if (city != null) {
-            return repository.findByAddress_City(city);
+        return clinics.stream()
+                .map(this::toMap)
+                .toList();
+    }
+
+    // -----------------------------
+    // ENTITY -> MAP
+    // -----------------------------
+    private Map<String, Object> toMap(Clinic c) {
+        Map<String, Object> m = new HashMap<>();
+
+        m.put("id", c.getId());
+        m.put("name", c.getName());
+        m.put("phoneNumber", c.getPhoneNumber());
+        m.put("hoursOfOperation", c.getHoursOfOperation());
+
+        // address flatten (дуже важливо для фронту)
+        if (c.getAddress() != null) {
+            m.put("city", c.getAddress().getCity());
+            m.put("region", c.getAddress().getRegion());
+            m.put("street", c.getAddress().getStreet());
+            m.put("latitude", c.getAddress().getLatitude());
+            m.put("longitude", c.getAddress().getLongitude());
         }
 
-        if (region != null) {
-            return repository.findByAddress_Region(region);
-        }
-
-        return repository.findAll();
+        return m;
     }
 }
-
 //GET /clinics?city=Kyiv
 //GET /clinics?region=Kyivska
