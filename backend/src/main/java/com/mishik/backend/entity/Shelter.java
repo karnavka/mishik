@@ -15,7 +15,7 @@ public class Shelter {
     private String name;
     private String phoneNumber;
     @OneToOne(optional = false)
-    @JoinColumn(name = "account_login", nullable = false)
+    @JoinColumn(name = "account_id", nullable = false)
     private Account account;
     @Embedded
     private Address address;

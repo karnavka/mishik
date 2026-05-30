@@ -23,19 +23,19 @@ public class AuthService {
     }
 
     public Map<String, String> login(LoginRequest request) {
-        Account user = userRepository.findByUsername(request.username)
+        Account user = userRepository.findByLogin(request.username)
                 .orElseThrow(() -> new RuntimeException("Користувача не знайдено"));
 
         if (!passwordEncoder.matches(request.password, user.getPassword())) {
             throw new RuntimeException("Невірний пароль");
         }
 
-        String token = jwtService.generateToken(user.getUsername(), user.getRole());
+        String token = jwtService.generateToken(user.getLogin(), user.getRole().name());
 
         // Повертаємо токен + роль фронтенду
         return Map.of(
                 "token", token,
-                "role", user.getRole()
+                "role", user.getRole().name()
         );
     }
 }

@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/shelters")
+@RequestMapping("/api/shelters")
 public class ShelterController {
 
     private final ShelterRepository repository;

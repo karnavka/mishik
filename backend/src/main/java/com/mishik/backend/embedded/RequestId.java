@@ -3,12 +3,16 @@ package com.mishik.backend.embedded;
 import java.io.Serializable;
 import java.util.Objects;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 
 @Embeddable
 public class RequestId implements Serializable {
 
+    @Column(name = "user_id")
     private Long userId;
+
+    @Column(name = "animal_id")
     private Long animalId;
 
     public RequestId() {}
@@ -18,15 +22,30 @@ public class RequestId implements Serializable {
         this.animalId = animalId;
     }
 
-    // ОБОВʼЯЗКОВО
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public Long getAnimalId() {
+        return animalId;
+    }
+
+    public void setAnimalId(Long animalId) {
+        this.animalId = animalId;
+    }
+
     @Override
-    public boolean equals(Object o) { 
+    public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         RequestId that = (RequestId) o;
         return Objects.equals(userId, that.userId) &&
-               Objects.equals(animalId, that.animalId);
-     }
+                Objects.equals(animalId, that.animalId);
+    }
 
     @Override
     public int hashCode() {

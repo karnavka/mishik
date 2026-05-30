@@ -9,5 +9,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface AccountRepository extends JpaRepository<Account, Integer> {
-    Optional<Account> findByUsername(String username); // JPA сам генерує SQL
+    Optional<Account> findByLogin(String login); // JPA сам генерує SQL
 }

@@ -13,15 +13,19 @@ import jakarta.persistence.OneToOne;
 
 @Entity
 public class User {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @OneToOne(optional = false)
-    @JoinColumn(name = "account_login", nullable = false)
+    @JoinColumn(name = "account_id", nullable = false)
     private Account account;
+
     private String firstName;
     private String lastName;
     private String patronymic;
+
     @Enumerated(EnumType.STRING)
     private Sex sex;
 

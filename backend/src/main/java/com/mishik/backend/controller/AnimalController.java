@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/animals")
+@RequestMapping("/api/animals")
 public class AnimalController {
 
     private final AnimalRepository repository;
