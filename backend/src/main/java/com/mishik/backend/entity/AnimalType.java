@@ -10,4 +10,20 @@ public class AnimalType {
     private Long id;
     //usefulInfo всередині як атрибут необов'язковий
     String usefulInfo;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getUsefulInfo() {
+        return usefulInfo;
+    }
+
+    public void setUsefulInfo(String usefulInfo) {
+        this.usefulInfo = usefulInfo;
+    }
 }
