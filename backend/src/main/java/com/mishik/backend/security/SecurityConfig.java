@@ -35,10 +35,10 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
 
-                        // 🔓 AUTH PUBLIC
+                        // AUTH PUBLIC
                         .requestMatchers("/api/auth/**").permitAll()
 
-                        // 🔓 PUBLIC READ API
+                        // PUBLIC READ API
                         .requestMatchers(HttpMethod.GET,
                                 "/api/animals/**",
                                 "/api/clinics/**",
@@ -49,13 +49,14 @@ public class SecurityConfig {
                                 "/api/animal-types"
                                 ).permitAll()
 
-                        // 👤 AUTHENTICATED USER ACTIONS
+                        // AUTHENTICATED USER ACTIONS
                         .requestMatchers("/api/users/me").authenticated()
 
-                        // 🧑‍💻 USER ACTIONS (write operations)
+                        // USER ACTIONS
                         .requestMatchers(HttpMethod.POST,
                                 "/api/adoption-requests/**",
-                                "/api/volunteering/**"
+                                "/api/volunteering/**",
+                                "/api/volunteering"
                         ).authenticated()
 
                         .requestMatchers(HttpMethod.PUT,
