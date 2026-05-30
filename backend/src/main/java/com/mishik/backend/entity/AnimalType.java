@@ -5,9 +5,36 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 @Entity
 public class AnimalType {
-     @Id
- @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    //usefulInfo всередині як атрибут необов'язковий
-    String usefulInfo;
+
+    private String usefulInfo;
+
+    public AnimalType() {
+    }
+
+    public AnimalType(Long id, String usefulInfo) {
+        this.id = id;
+        this.usefulInfo = usefulInfo;
+    }
+    public AnimalType(String usefulInfo) {
+        this.usefulInfo = usefulInfo;
+    }
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getUsefulInfo() {
+        return usefulInfo;
+    }
+
+    public void setUsefulInfo(String usefulInfo) {
+        this.usefulInfo = usefulInfo;
+    }
 }
