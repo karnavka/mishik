@@ -1,43 +1,25 @@
 package com.mishik.backend.entity;
 
-import com.mishik.backend.enums.Role;
+import jakarta.persistence.*;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.Id;
+import lombok.*;
 
 @Entity
+@Table(name = "account")
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Account {
+
     @Id
-    public String login;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
 
-    public String password;
+    private String username;
+    private String password;
+    private String role;
 
-    @Enumerated(EnumType.STRING)
-    private Role role;
-
-    public String getLogin() {
-        return login;
-    }
-
-    public void setLogin(String login) {
-        this.login = login;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public Role getRole() {
-        return role;
-    }
-
-    public void setRole(Role role) {
-        this.role = role;
-    }
+    @Column(name = "id_employee")
+    private String idEmployee;
 }
