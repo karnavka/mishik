@@ -57,7 +57,7 @@ public class DataLoader {
                 Account account = new Account();
                 account.setLogin("user" + i);
                 account.setPassword("1234");
-                account.setRole(Role.USER);
+                account.setRole(Role.ROLE_USER);
 
                 accountRepository.save(account);
 
@@ -133,7 +133,7 @@ public class DataLoader {
         Account acc = new Account();
         acc.setLogin(login);
         acc.setPassword("1234");
-        acc.setRole(Role.SHELTER);
+        acc.setRole(Role.ROLE_SHELTER);
         return repo.save(acc);
     }
 
