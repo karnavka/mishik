@@ -49,11 +49,15 @@ public class JwtFilter extends OncePerRequestFilter {
 
         String token = header.substring(7);
 
-        if (!jwtService.validate(token)) {
+        try {
+            if (!jwtService.validate(token)) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+        } catch (Exception e) {
             filterChain.doFilter(request, response);
             return;
         }
-
         String username = jwtService.extractUsername(token);
 
         Account account = accountRepository.findByLogin(username).orElse(null);

@@ -21,6 +21,6 @@ public class Account {
     private String password;
     private Role role;
 
-    @Column(name = "id_employee")
-    private String idEmployee;
+   // @Column(name = "id_employee")
+  //  private String idEmployee;
 }

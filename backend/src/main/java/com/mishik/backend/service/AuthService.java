@@ -23,7 +23,7 @@ public class AuthService {
     }
 
     public Map<String, String> login(LoginRequest request) {
-        Account user = userRepository.findByLogin(request.username)
+        Account user = userRepository.findByLogin(request.login)
                 .orElseThrow(() -> new RuntimeException("Користувача не знайдено"));
 
         if (!passwordEncoder.matches(request.password, user.getPassword())) {
