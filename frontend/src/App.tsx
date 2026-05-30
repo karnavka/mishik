@@ -1,122 +1,151 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
 import './App.css'
 
-function App() {
-  const [count, setCount] = useState(0)
+import { useState, useMemo } from 'react';
+import type {Animal, Organization} from "./types";
+import { useFetch } from './api/fetch';
+import { MOCK_ANIMALS, MOCK_ORGS } from './utils/mocks.ts';
+import {AnimalCard} from "./components/animalCard.tsx";
+import {OrgCard} from "./components/orgCard.tsx";
 
-  return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+// ─── Main App ─────────────────────────────────────────────────────────────────
 
-      <div className="ticks"></div>
+type Tab = 'animals' | 'orgs';
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+export default function App() {
+    const [tab, setTab] = useState<Tab>('animals');
+    const [search, setSearch] = useState('');
+    const [filters, setFilters] = useState<Record<string, string>>({});
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+    // Reset filters when switching tabs
+    function handleTabSwitch(t: Tab) {
+        setTab(t);
+        setSearch('');
+        setFilters({});
+    }
+
+    function toggleFilter(key: string, value: string) {
+        setFilters(prev =>
+            prev[key] === value
+                ? Object.fromEntries(Object.entries(prev).filter(([k]) => k !== key))
+                : { ...prev, [key]: value }
+        );
+    }
+
+    const { data: animals, loading: animalsLoading, error: animalsError } =
+        useFetch<Animal>(null, MOCK_ANIMALS);
+        //useFetch<Animal>('/api/animals', MOCK_ANIMALS);
+
+    const { data: orgs, loading: orgsLoading, error: orgsError } =
+        useFetch<Organization>(null, MOCK_ORGS);
+        //useFetch<Organization>('/api/organizations', MOCK_ORGS);
+
+    const visibleAnimals = useMemo(() => {
+        const q = search.toLowerCase();
+        return animals.filter(a => {
+            if (q && !a.name?.toLowerCase().includes(q) && !a.breed?.toLowerCase().includes(q)) return false;
+            return Object.entries(filters).every(([k, v]) => !v || String((a as Record<string, unknown>)[k]) === v);
+        });
+    }, [animals, search, filters]);   // ← animals added to deps
+
+    const visibleOrgs = useMemo(() => {
+        const q = search.toLowerCase();
+        return orgs.filter(o => {
+            if (q && !o.name?.toLowerCase().includes(q)) return false;
+            return Object.entries(filters).every(([k, v]) => !v || String((o as Record<string, unknown>)[k]) === v);
+        });
+    }, [orgs, search, filters]);
+
+    // ── Sidebar filter config ──
+    const sidebarFilters =
+        tab === 'animals'
+            ? [
+                { key: 'species', label: 'Вид',    opts: [{ v: 'Кіт', l: '🐱 Кіт' }, { v: 'Пес', l: '🐶 Пес' }] },
+                { key: 'gender',  label: 'Стать',  opts: [{ v: 'Хлопчик', l: '♂ Хлопчик' }, { v: 'Дівчинка', l: '♀ Дівчинка' }] },
+                { key: 'size',    label: 'Розмір', opts: [{ v: 'Маленький', l: 'Маленький' }, { v: 'Середній', l: 'Середній' }, { v: 'Великий', l: 'Великий' }] },
+            ]
+            : [
+                { key: 'type', label: 'Тип',   opts: [{ v: 'Притулок', l: '🏠 Притулок' }, { v: 'Клініка', l: '🏥 Клініка' }, { v: 'Фонд', l: '❤️ Фонд' }] },
+                { key: 'city', label: 'Місто', opts: [{ v: 'Київ', l: 'Київ' }, { v: 'Львів', l: 'Львів' }, { v: 'Харків', l: 'Харків' }] },
+            ];
+
+    return (
+        <>
+            <div className="app">
+
+                {/* Header */}
+                <header className="header">
+                    <span className="logo">🐾 Mishik</span>
+                    <button
+                        className={'tab-btn' + (tab === 'animals' ? ' active' : '')}
+                        onClick={() => handleTabSwitch('animals')}
+                    >
+                        Знайти друга
+                    </button>
+                    <button
+                        className={'tab-btn' + (tab === 'orgs' ? ' active' : '')}
+                        onClick={() => handleTabSwitch('orgs')}
+                    >
+                        Організації
+                    </button>
+                </header>
+
+                <div className="body">
+
+                    {/* Sidebar */}
+                    <aside className="sidebar">
+                        <span className="sidebar-title">Фільтри</span>
+                        {sidebarFilters.map(fg => (
+                            <div className="filter-group" key={fg.key}>
+                                <span className="filter-group-label">{fg.label}</span>
+                                {fg.opts.map(o => (
+                                    <button
+                                        key={o.v}
+                                        className={'filter-opt' + (filters[fg.key] === o.v ? ' selected' : '')}
+                                        onClick={() => toggleFilter(fg.key, o.v)}
+                                    >
+                                        {o.l}
+                                    </button>
+                                ))}
+                            </div>
+                        ))}
+                        <button
+                            className="add-btn"
+                            onClick={() => alert('TODO: open form')}
+                        >
+                            {tab === 'animals' ? '+ Додати тварину' : '+ Додати організацію'}
+                        </button>
+                    </aside>
+
+                    {/* Main */}
+                    <div className="main">
+                        <div className="search-bar">
+                            <input
+                                type="text"
+                                placeholder={tab === 'animals' ? "Пошук за ім'ям або породою..." : 'Пошук за назвою...'}
+                                value={search}
+                                onChange={e => setSearch(e.target.value)}
+                            />
+                        </div>
+
+                        <div className="feed">
+                            {tab === 'animals' && (
+                                animalsLoading     ? <div className="empty">Завантаження...</div> :
+                                    animalsError       ? <div className="empty">Помилка: {animalsError}</div> :
+                                        visibleAnimals.length === 0 ? <div className="empty">🐾 Тварин не знайдено</div> :
+                                            visibleAnimals.map(a => <AnimalCard key={a.id} animal={a} />)
+                            )}
+                            {tab === 'orgs' && (
+                                orgsLoading        ? <div className="empty">Завантаження...</div> :
+                                    orgsError          ? <div className="empty">Помилка: {orgsError}</div> :
+                                        visibleOrgs.length === 0 ? <div className="empty">🏠 Організацій не знайдено</div> :
+                                            visibleOrgs.map(o => <OrgCard key={o.id} org={o} />)
+                            )}
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </>
+    );
 }
 
-export default App
