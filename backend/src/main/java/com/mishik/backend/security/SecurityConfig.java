@@ -28,9 +28,9 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()        // логін/реєстрація
-                        .requestMatchers(HttpMethod.GET, "/api/orders/**").permitAll()  // перегляд без логіну
-                        .requestMatchers(HttpMethod.POST, "/api/orders/**").authenticated() // дія — з логіном
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/orders/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/orders/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

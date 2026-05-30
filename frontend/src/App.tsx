@@ -1,17 +1,20 @@
 import './App.css'
-
+import { useAuth } from '.api/useAuth.ts';
 import { useState, useMemo } from 'react';
 import type {Animal, Organization} from "./types";
 import { useFetch } from './api/fetch';
 import { MOCK_ANIMALS, MOCK_ORGS } from './utils/mocks.ts';
 import {AnimalCard} from "./components/animalCard.tsx";
 import {OrgCard} from "./components/orgCard.tsx";
+import { RoleGuard } from './components/RoleGuard.tsx';
 
 // ─── Main App ─────────────────────────────────────────────────────────────────
 
 type Tab = 'animals' | 'orgs';
-
-export default function App() {
+export const AnimalPage = () => {
+  const { loggedIn } = useAuth();
+ export default function App() {
+    
     const [tab, setTab] = useState<Tab>('animals');
     const [search, setSearch] = useState('');
     const [filters, setFilters] = useState<Record<string, string>>({});
@@ -68,6 +71,8 @@ export default function App() {
                 { key: 'city', label: 'Місто', opts: [{ v: 'Київ', l: 'Київ' }, { v: 'Львів', l: 'Львів' }, { v: 'Харків', l: 'Харків' }] },
             ];
 
+    
+
     return (
         <>
             <div className="app">
@@ -108,12 +113,15 @@ export default function App() {
                                 ))}
                             </div>
                         ))}
+                        <RoleGuard>
                         <button
                             className="add-btn"
                             onClick={() => alert('TODO: open form')}
                         >
                             {tab === 'animals' ? '+ Додати тварину' : '+ Додати організацію'}
                         </button>
+        
+                        </RoleGuard>
                     </aside>
 
                     {/* Main */}
@@ -128,6 +136,7 @@ export default function App() {
                         </div>
 
                         <div className="feed">
+                             
                             {tab === 'animals' && (
                                 animalsLoading     ? <div className="empty">Завантаження...</div> :
                                     animalsError       ? <div className="empty">Помилка: {animalsError}</div> :
@@ -140,7 +149,7 @@ export default function App() {
                                         visibleOrgs.length === 0 ? <div className="empty">🏠 Організацій не знайдено</div> :
                                             visibleOrgs.map(o => <OrgCard key={o.id} org={o} />)
                             )}
-                        </div>
+                                                    </div>
                     </div>
 
                 </div>
@@ -148,4 +157,5 @@ export default function App() {
         </>
     );
 }
+};
 
