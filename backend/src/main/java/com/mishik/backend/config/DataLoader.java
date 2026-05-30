@@ -8,6 +8,7 @@ import com.mishik.backend.repository.*;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
 public class DataLoader {
@@ -18,7 +19,9 @@ public class DataLoader {
             UserRepository userRepository,
             ShelterRepository shelterRepository,
             AnimalRepository animalRepository,
-            AnimalTypeRepository animalTypeRepository) {
+            AnimalTypeRepository animalTypeRepository,
+            PasswordEncoder passwordEncoder
+    ) {
 
         return args -> {
 
@@ -29,38 +32,24 @@ public class DataLoader {
             // =========================
             // ANIMAL TYPES
             // =========================
-
-            AnimalType dog = new AnimalType();
-            dog.setUsefulInfo("Dog");
-
-            AnimalType cat = new AnimalType();
-            cat.setUsefulInfo("Cat");
-
-            AnimalType rabbit = new AnimalType();
-            rabbit.setUsefulInfo("Rabbit");
-
-            AnimalType parrot = new AnimalType();
-            parrot.setUsefulInfo("Parrot");
-
-            animalTypeRepository.save(dog);
-            animalTypeRepository.save(cat);
-            animalTypeRepository.save(rabbit);
-            animalTypeRepository.save(parrot);
+            AnimalType dog = animalTypeRepository.save(new AnimalType("Dog"));
+            AnimalType cat = animalTypeRepository.save(new AnimalType("Cat"));
+            AnimalType rabbit = animalTypeRepository.save(new AnimalType("Rabbit"));
+            AnimalType parrot = animalTypeRepository.save(new AnimalType("Parrot"));
 
             AnimalType[] types = {dog, cat, rabbit, parrot};
 
             // =========================
             // USERS
             // =========================
-
             for (int i = 1; i <= 10; i++) {
 
                 Account account = new Account();
                 account.setLogin("user" + i);
-                account.setPassword("1234");
+                account.setPassword(passwordEncoder.encode("1234"));
                 account.setRole(Role.ROLE_USER);
 
-                accountRepository.save(account);
+                account = accountRepository.save(account);
 
                 User user = new User();
                 user.setAccount(account);
@@ -75,25 +64,23 @@ public class DataLoader {
             // =========================
             // SHELTERS
             // =========================
+            Account shelter1Acc = createAccount(accountRepository, passwordEncoder, "shelter1");
+            Account shelter2Acc = createAccount(accountRepository, passwordEncoder, "shelter2");
+            Account shelter3Acc = createAccount(accountRepository, passwordEncoder, "shelter3");
 
-            Account shelterAcc1 = createShelterAccount(accountRepository, "shelter1");
-            Account shelterAcc2 = createShelterAccount(accountRepository, "shelter2");
-            Account shelterAcc3 = createShelterAccount(accountRepository, "shelter3");
+            Shelter shelter1 = createShelter(shelter1Acc, "Happy Paws", "+380501111111", "Interview required");
+            Shelter shelter2 = createShelter(shelter2Acc, "Kind Hearts", "+380502222222", "Passport required");
+            Shelter shelter3 = createShelter(shelter3Acc, "Animal Home", "+380503333333", "Family check");
 
-            Shelter shelter1 = createShelter(shelterAcc1, "Happy Paws", "+380501111111", "Interview required");
-            Shelter shelter2 = createShelter(shelterAcc2, "Kind Hearts", "+380502222222", "Passport required");
-            Shelter shelter3 = createShelter(shelterAcc3, "Animal Home", "+380503333333", "Family check");
-
-            shelterRepository.save(shelter1);
-            shelterRepository.save(shelter2);
-            shelterRepository.save(shelter3);
+            shelter1 = shelterRepository.save(shelter1);
+            shelter2 = shelterRepository.save(shelter2);
+            shelter3 = shelterRepository.save(shelter3);
 
             Shelter[] shelters = {shelter1, shelter2, shelter3};
 
             // =========================
             // ANIMALS
             // =========================
-
             String[] names = {
                     "Rex", "Max", "Bella", "Lucy", "Charlie",
                     "Luna", "Rocky", "Milo", "Oscar", "Simba",
@@ -104,7 +91,6 @@ public class DataLoader {
             for (int i = 0; i < names.length; i++) {
 
                 Animal animal = new Animal();
-
                 animal.setName(names[i]);
                 animal.setAge((byte) (1 + i % 12));
                 animal.setHeight(20 + i * 2);
@@ -112,8 +98,8 @@ public class DataLoader {
 
                 animal.setSex(
                         i % 3 == 0 ? Sex.MALE :
-                        i % 3 == 1 ? Sex.FEMALE :
-                                Sex.UNKNOWN
+                                i % 3 == 1 ? Sex.FEMALE :
+                                        Sex.UNKNOWN
                 );
 
                 animal.setAnimalType(types[i % types.length]);
@@ -122,7 +108,7 @@ public class DataLoader {
                 animalRepository.save(animal);
             }
 
-            System.out.println("=== TEST DATA CREATED ===");
+            System.out.println("=== TEST DATA CREATED SUCCESSFULLY ===");
         };
     }
 
@@ -130,15 +116,24 @@ public class DataLoader {
     // HELPERS
     // =========================
 
-    private Account createShelterAccount(AccountRepository repo, String login) {
+    private Account createAccount(
+            AccountRepository repo,
+            PasswordEncoder encoder,
+            String login
+    ) {
         Account acc = new Account();
         acc.setLogin(login);
-        acc.setPassword("1234");
+        acc.setPassword(encoder.encode("1234"));
         acc.setRole(Role.ROLE_SHELTER);
         return repo.save(acc);
     }
 
-    private Shelter createShelter(Account account, String name, String phone, String conditions) {
+    private Shelter createShelter(
+            Account account,
+            String name,
+            String phone,
+            String conditions
+    ) {
         Shelter shelter = new Shelter();
         shelter.setAccount(account);
         shelter.setName(name);

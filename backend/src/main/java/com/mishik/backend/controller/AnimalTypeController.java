@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.mishik.backend.repository.AnimalTypeRepository;
 
 @RestController
-@RequestMapping("/animal-types")
+@RequestMapping("/api/animal-types")
 public class AnimalTypeController {
 
     private final AnimalTypeRepository repository;

@@ -2,6 +2,7 @@ package com.mishik.backend.controller;
 
 import com.mishik.backend.entity.Volonteering;
 import com.mishik.backend.repository.VolonteeringRepository;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -10,7 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/volonteering")
+@RequestMapping("/api/volonteering")
 public class VolonteeringController {
 
     private final VolonteeringRepository repository;
@@ -75,5 +76,15 @@ public class VolonteeringController {
         }
 
         return m;
+    }
+
+    //створити репозиторій
+    @PostMapping
+    public Map<String, Object> create(@RequestBody Volonteering v, Authentication auth) {
+
+        v.setId(null);
+        repository.save(v);
+
+        return Map.of("status", "created");
     }
 }

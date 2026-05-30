@@ -12,7 +12,6 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-
 public class Account {
 
     @Id
@@ -23,6 +22,7 @@ public class Account {
     private String password;
     @Enumerated(EnumType.STRING)
     private Role role;
+
     @Column(name = "id_employee")
     private String idEmployee;
 }

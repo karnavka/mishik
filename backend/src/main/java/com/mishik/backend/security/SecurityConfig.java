@@ -1,4 +1,5 @@
 package com.mishik.backend.security;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -21,18 +22,55 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
         http
+                // JWT → CSRF не потрібен
                 .csrf(csrf -> csrf.disable())
+
+                // Stateless API
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
+
                 .authorizeHttpRequests(auth -> auth
+
+                        // 🔓 AUTH PUBLIC
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/orders/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/orders/**").authenticated()
+
+                        // 🔓 PUBLIC READ API
+                        .requestMatchers(HttpMethod.GET,
+                                "/api/animals/**",
+                                "/api/clinics/**",
+                                "/api/shelters/**",
+                                "/api/volunteering/**",
+                                "/api/volunteering",
+                                "/api/animal-types/**",
+                                "/api/animal-types"
+                                ).permitAll()
+
+                        // 👤 AUTHENTICATED USER ACTIONS
+                        .requestMatchers("/api/users/me").authenticated()
+
+                        // 🧑‍💻 USER ACTIONS (write operations)
+                        .requestMatchers(HttpMethod.POST,
+                                "/api/adoption-requests/**",
+                                "/api/volunteering/**"
+                        ).authenticated()
+
+                        .requestMatchers(HttpMethod.PUT,
+                                "/api/users/me"
+                        ).authenticated()
+
+                        .requestMatchers(HttpMethod.DELETE,
+                                "/api/adoption-requests/**"
+                        ).authenticated()
+
+                        // 🔒 EVERYTHING ELSE
                         .anyRequest().authenticated()
                 )
+
+                // JWT filter
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

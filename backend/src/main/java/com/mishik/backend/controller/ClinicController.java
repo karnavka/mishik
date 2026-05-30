@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/clinics")
+@RequestMapping("/api/clinics")
 public class ClinicController {
 
     private final ClinicRepository repository;
