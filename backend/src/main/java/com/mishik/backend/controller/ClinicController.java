@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.mishik.backend.entity.Clinic;
 import com.mishik.backend.repository.ClinicRepository;
 
-
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -26,24 +25,26 @@ public class ClinicController {
         this.repository = repository;
     }
 
+    // -------------------------------
+    // приклад : GET /clinics?city=Kyiv
+    // приклад : GET /clinics?region=Kyivska
+    // приклад : GET /clinics?city=Kyiv&region=Kyivska
+    // фільтрація клінік по місту та/або регіону (параметри необов'язкові)
+    // -------------------------------
     @GetMapping
     public List<Map<String, Object>> getClinics(
             @RequestParam(required = false) String city,
-            @RequestParam(required = false) String region
-    ) {
+            @RequestParam(required = false) String region) {
 
         List<Clinic> clinics;
 
         if (city != null && region != null) {
             clinics = repository.findByAddress_CityAndAddress_Region(city, region);
-        }
-        else if (city != null) {
+        } else if (city != null) {
             clinics = repository.findByAddress_City(city);
-        }
-        else if (region != null) {
+        } else if (region != null) {
             clinics = repository.findByAddress_Region(region);
-        }
-        else {
+        } else {
             clinics = repository.findAll();
         }
 
@@ -52,9 +53,7 @@ public class ClinicController {
                 .toList();
     }
 
-    // -----------------------------
-    // ENTITY -> MAP
-    // -----------------------------
+    // доп метод (те що повернеться фронту)
     private Map<String, Object> toMap(Clinic c) {
         Map<String, Object> m = new HashMap<>();
 
@@ -63,7 +62,6 @@ public class ClinicController {
         m.put("phoneNumber", c.getPhoneNumber());
         m.put("hoursOfOperation", c.getHoursOfOperation());
 
-        // address flatten (дуже важливо для фронту)
         if (c.getAddress() != null) {
             m.put("city", c.getAddress().getCity());
             m.put("region", c.getAddress().getRegion());
@@ -75,5 +73,5 @@ public class ClinicController {
         return m;
     }
 }
-//GET /clinics?city=Kyiv
-//GET /clinics?region=Kyivska
+// GET /clinics?city=Kyiv
+// GET /clinics?region=Kyivska

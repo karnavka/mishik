@@ -19,10 +19,10 @@ public class AnimalController {
         this.repository = repository;
     }
 
-    // -------------------------------
-    // 1. BY SHELTER
-    // GET /animals/shelter/1
-    // -------------------------------
+ // -------------------------------
+    // Приклад : GET /animals/shelter/1
+    // Знаходження всіх тварин, які знаходяться в конкретному притулку
+ // -------------------------------
     @GetMapping("/shelter/{id}")
     public List<Map<String, Object>> getByShelter(@PathVariable Long id) {
 
@@ -33,8 +33,8 @@ public class AnimalController {
     }
 
     // -------------------------------
-    // 2. FILTER API (MAIN FOR FRONTEND)
-    // GET /animals?sex=MALE&typeId=1
+    // для фільтрівання по параметрах 
+    // приклад : GET /animals?sex=MALE&typeId=1
     // -------------------------------
     @GetMapping
     public List<Map<String, Object>> getFiltered(
@@ -61,10 +61,7 @@ public class AnimalController {
                 .map(this::toMap)
                 .toList();
     }
-
-    // -------------------------------
-    // mapper (Entity -> Map)
-    // -------------------------------
+//просто допоміжний метод для конвертації сутності в Map 
     private Map<String, Object> toMap(Animal a) {
         Map<String, Object> m = new HashMap<>();
 

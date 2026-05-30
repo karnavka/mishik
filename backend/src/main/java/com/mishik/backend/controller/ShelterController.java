@@ -25,6 +25,12 @@ public class ShelterController {
         this.repository = repository;
     }
 
+     // -------------------------------
+    // приклад : GET /shelters?city=Kyiv
+    // приклад : GET /shelters?region=Kyivska
+    // приклад : GET /shelters?city=Kyiv&region=Kyivska
+    // фільтрація притулків по місту та/або регіону (параметри необов'язкові)
+    // -------------------------------
     @GetMapping
     public List<Map<String, Object>> getShelters(
             @RequestParam(required = false) String city,
@@ -51,9 +57,7 @@ public class ShelterController {
                 .toList();
     }
 
-    // -----------------------------
-    // ENTITY -> MAP
-    // -----------------------------
+   // просто допоміжний метод для конвертації сутності в Map
     private Map<String, Object> toMap(Shelter s) {
         Map<String, Object> m = new HashMap<>();
 

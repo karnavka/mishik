@@ -21,6 +21,7 @@ public class AnimalTypeController {
     }
 
     // GET /animal-types
+    // взяти всі види тварин для переліку на фронтенді
     @GetMapping
     public List<Map<String, Object>> getAll() {
 

@@ -19,6 +19,11 @@ public class VolonteeringController {
         this.repository = repository;
     }
 
+    // -------------------------------
+    // приклад : GET /volonteering?city=Kyiv
+    // приклад : GET /volonteering?region=Kyivska
+    // приклад : GET /volonteering?city=Kyiv&region=Kyivska
+    // фільтрація волонтерств по місту та/або регі
     @GetMapping
     public List<Map<String, Object>> getVolonteering(
             @RequestParam(required = false) String city,
@@ -46,6 +51,7 @@ public class VolonteeringController {
     }
 
   
+    // просто допоміжний метод для конвертації сутності в Map
     private Map<String, Object> toMap(Volonteering v) {
 
         Map<String, Object> m = new HashMap<>();
