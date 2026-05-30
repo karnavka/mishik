@@ -2,7 +2,7 @@ package com.mishik.backend.security;
 
 import com.mishik.backend.entity.Account;
 import com.mishik.backend.service.JwtService;
-import com.mishik.backend.dao.AccountRepository;
+import com.mishik.backend.repository.AccountRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -57,7 +57,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
         String username = jwtService.extractUsername(token);
 
-        Account acc = repo.findByUsername(username).orElse(null);
+        Account acc = repo.findByLogin(username).orElse(null);
 
         if (acc != null) {
             List<GrantedAuthority> auth = List.of(
@@ -66,7 +66,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
             UsernamePasswordAuthenticationToken authToken =
                     new UsernamePasswordAuthenticationToken(
-                            acc.getUsername(),
+                            acc.getLogin(),
                             null,
                             auth
                     );

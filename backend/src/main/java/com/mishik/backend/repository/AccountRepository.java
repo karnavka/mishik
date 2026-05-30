@@ -3,8 +3,11 @@ package com.mishik.backend.repository;
 
 import com.mishik.backend.entity.Account;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-public interface AccountRepository
-        extends JpaRepository<Account, String> {
+import java.util.Optional;
 
+@Repository
+public interface AccountRepository extends JpaRepository<Account, Integer> {
+    Optional<Account> findByLogin(String login); // JPA сам генерує SQL
 }

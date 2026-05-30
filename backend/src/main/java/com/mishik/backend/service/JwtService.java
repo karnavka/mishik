@@ -12,9 +12,9 @@ public class JwtService {
 
     private final String SECRET = "super-super-super-super-secret-key-123super-secret-key-123";
 
-    public String generateToken(String username, String role) {
+    public String generateToken(String login, String role) {
         return Jwts.builder()
-                .setSubject(username)
+                .setSubject(login)
                 .claim("role", role)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 86400000))
