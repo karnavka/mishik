@@ -5,9 +5,11 @@ import { logout } from '../utils/auth';
 
 type Props = {
   onLoginClick: () => void;
+  dark: boolean;
+  onThemeToggle: () => void;
 };
 
-export const Header = ({ onLoginClick }: Props) => {
+export const Header = ({ onLoginClick, dark, onThemeToggle }: Props) => {
   const { loggedIn, role } = useAuth();
   const location = useLocation();
 
@@ -35,8 +37,12 @@ export const Header = ({ onLoginClick }: Props) => {
           </Link>
         ))}
       </div>
-
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <button className="tab-btn" onClick={onThemeToggle}
+          title={dark ? 'Світла тема' : 'Темна тема'}
+          style={{ fontSize: 16, padding: '6px 10px' }} >
+          {dark ? '☀' : '☁︎'}
+        </button>
         {loggedIn ? (
           <>
             <Link to="/profile"
