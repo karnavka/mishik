@@ -1,6 +1,6 @@
 package com.mishik.backend.service;
 
-import com.mishik.backend.dao.AccountRepository;
+import com.mishik.backend.repository.AccountRepository;
 import com.mishik.backend.dto.LoginRequest;
 import com.mishik.backend.entity.Account;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -32,7 +32,6 @@ public class AuthService {
 
         String token = jwtService.generateToken(user.getLogin(), user.getRole().name());
 
-        // Повертаємо токен + роль фронтенду
         return Map.of(
                 "token", token,
                 "role", user.getRole().name()

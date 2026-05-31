@@ -12,4 +12,6 @@ export const useAuth = () => {
     isUser: role === 'USER',
     isShelter: role === 'SHELTER',
   };
+  
 };
+export const notifyAuthChange = () => window.dispatchEvent(new Event('auth-change'));

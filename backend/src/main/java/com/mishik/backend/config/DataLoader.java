@@ -1,6 +1,6 @@
 package com.mishik.backend.config;
 
-import com.mishik.backend.dao.AccountRepository;
+import com.mishik.backend.repository.AccountRepository;
 import com.mishik.backend.entity.*;
 import com.mishik.backend.enums.Role;
 import com.mishik.backend.enums.Sex;

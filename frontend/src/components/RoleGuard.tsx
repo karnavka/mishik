@@ -1,3 +1,5 @@
+import { useAuth } from '../api/useAuth';
+
 type Props = {
   roles?: string[];
   requireAuth?: boolean;

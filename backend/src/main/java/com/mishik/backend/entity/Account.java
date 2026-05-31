@@ -5,9 +5,10 @@ import jakarta.persistence.*;
 
 import lombok.*;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "account")
-@Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -19,6 +20,7 @@ public class Account {
 
     private String login;
     private String password;
+    @Enumerated(EnumType.STRING)
     private Role role;
 
    // @Column(name = "id_employee")

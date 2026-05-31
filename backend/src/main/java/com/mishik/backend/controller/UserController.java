@@ -1,6 +1,6 @@
 package com.mishik.backend.controller;
 
-import com.mishik.backend.dao.AccountRepository;
+import com.mishik.backend.repository.AccountRepository;
 import com.mishik.backend.entity.Account;
 import com.mishik.backend.entity.User;
 import com.mishik.backend.repository.UserRepository;

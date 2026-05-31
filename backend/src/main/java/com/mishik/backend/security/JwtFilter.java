@@ -2,7 +2,7 @@ package com.mishik.backend.security;
 
 import com.mishik.backend.entity.Account;
 import com.mishik.backend.service.JwtService;
-import com.mishik.backend.dao.AccountRepository;
+import com.mishik.backend.repository.AccountRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
