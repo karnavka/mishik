@@ -25,6 +25,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
+                .cors(cors -> {})
                 // JWT → CSRF не потрібен
                 .csrf(csrf -> csrf.disable())
 
