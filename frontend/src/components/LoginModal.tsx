@@ -27,7 +27,7 @@ export const LoginModal = ({ onClose }: Props) => {
       const res = await fetch('http://localhost:8080/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ login: username, password }),
       });
       if (!res.ok) throw new Error('Невірний логін або пароль');
       const data = await res.json();
@@ -48,7 +48,7 @@ export const LoginModal = ({ onClose }: Props) => {
       const res = await fetch('http://localhost:8080/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password, role: selectedRole }),
+        body: JSON.stringify({ login: username, password, role: selectedRole }),
       });
       if (!res.ok) throw new Error('Помилка реєстрації. Можливо логін вже зайнятий.');
       const data = await res.json();
