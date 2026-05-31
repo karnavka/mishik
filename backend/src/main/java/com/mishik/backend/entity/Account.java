@@ -23,6 +23,4 @@ public class Account {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    @Column(name = "id_employee")
-    private String idEmployee;
 }
