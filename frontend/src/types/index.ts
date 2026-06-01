@@ -14,13 +14,15 @@ export interface Animal {
 export interface Organization {
     id: number;
     name: string;
+    phoneNumber?: string;
+    adoptionConditions?: string;
+    login?: string;
     type?: string;
     city?: string;
-    phone?: string;
-    schedule?: string;
-    rating?: number;
-    description?: string;
-    logoUrl?: string;
+    region?: string;
+    street?: string;
+    latitude?: number;
+    longitude?: number;
 }
 
 

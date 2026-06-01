@@ -5,10 +5,10 @@ import { MOCK_ORGS } from '../utils/mocks';
 import { OrgCard } from '../components/orgCard';
 import { Sidebar } from '../components/Sidebar';
 
-const FILTERS = [
-  { key: 'type', label: 'Тип',   opts: [{ v: 'Притулок', l: '🏠 Притулок' }, { v: 'Клініка', l: '🏥 Клініка' }, { v: 'Фонд', l: '❤️ Фонд' }] },
-  { key: 'city', label: 'Місто', opts: [{ v: 'Київ', l: 'Київ' }, { v: 'Львів', l: 'Львів' }, { v: 'Харків', l: 'Харків' }] },
-];
+// const FILTERS = [
+//   { key: 'type', label: 'Тип',   opts: [{ v: 'Притулок', l: '🏠 Притулок' }, { v: 'Клініка', l: '🏥 Клініка' }, { v: 'Фонд', l: '❤️ Фонд' }] },
+//   { key: 'city', label: 'Місто', opts: [{ v: 'Київ', l: 'Київ' }, { v: 'Львів', l: 'Львів' }, { v: 'Харків', l: 'Харків' }] },
+// ];
 
 type Props = { onLoginRequest: () => void };
 
@@ -23,23 +23,39 @@ export const SheltersPage = ({ onLoginRequest }: Props) => {
         : { ...prev, [key]: value }
     );
 
-  const { data: orgs, loading, error } = useFetch<Organization>(null, MOCK_ORGS);
-  // замінити null на '/api/organizations' коли backend готовий
+  const query = new URLSearchParams(filters).toString();
+  const url   = '/api/shelters' + (query ? '?' + query : '');
+
+  const { data: shelters, loading, error } = useFetch<Organization>(url);
+  //const { data: orgs, loading, error } = useFetch<Organization>(null, MOCK_ORGS);
+
+  const { data: allShelters } = useFetch<Organization>('/api/shelters');
 
   const visible = useMemo(() => {
     const q = search.toLowerCase();
-    return orgs.filter(o => {
-      if (q && !o.name?.toLowerCase().includes(q)) return false;
-      return Object.entries(filters).every(([k, v]) => !v || String((o as Record<string, unknown>)[k]) === v);
-    });
-  }, [orgs, search, filters]);
+    if (!q) return shelters;
+    return shelters.filter(s => s.name?.toLowerCase().includes(q));
+  }, [shelters, search]);
+
+  const cities = useMemo(() => {
+    const unique = new Set(shelters.map(s => s.city).filter(Boolean));
+    return Array.from(unique) as string[];
+  }, [allShelters]);
+
+  const filterGroups = [
+    {
+      key: 'city',
+      label: 'Місто',
+      opts: cities.map(c => ({ v: c, l: c })),
+    },
+  ];
 
   return (
     <div className="body">
       <Sidebar
         filters={filters}
         onToggle={toggle}
-        filterGroups={FILTERS}
+        filterGroups={filterGroups}
         addLabel="+ Додати організацію"
         onAdd={onLoginRequest}
       />
