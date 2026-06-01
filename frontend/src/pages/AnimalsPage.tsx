@@ -5,17 +5,41 @@ import { MOCK_ANIMALS } from '../utils/mocks';
 import { AnimalCard } from '../components/animalCard';
 import { Sidebar } from '../components/Sidebar';
 
-const FILTERS = [
-  { key: 'species', label: 'Вид',    opts: [{ v: 'Кіт', l: '🐱 Кіт' }, { v: 'Пес', l: '🐶 Пес' }] },
-  { key: 'gender',  label: 'Стать',  opts: [{ v: 'Хлопчик', l: '♂ Хлопчик' }, { v: 'Дівчинка', l: '♀ Дівчинка' }] },
-  { key: 'size',    label: 'Розмір', opts: [{ v: 'Маленький', l: 'Маленький' }, { v: 'Середній', l: 'Середній' }, { v: 'Великий', l: 'Великий' }] },
-];
+// const FILTERS = [
+//   {
+//     key: 'typeId',
+//     label: 'Вид',
+//     opts: [{ v: '1', l:'🐶 Пес' }, { v: '2', l: '🐱 Кіт' }],
+//   },
+//   {
+//     key: 'sex',
+//     label: 'Стать',
+//     opts: [{ v: 'MALE', l: '♂ Хлопчик' }, { v: 'FEMALE', l: '♀ Дівчинка' }],
+//   },
+// ];
 
 type Props = { onLoginRequest: () => void };
 
 export const AnimalsPage = ({ onLoginRequest }: Props) => {
   const [search, setSearch] = useState('');
   const [filters, setFilters] = useState<Record<string, string>>({});
+
+  const { data: animalTypes } = useFetch<{ id: number; type: string }>('/api/animal-types');
+  const typeFilter = {
+    key: 'typeId',
+    label: 'Вид',
+    opts: animalTypes.map(t => ({ v: String(t.id), l: t.type })),
+  };
+  console.log(animalTypes);
+  const filterGroups = [typeFilter,
+    {
+      key: 'sex',
+      label: 'Стать',
+      opts: [
+        { v: 'MALE', l: '♂ Хлопчик' },
+        { v: 'FEMALE', l: '♀ Дівчинка' },
+      ],
+    },];
 
   const toggle = (key: string, value: string) =>
     setFilters(prev =>
@@ -24,23 +48,25 @@ export const AnimalsPage = ({ onLoginRequest }: Props) => {
         : { ...prev, [key]: value }
     );
 
-  const { data: animals, loading, error } = useFetch<Animal>(null, MOCK_ANIMALS);
-  // замінити null на '/api/animals' коли backend готовий
+  const query = new URLSearchParams(filters).toString();
+  const url   = '/api/animals' + (query ? '?' + query : '');
 
+  const { data: animals, loading, error } = useFetch<Animal>(url);
+
+  //тут поки на фронті лишається обробка
   const visible = useMemo(() => {
     const q = search.toLowerCase();
-    return animals.filter(a => {
-      if (q && !a.name?.toLowerCase().includes(q) && !a.breed?.toLowerCase().includes(q)) return false;
-      return Object.entries(filters).every(([k, v]) => !v || String((a as Record<string, unknown>)[k]) === v);
-    });
-  }, [animals, search, filters]);
+    if (!q) return animals;
+    return animals.filter(a => a.name?.toLowerCase().includes(q));
+  }, [animals, search]);
 
   return (
+
     <div className="body">
       <Sidebar
         filters={filters}
         onToggle={toggle}
-        filterGroups={FILTERS}
+        filterGroups={filterGroups}
         addLabel="+ Додати тварину"
         onAdd={onLoginRequest}
       />
@@ -48,7 +74,7 @@ export const AnimalsPage = ({ onLoginRequest }: Props) => {
         <div className="search-bar">
           <input
             type="text"
-            placeholder="Пошук за ім'ям або породою..."
+            placeholder="Пошук за ім'ям..."
             value={search}
             onChange={e => setSearch(e.target.value)}
           />

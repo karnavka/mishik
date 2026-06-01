@@ -4,36 +4,31 @@ import { RoleGuard } from './RoleGuard';
 const EMOJI: Record<string, string> = {
     кіт: '🐱', cat: '🐱',
     пес: '🐶', dog: '🐶',
+    rabbit: '🐰', parrot: '🦜'
 };
 const animalEmoji = (s: string) => EMOJI[s?.toLowerCase()] ?? '🐾';
 
 type Props = { animal: Animal; onLoginRequest?: () => void };
 
+//додати через бек картинки!!🦧
 export const AnimalCard = ({ animal, onLoginRequest }: Props) => (
     <div className="card">
         <div className="card-avatar">
-            {animal.imageUrl
-                ? <img src={animal.imageUrl} alt={animal.name} />
-                : animalEmoji(animal.species)}
+            {/*animal.imageUrl ? <img src={animal.imageUrl} alt={animal.name} /> : */animalEmoji(animal.animalType)}
         </div>
         <div className="card-body">
             <div className="card-title">{animal.name}</div>
-            <div className="card-sub">
-                {[animal.breed, animal.shelterName].filter(Boolean).join(' · ')}
-            </div>
+            <div className="card-sub">{[animal.animalType, animal.shelterName].filter(Boolean).join(' · ')}</div>
+
             <div className="badges">
-                {[animal.species, animal.gender, animal.size].filter(Boolean).map(b => (
-                    <span className="badge" key={b}>{b}</span>
-                ))}
-                {animal.vaccinated !== undefined && (
-                    <span className="badge">{animal.vaccinated ? '✓ Щеплений' : '✗ Без щеплень'}</span>
-                )}
+                <span className="badge">{animal.animalType}</span>
+                <span className="badge">{animal.sex === 'MALE' ? '♂ Хлопчик' : '♀ Дівчинка'}</span>
             </div>
-            {animal.age && (
-                <div className="card-fields">
-                    <div className="card-field"><span>Вік</span>{animal.age}</div>
-                </div>
-            )}
+
+            <div className="card-fields">
+                {animal.age && <div className="card-field"><span>Вік</span>{animal.age} р.</div>}
+                {animal.description && <div className="card-field"><span>Опис</span>{animal.description}</div>}
+            </div>
 
             <div className="card-actions">
                 {/* Видно всім — зв'язатись */}

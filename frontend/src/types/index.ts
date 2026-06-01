@@ -1,15 +1,14 @@
 export interface Animal {
     id: number;
     name: string;
-    species: string;
-    breed?: string;
-    age?: string;
-    gender?: string;
-    size?: string;
-    vaccinated?: boolean;
-    shelterName?: string;
+    age: number;
+    height: number;
+    sex: 'MALE' | 'FEMALE';
     description?: string;
-    imageUrl?: string;
+    animalTypeId: number;
+    animalType: string;
+    shelterId: number;
+    shelterName: string;
 }
 
 export interface Organization {
