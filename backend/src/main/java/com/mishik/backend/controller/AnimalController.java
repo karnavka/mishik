@@ -80,4 +80,17 @@ public class AnimalController {
 
         return m;
     }
+
+    //тварина за id
+    @GetMapping("/{id}")
+    public Map<String, Object> getById(@PathVariable Long id) {
+
+        Animal animal = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Animal not found"));
+
+        return toMap(animal);
+    }
+
+
+
 }

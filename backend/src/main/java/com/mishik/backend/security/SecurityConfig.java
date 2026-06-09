@@ -36,39 +36,49 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
 
-                        // AUTH PUBLIC
+                        // ========================
+                        // PUBLIC AUTH
+                        // ========================
                         .requestMatchers("/api/auth/**").permitAll()
 
-                        // PUBLIC READ API
+                        // ========================
+                        // PUBLIC READ ONLY
+                        // ========================
                         .requestMatchers(HttpMethod.GET,
                                 "/api/animals/**",
-                                "/api/clinics/**",
                                 "/api/shelters/**",
-                                "/api/volunteering/**",
-                                "/api/volunteering",
-                                "/api/animal-types/**",
-                                "/api/animal-types"
-                                ).permitAll()
+                                "/api/clinics/**",
+                                "/api/animal-types/**"
+                        ).permitAll()
 
-                        // AUTHENTICATED USER ACTIONS
-                        .requestMatchers("/api/users/me").authenticated()
-
-                        // USER ACTIONS
+                        // ========================
+                        // USER ONLY ACTIONS
+                        // ========================
                         .requestMatchers(HttpMethod.POST,
                                 "/api/adoption-requests/**",
-                                "/api/volunteering/**",
-                                "/api/volunteering"
-                        ).authenticated()
-
-                        .requestMatchers(HttpMethod.PUT,
-                                "/api/users/me"
-                        ).authenticated()
+                                "/api/volunteering/**"
+                        ).hasRole("USER")
 
                         .requestMatchers(HttpMethod.DELETE,
-                                "/api/adoption-requests/**"
-                        ).authenticated()
+                                "/api/adoption-requests/**",
+                                "/api/volunteering/**"
+                        ).hasRole("USER")
 
-                        // 🔒 EVERYTHING ELSE
+                        // ========================
+                        // USER PROFILE
+                        // ========================
+                        .requestMatchers("/api/users/me/**").hasAnyRole("USER", "SHELTER")
+
+                        // ========================
+                        // SHELTER ONLY
+                        // ========================
+                        .requestMatchers("/api/shelters/me/**").hasRole("SHELTER")
+                        .requestMatchers("/api/shelters/me/adoption-requests/**")
+                        .hasRole("SHELTER")
+
+                        // ========================
+                        // EVERYTHING ELSE
+                        // ========================
                         .anyRequest().authenticated()
                 )
 

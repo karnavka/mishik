@@ -20,4 +20,7 @@ public interface AnimalRepository extends JpaRepository<Animal, Long> {
     List<Animal> findByAnimalType_Id(Long typeId);
 
     List<Animal> findBySexAndAnimalType_Id(Sex sex, Long typeId);
+
+    List<Animal> findByShelterId(Long shelterId);
+
 }

@@ -24,7 +24,7 @@ public class VolonteeringController {
     // приклад : GET /volonteering?city=Kyiv
     // приклад : GET /volonteering?region=Kyivska
     // приклад : GET /volonteering?city=Kyiv&region=Kyivska
-    // фільтрація волонтерств по місту та/або регі
+    // фільтрація волонтерств по місту та/або регіоні
     @GetMapping
     public List<Map<String, Object>> getVolonteering(
             @RequestParam(required = false) String city,
@@ -78,7 +78,7 @@ public class VolonteeringController {
         return m;
     }
 
-    //створити репозиторій
+    //створити волонтерство
     @PostMapping
     public Map<String, Object> create(@RequestBody Volonteering v, Authentication auth) {
 
