@@ -8,8 +8,8 @@ interface FetchState<T> {
 
 export function useFetch<T>(url: string | null, mockData?: T[]): FetchState<T> {
     const [state, setState] = useState<FetchState<T>>({
-        data: mockData ?? [],   // start with mock immediately — no flash
-        loading: url !== null,  // only show spinner if we're actually fetching
+        data: mockData ?? [],
+        loading: url !== null,
         error: null,
     });
 

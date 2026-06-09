@@ -5,24 +5,26 @@ import {orgEmoji} from "./elements.ts";
 export function OrgCard({ org }: { org: Organization }) {
     return (
         <div className="card">
-            <div className="card-avatar">
-                {org.logoUrl
-                    ? <img src={org.logoUrl} alt={org.name} />
-                    : orgEmoji(org.type)}
+            {/*нам тре дуже додати картінки*/}
+            <div className="card-avatar">{
+                // org.logoUrl
+                //     ? <img src={org.logoUrl} alt={org.name} /> :
+                    orgEmoji(org.type)}
             </div>
             <div className="card-body">
                 <div className="card-title">{org.name}</div>
-                <div className="card-sub">{[org.city, org.type].filter(Boolean).join(' · ')}</div>
+                {/*<div className="card-sub">*/}
+                {/*    {[org.city, org.region].filter(Boolean).join(', ')}*/}
+                {/*</div>*/}
+
                 <div className="badges">
-                    {[org.type, org.city].filter(Boolean).map(b => (
-                        <span className="badge" key={b}>{b}</span>
-                    ))}
-                    {org.rating && <span className="badge">{org.rating} ★</span>}
+                    {org.city   && <span className="badge">{org.city}</span>}
+                    {org.region && <span className="badge">{org.region}</span>}
                 </div>
+
                 <div className="card-fields">
-                    {org.schedule && <div className="card-field"><span>Графік</span>{org.schedule}</div>}
-                    {org.phone    && <div className="card-field"><span>Тел.</span>{org.phone}</div>}
-                    {org.description && <div className="card-field"><span>Про нас</span>{org.description}</div>}
+                    {org.phoneNumber        && <div className="card-field"><span>Тел.</span>{org.phoneNumber}</div>}
+                    {org.adoptionConditions && <div className="card-field"><span>Умови</span>{org.adoptionConditions}</div>}
                 </div>
                 <div className="card-actions">
                     <button className="btn-primary" onClick={e => { e.stopPropagation(); alert('TODO: contact'); }}>

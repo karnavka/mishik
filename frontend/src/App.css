@@ -88,10 +88,13 @@ body {
   width: 100%;
 }
 
-/* ── Sidebar ── */
+
+/*SIDE*/
+
 .sidebar {
   width: 220px;
-  min-width: 220px;
+  min-width: 120px;
+
   padding: 20px 16px;
   background: var(--surface);
   border-right: 1px solid var(--border);
@@ -100,6 +103,8 @@ body {
   gap: 20px;
   overflow-y: auto;
   transition: background .2s, border-color .2s;
+
+  flex-shrink: 1;
 }
 
 .sidebar-title {
@@ -144,7 +149,9 @@ body {
 }
 .add-btn:hover { background: var(--btn-hover); }
 
-/* ── Main ── */
+
+/*MAIN*/
+
 .main {
   flex: 1;
   min-width: 0;
@@ -173,15 +180,19 @@ body {
 .search-bar input:focus { border-color: var(--border-hover); }
 .search-bar input::placeholder { color: var(--text-muted); }
 
-/* ── Feed ── */
+
 .feed {
   flex: 1;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  overflow-y: auto;
-  width: 100%;
+  padding: 16px;
+  overflow-y: hidden;
+
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+  column-gap: 0px;
+  row-gap: 16px;
+
+  justify-content: left;
+  align-content: start;
 }
 
 .empty {
@@ -191,7 +202,10 @@ body {
   font-size: 15px;
 }
 
-/* ── Card ── */
+
+/*CARD*/
+
+
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -201,6 +215,7 @@ body {
   gap: 14px;
   cursor: pointer;
   transition: border-color .15s, background .2s;
+
   width: 89%;
   max-width: 600px;
 }
