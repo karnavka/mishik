@@ -19,6 +19,7 @@ public class Shelter {
     private Account account;
     @Embedded
     private Address address;
+    private String imageUrl;
 
     private String adoptionConditions;
 
@@ -68,5 +69,13 @@ public class Shelter {
 
     public void setAdoptionConditions(String adoptionConditions) {
         this.adoptionConditions = adoptionConditions;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 }

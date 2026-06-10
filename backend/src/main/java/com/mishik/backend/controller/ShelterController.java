@@ -65,6 +65,22 @@ public class ShelterController {
                 .toList();
     }
 
+    @GetMapping("/{id}")
+    public Map<String, Object> getShelter(
+            @PathVariable Long id
+    ) {
+
+        Shelter shelter = repository
+                .findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "Shelter not found"
+                        )
+                );
+
+        return toMap(shelter);
+    }
+
 
 
     //--- далі методи для авторизованого притулку: ---
@@ -256,6 +272,7 @@ public class ShelterController {
         m.put("name", s.getName());
         m.put("phoneNumber", s.getPhoneNumber());
         m.put("adoptionConditions", s.getAdoptionConditions());
+        m.put("imageUrl", s.getImageUrl());
 
         if (s.getAccount() != null) {
             m.put("login", s.getAccount().getLogin());

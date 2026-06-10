@@ -39,6 +39,7 @@ public class SecurityConfig {
                         // ========================
                         // PUBLIC AUTH
                         // ========================
+                        .requestMatchers("/images/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
 
                         // ========================
@@ -48,7 +49,8 @@ public class SecurityConfig {
                                 "/api/animals/**",
                                 "/api/shelters/**",
                                 "/api/clinics/**",
-                                "/api/animal-types/**"
+                                "/api/animal-types/**",
+                                "/images/**"
                         ).permitAll()
 
                         // ========================
