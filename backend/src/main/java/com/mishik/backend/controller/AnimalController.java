@@ -1,5 +1,6 @@
 package com.mishik.backend.controller;
 
+import com.mishik.backend.embedded.DonationDetails;
 import com.mishik.backend.entity.Animal;
 import com.mishik.backend.enums.Sex;
 import com.mishik.backend.repository.AnimalRepository;
@@ -77,11 +78,24 @@ public class AnimalController {
 
         m.put("shelterId", a.getShelter().getId());
         m.put("shelterName", a.getShelter().getName());
+        m.put("shelterDonationDetails", toMap(a.getShelter().getDonationDetails()));
 
         return m;
     }
 
     //тварина за id
+    private Map<String, Object> toMap(DonationDetails d) {
+        if (d == null) {
+            return null;
+        }
+
+        Map<String, Object> m = new HashMap<>();
+
+        m.put("donationUrl", d.getDonationUrl());
+
+        return m;
+    }
+
     @GetMapping("/{id}")
     public Map<String, Object> getById(@PathVariable Long id) {
 

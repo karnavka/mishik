@@ -3,6 +3,7 @@ package com.mishik.backend.controller;
 import java.util.List;
 
 import com.mishik.backend.dto.AnimalRequest;
+import com.mishik.backend.embedded.DonationDetails;
 import com.mishik.backend.entity.*;
 import com.mishik.backend.repository.*;
 import org.springframework.security.core.Authentication;
@@ -101,6 +102,11 @@ public class ShelterController {
         shelter.setName((String) req.get("name"));
         shelter.setPhoneNumber((String) req.get("phoneNumber"));
         shelter.setAdoptionConditions((String) req.get("adoptionConditions"));
+
+        Object donationDetails = req.get("donationDetails");
+        if (donationDetails instanceof Map<?, ?> donationMap) {
+            shelter.setDonationDetails(toDonationDetails(donationMap));
+        }
 
         repository.save(shelter);
 
@@ -256,6 +262,7 @@ public class ShelterController {
         m.put("name", s.getName());
         m.put("phoneNumber", s.getPhoneNumber());
         m.put("adoptionConditions", s.getAdoptionConditions());
+        m.put("donationDetails", toMap(s.getDonationDetails()));
 
         if (s.getAccount() != null) {
             m.put("login", s.getAccount().getLogin());
@@ -273,6 +280,27 @@ public class ShelterController {
 
         return m;
     }
+
+    private DonationDetails toDonationDetails(Map<?, ?> m) {
+        DonationDetails details = new DonationDetails();
+
+        details.setDonationUrl((String) m.get("donationUrl"));
+
+        return details;
+    }
+
+    private Map<String, Object> toMap(DonationDetails d) {
+        if (d == null) {
+            return null;
+        }
+
+        Map<String, Object> m = new HashMap<>();
+
+        m.put("donationUrl", d.getDonationUrl());
+
+        return m;
+    }
+
     private Map<String, Object> toMap(Animal a) {
         Map<String, Object> m = new HashMap<>();
 

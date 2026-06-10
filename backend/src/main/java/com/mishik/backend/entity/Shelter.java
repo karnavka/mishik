@@ -1,5 +1,6 @@
 package com.mishik.backend.entity;
 import com.mishik.backend.embedded.Address;
+import com.mishik.backend.embedded.DonationDetails;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -21,6 +22,8 @@ public class Shelter {
     private Address address;
 
     private String adoptionConditions;
+    @Embedded
+    private DonationDetails donationDetails;
 
     public Long getId() {
         return id;
@@ -68,5 +71,13 @@ public class Shelter {
 
     public void setAdoptionConditions(String adoptionConditions) {
         this.adoptionConditions = adoptionConditions;
+    }
+
+    public DonationDetails getDonationDetails() {
+        return donationDetails;
+    }
+
+    public void setDonationDetails(DonationDetails donationDetails) {
+        this.donationDetails = donationDetails;
     }
 }
