@@ -23,9 +23,9 @@ export const useAuth = () => {
     loggedIn,
     role,
     isAdmin: role === 'ADMIN',
-    isModerator: role === 'MODERATOR' || role === 'ADMIN',
-    isUser: role === 'USER',
-    isShelter: role === 'SHELTER',
+    isModerator: role === 'ROLE_MODERATOR' || role === 'ROLE_ADMIN',
+    isUser: role === 'ROLE_USER',
+    isShelter: role === 'ROLE_SHELTER',
   };
   
 };

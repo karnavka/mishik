@@ -40,26 +40,61 @@ export const LoginModal = ({ onClose }: Props) => {
   };
 
   const handleRegister = async () => {
-    if (!username || !password) { setError('Заповніть всі поля'); return; }
-    if (password !== confirmPassword) { setError('Паролі не співпадають'); return; }
-    if (password.length < 6) { setError('Пароль мінімум 6 символів'); return; }
-    setLoading(true); setError('');
-    try {
-      const res = await fetch('http://localhost:8080/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ login: username, password, role: selectedRole }),
-      });
-      if (!res.ok) throw new Error('Помилка реєстрації. Можливо логін вже зайнятий.');
-      const data = await res.json();
-      saveAuth(data.token, data.role);
-      notifyAuthChange();
-      onClose();
-    } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Помилка');
-    } finally { setLoading(false); }
-  };
+  if (!username || !password) {setError('Заповніть всі поля');
+    return;
+  }
+  if (password !== confirmPassword) { setError('Паролі не співпадають');
+    return;
+  }
+  setLoading(true);
+  setError('');
+  try {
+    const endpoint =
+      selectedRole === 'USER'
+        ? 'http://localhost:8080/api/auth/register/user'
+        : 'http://localhost:8080/api/auth/register/shelter';
 
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        login: username,
+        password,
+      }),
+    });
+
+    if (!res.ok) {
+      throw new Error('Помилка реєстрації');
+    }
+    const loginRes = await fetch('http://localhost:8080/api/auth/login', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    login: username,
+    password,
+  }),
+});
+
+if (!loginRes.ok) {
+  throw new Error('Не вдалося виконати автоматичний вхід');
+}
+
+const loginData = await loginRes.json();
+
+saveAuth(loginData.token, loginData.role);
+notifyAuthChange();
+
+onClose();
+  } catch (e) {
+    setError('Помилка реєстрації');
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <div
       style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.35)', display:'flex',

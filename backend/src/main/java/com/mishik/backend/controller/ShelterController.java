@@ -5,6 +5,7 @@ import java.util.List;
 import com.mishik.backend.dto.AnimalRequest;
 import com.mishik.backend.entity.*;
 import com.mishik.backend.repository.*;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -101,7 +102,7 @@ public class ShelterController {
         shelter.setName((String) req.get("name"));
         shelter.setPhoneNumber((String) req.get("phoneNumber"));
         shelter.setAdoptionConditions((String) req.get("adoptionConditions"));
-
+        shelter.setSocialLinks((String) req.get("socialLinks"));
         repository.save(shelter);
 
         return Map.of("status", "updated");
@@ -190,18 +191,19 @@ public class ShelterController {
 
     //додати тварину
     @PostMapping("/me/animals")
-    public Map<String, Object> createAnimal(
+    public ResponseEntity<?> createAnimal(
             Authentication authentication,
             @RequestBody AnimalRequest req
     ) {
-
         String login = authentication.getName();
-
-        Account account = accountRepository.findByLogin(login)
-                .orElseThrow(() -> new RuntimeException("Account not found"));
-
-        Shelter shelter = repository.findByAccount(account)
-                .orElseThrow(() -> new RuntimeException("Shelter not found"));
+        Account account = accountRepository.findByLogin(login).orElseThrow();
+        Shelter shelter = repository.findByAccount(account).orElseThrow();
+        if (shelter.getPhoneNumber() == null || shelter.getPhoneNumber().isBlank()) {
+            return ResponseEntity.status(403).body(Map.of(
+                    "error", "phone_required",
+                    "message", "Для додавання тварин необхідно вказати номер телефону притулку"
+            ));
+        }
 
         Animal animal = new Animal();
         animal.setName(req.getName());
@@ -209,24 +211,17 @@ public class ShelterController {
         animal.setHeight(req.getHeight());
         animal.setSex(req.getSex());
         animal.setDescription(req.getDescription());
-
         animal.setShelter(shelter);
 
         if (req.getAnimalTypeId() != null) {
             AnimalType type = animalTypeRepository.findById(req.getAnimalTypeId())
                     .orElseThrow(() -> new RuntimeException("AnimalType not found"));
-
             animal.setAnimalType(type);
         }
 
         Animal saved = animalRepository.save(animal);
-
-        return Map.of(
-                "status", "created",
-                "animal", toMap(saved)
-        );
+        return ResponseEntity.ok(Map.of("status", "created", "animal", toMap(saved)));
     }
-
     //отримати надіслені собі реквести на тварин
     @GetMapping("/api/shelters/me/adoption-requests")
     public List<Map<String, Object>> getShelterRequests(Authentication authentication) {
@@ -256,6 +251,8 @@ public class ShelterController {
         m.put("name", s.getName());
         m.put("phoneNumber", s.getPhoneNumber());
         m.put("adoptionConditions", s.getAdoptionConditions());
+        m.put("socialLinks", s.getSocialLinks());
+        m.put("phoneVerified", s.isPhoneVerified());
 
         if (s.getAccount() != null) {
             m.put("login", s.getAccount().getLogin());
