@@ -2,15 +2,14 @@ package com.mishik.backend.entity;
 
 import com.mishik.backend.enums.Sex;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.*;
+import lombok.*;
 
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 public class User {
 
@@ -28,6 +27,9 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     private Sex sex;
+
+    private String phoneNumber;
+    private boolean phoneVerified = false;
 
     public Long getId() {
         return id;

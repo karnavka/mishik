@@ -8,7 +8,16 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.*;
+import lombok.*;
+
 @Entity
+@Getter
+@Setter
+@Table(name = "shelter")
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Shelter {
      @Id
      @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,8 +32,12 @@ public class Shelter {
     private String imageUrl;
 
     private String adoptionConditions;
+
+
     @Embedded
     private DonationDetails donationDetails;
+    private String socialLinks;
+    private boolean phoneVerified = false;
 
     public Long getId() {
         return id;

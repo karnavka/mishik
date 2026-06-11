@@ -41,7 +41,8 @@ public class UserController {
         res.put("patronymic", user.getPatronymic());
         res.put("sex", user.getSex());
         res.put("login", account.getLogin());
-
+        res.put("phoneNumber", user.getPhoneNumber());
+        res.put("phoneVerified", user.isPhoneVerified());
         return res;
     }
 
@@ -63,8 +64,15 @@ public class UserController {
         user.setLastName((String) req.get("lastName"));
         user.setPatronymic((String) req.get("patronymic"));
 
+        String phoneNumber = (String) req.get("phoneNumber");
+        if (phoneNumber != null) {
+            // якщо номер змінився — скидаємо верифікацію
+            if (!phoneNumber.equals(user.getPhoneNumber())) {
+                user.setPhoneVerified(false);
+            }
+            user.setPhoneNumber(phoneNumber.isBlank() ? null : phoneNumber);
+        }
         userRepository.save(user);
-
         return Map.of("status", "updated");
     }
 }
