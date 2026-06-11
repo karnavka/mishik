@@ -49,11 +49,11 @@ public class DataLoader {
                 account.setPassword(passwordEncoder.encode("1234"));
                 account.setRole(Role.ROLE_USER);
 
-             //   System.out.println("Before save: " + account.getRole());
+                //   System.out.println("Before save: " + account.getRole());
 
                 account = accountRepository.save(account);
 
-             //   System.out.println("After save: " + account.getRole());
+                //   System.out.println("After save: " + account.getRole());
 
                 User user = new User();
                 user.setAccount(account);

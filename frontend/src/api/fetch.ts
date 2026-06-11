@@ -14,7 +14,7 @@ export function useFetch<T>(url: string | null, mockData?: T[]): FetchState<T> {
     });
 
     useEffect(() => {
-        if (!url) return;  // no URL → keep using mock, do nothing
+        if (!url) return;
 
         setState(s => ({ ...s, loading: true, error: null }));
 

@@ -3,6 +3,7 @@ package com.mishik.backend.controller;
 import java.util.List;
 
 import com.mishik.backend.dto.AnimalRequest;
+import com.mishik.backend.embedded.DonationDetails;
 import com.mishik.backend.entity.*;
 import com.mishik.backend.repository.*;
 import org.springframework.http.ResponseEntity;
@@ -66,6 +67,22 @@ public class ShelterController {
                 .toList();
     }
 
+    @GetMapping("/{id}")
+    public Map<String, Object> getShelter(
+            @PathVariable Long id
+    ) {
+
+        Shelter shelter = repository
+                .findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "Shelter not found"
+                        )
+                );
+
+        return toMap(shelter);
+    }
+
 
 
     //--- далі методи для авторизованого притулку: ---
@@ -103,6 +120,12 @@ public class ShelterController {
         shelter.setPhoneNumber((String) req.get("phoneNumber"));
         shelter.setAdoptionConditions((String) req.get("adoptionConditions"));
         shelter.setSocialLinks((String) req.get("socialLinks"));
+
+        Object donationDetails = req.get("donationDetails");
+        if (donationDetails instanceof Map<?, ?> donationMap) {
+            shelter.setDonationDetails(toDonationDetails(donationMap));
+        }
+
         repository.save(shelter);
 
         return Map.of("status", "updated");
@@ -211,17 +234,20 @@ public class ShelterController {
         animal.setHeight(req.getHeight());
         animal.setSex(req.getSex());
         animal.setDescription(req.getDescription());
+
         animal.setShelter(shelter);
 
         if (req.getAnimalTypeId() != null) {
             AnimalType type = animalTypeRepository.findById(req.getAnimalTypeId())
                     .orElseThrow(() -> new RuntimeException("AnimalType not found"));
+
             animal.setAnimalType(type);
         }
 
         Animal saved = animalRepository.save(animal);
         return ResponseEntity.ok(Map.of("status", "created", "animal", toMap(saved)));
     }
+
     //отримати надіслені собі реквести на тварин
     @GetMapping("/api/shelters/me/adoption-requests")
     public List<Map<String, Object>> getShelterRequests(Authentication authentication) {
@@ -253,6 +279,8 @@ public class ShelterController {
         m.put("adoptionConditions", s.getAdoptionConditions());
         m.put("socialLinks", s.getSocialLinks());
         m.put("phoneVerified", s.isPhoneVerified());
+        m.put("donationDetails", toMap(s.getDonationDetails()));
+        m.put("imageUrl", s.getImageUrl());
 
         if (s.getAccount() != null) {
             m.put("login", s.getAccount().getLogin());
@@ -270,6 +298,27 @@ public class ShelterController {
 
         return m;
     }
+
+    private DonationDetails toDonationDetails(Map<?, ?> m) {
+        DonationDetails details = new DonationDetails();
+
+        details.setDonationUrl((String) m.get("donationUrl"));
+
+        return details;
+    }
+
+    private Map<String, Object> toMap(DonationDetails d) {
+        if (d == null) {
+            return null;
+        }
+
+        Map<String, Object> m = new HashMap<>();
+
+        m.put("donationUrl", d.getDonationUrl());
+
+        return m;
+    }
+
     private Map<String, Object> toMap(Animal a) {
         Map<String, Object> m = new HashMap<>();
 

@@ -3,6 +3,14 @@ import com.mishik.backend.embedded.Address;
 import jakarta.persistence.*;
 import lombok.*;
 
+import com.mishik.backend.embedded.DonationDetails;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 @Entity
 @Getter
 @Setter
@@ -21,8 +29,11 @@ public class Shelter {
     private Account account;
     @Embedded
     private Address address;
+    private String imageUrl;
 
     private String adoptionConditions;
+    @Embedded
+    private DonationDetails donationDetails;
     private String socialLinks;
     private boolean phoneVerified = false;
 
@@ -72,5 +83,21 @@ public class Shelter {
 
     public void setAdoptionConditions(String adoptionConditions) {
         this.adoptionConditions = adoptionConditions;
+    }
+
+    public DonationDetails getDonationDetails() {
+        return donationDetails;
+    }
+
+    public void setDonationDetails(DonationDetails donationDetails) {
+        this.donationDetails = donationDetails;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 }
