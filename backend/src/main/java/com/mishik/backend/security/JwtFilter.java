@@ -69,11 +69,8 @@ public class JwtFilter extends OncePerRequestFilter {
 
         if (account != null) {
 
-            String role = account.getRole().name();
-            String authority = role.startsWith("ROLE_") ? role : "ROLE_" + role;
-
             var authorities = List.of(
-                    new SimpleGrantedAuthority(authority)
+                    new SimpleGrantedAuthority("ROLE_" + account.getRole().name())
             );
 
             UsernamePasswordAuthenticationToken auth =

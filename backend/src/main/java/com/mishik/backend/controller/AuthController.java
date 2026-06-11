@@ -4,8 +4,6 @@ import com.mishik.backend.service.AuthService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
-
 @RestController
 @RequestMapping("/api/auth")
 @CrossOrigin(origins = "http://localhost:3000")
@@ -28,35 +26,5 @@ public class AuthController {
         }
 
 
-    }
-
-    @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody Map<String, Object> request) {
-        try {
-            return ResponseEntity.ok(authService.register(request));
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-
-    @PostMapping("/register/user")
-    public ResponseEntity<?> registerUser(@RequestBody Map<String, Object> request) {
-        try {
-            return ResponseEntity.ok(authService.registerUser(request));
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-
-    @PostMapping("/register/shelter")
-    public ResponseEntity<?> registerShelter(@RequestBody Map<String, Object> request) {
-        try {
-            return ResponseEntity.ok(authService.registerShelter(request));
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
     }
 }
