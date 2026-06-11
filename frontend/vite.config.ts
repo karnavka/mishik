@@ -10,7 +10,8 @@ export default defineConfig({
   ],
   server: {
     proxy: {
-      '/api': 'http://localhost:8080',   // ← forward all /api/* to Spring Boot
+      '/api': 'http://localhost:8080',
+      '/images': 'http://localhost:8080',
     },
   },
 })

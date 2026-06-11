@@ -9,6 +9,7 @@ export interface Animal {
     animalType: string;
     shelterId: number;
     shelterName: string;
+    imageUrl: string;
 }
 
 export interface Organization {
@@ -23,6 +24,7 @@ export interface Organization {
     street?: string;
     latitude?: number;
     longitude?: number;
+    imageUrl: string;
 }
 
 

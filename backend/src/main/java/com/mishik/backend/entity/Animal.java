@@ -21,6 +21,7 @@ public class Animal {
     private int height;
     private byte age;
     private String description;
+    private String imageUrl;
 
     @Enumerated(EnumType.STRING)
     private Sex sex;
@@ -95,5 +96,13 @@ public class Animal {
 
     public void setShelter(Shelter shelter) {
         this.shelter = shelter;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 }

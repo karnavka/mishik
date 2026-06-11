@@ -8,13 +8,16 @@ const EMOJI: Record<string, string> = {
 };
 const animalEmoji = (s: string) => EMOJI[s?.toLowerCase()] ?? '🐾';
 
-type Props = { animal: Animal; onLoginRequest?: () => void };
+type Props = { animal: Animal;
+    onLoginRequest?: () => void;
+    onClick?: () => void;
+};
 
-//додати через бек картинки!!🦧
-export const AnimalCard = ({ animal, onLoginRequest }: Props) => (
-    <div className="card">
+
+export const AnimalCard = ({ animal, onLoginRequest, onClick }: Props) => (
+    <div className="card" onClick={onClick} style={{ cursor: onClick ? 'pointer' : undefined }}>
         <div className="card-avatar">
-            {/*animal.imageUrl ? <img src={animal.imageUrl} alt={animal.name} /> : */animalEmoji(animal.animalType)}
+            {animal.imageUrl ? <img src={animal.imageUrl } /> : animalEmoji(animal.animalType)}
         </div>
         <div className="card-body">
             <div className="card-title">{animal.name}</div>
@@ -22,7 +25,13 @@ export const AnimalCard = ({ animal, onLoginRequest }: Props) => (
 
             <div className="badges">
                 <span className="badge">{animal.animalType}</span>
-                <span className="badge">{animal.sex === 'MALE' ? '♂ Хлопчик' : '♀ Дівчинка'}</span>
+                {animal.sex !== 'UNKNOWN' && (
+                    <span className="badge">
+                        {animal.sex === 'MALE'
+                            ? '♂ Хлопчик'
+                            : '♀ Дівчинка'}
+                    </span>
+                )}
             </div>
 
             <div className="card-fields">

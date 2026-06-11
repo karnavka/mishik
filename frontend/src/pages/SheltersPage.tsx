@@ -1,9 +1,10 @@
-import { useState, useMemo } from 'react';
+import {useState, useMemo, useEffect} from 'react';
 import type { Organization } from '../types';
 import { useFetch } from '../api/fetch';
-import { MOCK_ORGS } from '../utils/mocks';
 import { OrgCard } from '../components/orgCard';
 import { Sidebar } from '../components/Sidebar';
+import {ShelterDetail} from "../components/shelterDetail.tsx";
+import {useLocation} from "react-router-dom";
 
 // const FILTERS = [
 //   { key: 'type', label: 'Тип',   opts: [{ v: 'Притулок', l: '🏠 Притулок' }, { v: 'Клініка', l: '🏥 Клініка' }, { v: 'Фонд', l: '❤️ Фонд' }] },
@@ -12,9 +13,23 @@ import { Sidebar } from '../components/Sidebar';
 
 type Props = { onLoginRequest: () => void };
 
-export const SheltersPage = ({ onLoginRequest }: Props) => {
+export const SheltersPage = ({ onLoginRequest}: Props) => {
   const [search, setSearch] = useState('');
   const [filters, setFilters] = useState<Record<string, string>>({});
+  const [selected, setSelected] = useState<Organization | null>(null);
+
+  const location = useLocation();
+
+  useEffect(() => {
+    const state = location.state as { shelterId?: number } | null;
+    if (state?.shelterId) {
+      fetch(`/api/shelters/${state.shelterId}`)
+          .then(r => r.json())
+          .then(data => setSelected(data));
+    } else {
+      setSelected(null);
+    }
+  }, [location]);
 
   const toggle = (key: string, value: string) =>
     setFilters(prev =>
@@ -50,6 +65,16 @@ export const SheltersPage = ({ onLoginRequest }: Props) => {
     },
   ];
 
+  if(selected){
+    return(
+        <ShelterDetail
+          org = {selected}
+          onBack = {()=>setSelected(null)}
+          onLoginRequest = {onLoginRequest}
+        />
+    )
+  }
+
   return (
     <div className="body">
       <Sidebar
@@ -72,7 +97,7 @@ export const SheltersPage = ({ onLoginRequest }: Props) => {
           {loading  ? <div className="empty">Завантаження...</div>
           : error   ? <div className="empty">Помилка: {error}</div>
           : visible.length === 0 ? <div className="empty">Організацій не знайдено</div>
-          : visible.map(o => <OrgCard key={o.id} org={o} />)
+          : visible.map(o => <OrgCard key={o.id} org={o} onClick = {()=>setSelected(o)} />)
           }
         </div>
       </div>
