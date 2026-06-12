@@ -22,10 +22,11 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http)  {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) {
 
         http
-                .cors(cors -> {})
+                .cors(cors -> {
+                })
                 // JWT → CSRF не потрібен
                 .csrf(csrf -> csrf.disable())
 
@@ -65,6 +66,23 @@ public class SecurityConfig {
                                 "/api/adoption-requests/**",
                                 "/api/volunteering/**"
                         ).hasRole("USER")
+                        // PATCH статус і GET деталі для притулку
+                        .requestMatchers(HttpMethod.GET,
+                                "/api/adoption-requests/shelter",
+                                "/api/adoption-requests/*/contact"
+                        ).hasRole("SHELTER")
+
+                        .requestMatchers(HttpMethod.PATCH,
+                                "/api/adoption-requests/**"
+                        ).hasRole("SHELTER")
+                        .requestMatchers(HttpMethod.GET,
+                                "/api/adoption-requests/my",
+                                "/api/adoption-requests/my/*"
+                        ).hasRole("USER")
+                        // GET мої заявки для юзера
+                        .requestMatchers(HttpMethod.GET,
+                                "/api/adoption-requests/my"
+                        ).hasRole("USER")
 
                         // ========================
                         // USER PROFILE
@@ -81,6 +99,8 @@ public class SecurityConfig {
                         // ========================
                         // EVERYTHING ELSE
                         // ========================
+                        // SecurityConfig — додай перед anyRequest()
+                        .requestMatchers(HttpMethod.GET, "/api/adoption-requests/debug").permitAll()
                         .anyRequest().authenticated()
                 )
 

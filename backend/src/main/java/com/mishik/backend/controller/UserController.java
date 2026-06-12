@@ -12,6 +12,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/users")
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5173"})
 public class UserController {
 
     private final UserRepository userRepository;
@@ -66,11 +67,8 @@ public class UserController {
 
         String phoneNumber = (String) req.get("phoneNumber");
         if (phoneNumber != null) {
-            // якщо номер змінився — скидаємо верифікацію
-            if (!phoneNumber.equals(user.getPhoneNumber())) {
-                user.setPhoneVerified(false);
-            }
             user.setPhoneNumber(phoneNumber.isBlank() ? null : phoneNumber);
+            user.setPhoneVerified(!phoneNumber.isBlank());
         }
         userRepository.save(user);
         return Map.of("status", "updated");

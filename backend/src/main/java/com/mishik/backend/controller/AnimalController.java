@@ -18,6 +18,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/animals")
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5173"})
 public class AnimalController {
 
     private final AnimalRepository repository;
