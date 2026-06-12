@@ -27,7 +27,7 @@ export const UserProfileForm = ({ form, setForm, onSave, onCancel }: Props) => {
     setForm(f => ({ ...f, [key]: val }));
 
   return (
-    <FormCard title="✏️ Редагування профілю" onSave={onSave} onCancel={onCancel} saveLabel="Зберегти зміни">
+    <FormCard title="⛏︎" onSave={onSave} onCancel={onCancel} saveLabel="Зберегти зміни">
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 14 }}>
         {NAME_FIELDS.map(({ key, label }) => (
           <FormField key={key} label={label}>

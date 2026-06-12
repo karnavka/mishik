@@ -15,7 +15,6 @@ import type { UserProfileFormState } from '../components/UserProfileForm';
 import { ShelterProfileForm } from '../components/ShelterProfileForm';
 import type { ShelterProfileFormState } from '../components/ShelterProfileForm';
 
-// ── Types ──────────────────────────────────────────────────────────────────
 type UserInfo = {
   id: number; firstName: string; lastName: string;
   patronymic: string; sex: string; login: string;
@@ -42,24 +41,12 @@ type FavAnimal = {
   sex: string; age?: number; description?: string; shelterName?: string;
 };
 
-// ── Shared small UI ────────────────────────────────────────────────────────
-const PhoneBadge = ({ verified }: { verified?: boolean }) => (
-  <span style={{
-    display: 'inline-flex', alignItems: 'center', gap: 4,
-    padding: '2px 8px', borderRadius: 12, fontSize: 11, fontWeight: 600,
-    background: verified ? '#27ae6022' : '#f39c1222',
-    color: verified ? '#27ae60' : '#f39c12',
-  }}>
-    {verified ? '✓ Підтверджено' : '⚠ Не підтверджено'}
-  </span>
-);
-
 const PhoneRequiredNotice = ({ message }: { message: string }) => (
   <div style={{
     padding: '12px 16px', borderRadius: 10, background: '#f39c1215',
     border: '1px solid #f39c1240', display: 'flex', alignItems: 'center', gap: 10,
   }}>
-    <span style={{ fontSize: 20 }}>📱</span>
+    <span style={{ fontSize: 25}}>☏</span>
     <div>
       <div style={{ fontSize: 13, fontWeight: 600, color: '#f39c12' }}>Потрібен телефон</div>
       <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{message}</div>
@@ -84,9 +71,6 @@ const StatusBadge = ({ status }: { status: string }) => {
   );
 };
 
-// ══════════════════════════════════════════════════════════════════════════
-// USER TABS
-// ══════════════════════════════════════════════════════════════════════════
 const UserInfoTab = () => {
   const [info, setInfo] = useState<UserInfo | null>(null);
   const [editing, setEditing] = useState(false);
@@ -135,7 +119,6 @@ const UserInfoTab = () => {
   return (
     <div style={section}>
       {!hasPhone  && <PhoneRequiredNotice message="Для подачі заявок на усиновлення необхідно вказати та підтвердити номер телефону." />}
-      {hasPhone && !info.phoneVerified && <PhoneRequiredNotice message="Номер телефону вказано, але ще не підтверджено. Заявки на усиновлення недоступні до підтвердження." />}
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
         <FormField label="Логін" disabled value={info.login} />
@@ -146,15 +129,11 @@ const UserInfoTab = () => {
       <FormField label="Повне ім'я" disabled
         value={[info.firstName, info.lastName, info.patronymic].filter(Boolean).join(' ') || '—'} />
 
-      <FormField
-        label="Номер телефону"
-        disabled value={info.phoneNumber || '—'}
-        headerRight={hasPhone ? <PhoneBadge verified={info.phoneVerified} /> : undefined}
-      />
+      <FormField label="Номер телефону" disabled value={info.phoneNumber || '—'} />
 
       <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
         <button className="btn-ghost" style={{ alignSelf: 'flex-start' }} onClick={startEdit}>
-          ✏️ Редагувати профіль
+          ⛏︎
         </button>
         {saved && <span style={{ color: '#27ae60', fontSize: 13 }}>✓ Збережено</span>}
       </div>
@@ -162,41 +141,26 @@ const UserInfoTab = () => {
   );
 };
 
-const MOCK_FAV_ANIMALS: FavAnimal[] = [
-  { id: 1, name: 'Барсик', animalType: 'Кіт', shelterId: 1, sex: 'MALE', age: 2, description: 'Дружелюбний котик', shelterName: 'Притулок №1' },
-  { id: 2, name: 'Рекс',   animalType: 'Пес', shelterId: 2, sex: 'MALE', age: 4, description: 'Активний пес',      shelterName: 'Притулок №2' },
-];
-
-const UserFavoritesTab = ({ favorites, onToggleFavorite }: {
-  favorites: Set<number>;
-  onToggleFavorite: (id: number) => void;
-}) => {
-  const favAnimals = MOCK_FAV_ANIMALS.filter(a => favorites.has(a.id));
-
-  if (favAnimals.length === 0)
-    return (
-      <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-muted)' }}>
-        <div style={{ fontSize: 40, marginBottom: 12 }}>♡</div>
-        <div style={{ fontSize: 15, fontWeight: 500 }}>Немає уподобаних тварин</div>
-        <div style={{ fontSize: 13, marginTop: 6 }}>Натисніть ♡ на картці тварини, щоб зберегти</div>
-      </div>
-    );
-
-  return (
-    <Grid2>
-      {favAnimals.map(a => (
-        <AnimalCard key={a.id} animal={a as any} isFavorited onToggleFavorite={onToggleFavorite} />
-      ))}
-    </Grid2>
-  );
-};
-
 const UserRequestsTab = () => {
-  const [requests, setRequests] = useState<Request[]>([
-    { userId: 1, userLogin: 'me', animalId: 3, animalName: 'Сніжинка', status: 'PENDING',  createdDate: '2025-06-01' },
-    { userId: 1, userLogin: 'me', animalId: 4, animalName: 'Бублик',   status: 'APPROVED', createdDate: '2025-05-20' },
-    { userId: 1, userLogin: 'me', animalId: 5, animalName: 'Пуговка',  status: 'REJECTED', createdDate: '2025-05-10' },
-  ]);
+  const navigate = useNavigate();
+  const [requests, setRequests] = useState<Request[]>([]);
+  const [loading, setLoading]   = useState(true);
+
+  useEffect(() => {
+    authFetch('http://localhost:8080/api/adoption-requests/my')
+      .then(r => r.json())
+      .then(data => setRequests(Array.isArray(data) ? data : []))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  const cancelRequest = async (animalId: number) => {
+    await authFetch(`http://localhost:8080/api/adoption-requests/${animalId}`, { method: 'DELETE' });
+    setRequests(prev => prev.filter(x => x.animalId !== animalId));
+  };
+
+  if (loading)
+    return <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-muted)' }}>Завантаження...</div>;
 
   if (requests.length === 0)
     return (
@@ -222,9 +186,21 @@ const UserRequestsTab = () => {
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <StatusBadge status={r.status} />
+            <button
+              className="btn-ghost"
+              style={{ fontSize: 12 }}
+              onClick={() => navigate(`/requests/${r.animalId}/my`, { state: { request: r } })}
+            >
+              Деталі →
+            </button>
             {r.status === 'PENDING' && (
-              <button className="btn-ghost" style={{ color: '#e74c3c', borderColor: '#e74c3c', fontSize: 12 }}
-                onClick={() => setRequests(prev => prev.filter(x => x.animalId !== r.animalId))}>✕</button>
+              <button
+                className="btn-ghost"
+                style={{ color: '#e74c3c', borderColor: '#e74c3c', fontSize: 12 }}
+                onClick={() => cancelRequest(r.animalId)}
+              >
+                ✕
+              </button>
             )}
           </div>
         </div>
@@ -233,9 +209,6 @@ const UserRequestsTab = () => {
   );
 };
 
-// ══════════════════════════════════════════════════════════════════════════
-// SHELTER TABS
-// ══════════════════════════════════════════════════════════════════════════
 const ShelterInfoTab = () => {
   const [info, setInfo] = useState<ShelterInfo | null>(null);
   const [editing, setEditing] = useState(false);
@@ -295,7 +268,6 @@ const ShelterInfoTab = () => {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
         <FormField
           label="Телефон" disabled value={info.phoneNumber || '—'}
-          headerRight={hasPhone ? <PhoneBadge verified={info.phoneVerified} /> : undefined}
         />
         <FormField label="Соц. мережі" disabled value={info.socialLinks || '—'} />
       </div>
@@ -307,7 +279,7 @@ const ShelterInfoTab = () => {
 
       <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
         <button className="btn-ghost" style={{ alignSelf: 'flex-start' }} onClick={startEdit}>
-          ✏️ Редагувати профіль
+          ⛏︎
         </button>
         {saved && <span style={{ color: '#27ae60', fontSize: 13 }}>✓ Збережено</span>}
       </div>
@@ -315,18 +287,33 @@ const ShelterInfoTab = () => {
   );
 };
 
+import { useNavigate } from 'react-router-dom';
+
 const ShelterRequestsTab = () => {
-  const [requests, setRequests] = useState<Request[]>([
-    { userId: 5, userLogin: 'ivan_k',  animalId: 1, animalName: 'Барсик', status: 'PENDING',  createdDate: '2025-06-03' },
-    { userId: 6, userLogin: 'olena_m', animalId: 2, animalName: 'Рекс',   status: 'PENDING',  createdDate: '2025-06-05' },
-    { userId: 7, userLogin: 'petro_v', animalId: 3, animalName: 'Муся',   status: 'APPROVED', createdDate: '2025-06-01' },
-  ]);
+  const navigate = useNavigate();
+  const [requests, setRequests] = useState<Request[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const updateStatus = (animalId: number, userId: number, status: string) =>
-    setRequests(r => r.map(x => x.animalId === animalId && x.userId === userId ? { ...x, status } : x));
+  useEffect(() => {
+    authFetch('http://localhost:8080/api/adoption-requests/shelter')
+      .then(r => r.json())
+      .then(data => {
+        const mapped = data.map((item: any) => ({
+          userId:      item.user.id,
+          userLogin:   item.user.login,
+          animalId:    item.animal.id,
+          animalName:  item.animal.name,
+          status:      item.status,
+          createdDate: item.createdDate,
+        }));
+        setRequests(mapped);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
 
-  const pending  = requests.filter(r => r.status === 'PENDING');
-  const resolved = requests.filter(r => r.status !== 'PENDING');
+  if (loading)
+    return <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-muted)' }}>Завантаження...</div>;
 
   if (requests.length === 0)
     return (
@@ -336,25 +323,31 @@ const ShelterRequestsTab = () => {
       </div>
     );
 
+  const pending  = requests.filter(r => r.status === 'PENDING');
+  const resolved = requests.filter(r => r.status !== 'PENDING');
+
   const RequestCard = ({ r }: { r: Request }) => (
-    <div style={{ padding: '14px 18px', borderRadius: 12, border: '1px solid var(--border)', background: 'var(--surface)' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: r.status === 'PENDING' ? 12 : 0 }}>
-        <div>
-          <div style={{ fontWeight: 500, fontSize: 14 }}>🐾 {r.animalName}</div>
-          <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 3 }}>
-            👤 {r.userLogin} · {new Date(r.createdDate).toLocaleDateString('uk-UA')}
-          </div>
+    <div style={{
+      padding: '14px 18px', borderRadius: 12,
+      border: '1px solid var(--border)', background: 'var(--surface)',
+      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+    }}>
+      <div>
+        <div style={{ fontWeight: 500, fontSize: 14 }}>🐾 {r.animalName}</div>
+        <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 3 }}>
+          👤 {r.userLogin} · {new Date(r.createdDate).toLocaleDateString('uk-UA')}
         </div>
-        <StatusBadge status={r.status} />
       </div>
-      {r.status === 'PENDING' && (
-        <div style={{ display: 'flex', gap: 8 }}>
-          <button className="btn-primary" style={{ background: '#27ae60', borderColor: '#27ae60', fontSize: 12 }}
-            onClick={() => updateStatus(r.animalId, r.userId, 'APPROVED')}>✓ Схвалити</button>
-          <button className="btn-ghost" style={{ color: '#e74c3c', borderColor: '#e74c3c', fontSize: 12 }}
-            onClick={() => updateStatus(r.animalId, r.userId, 'REJECTED')}>✕ Відхилити</button>
-        </div>
-      )}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <StatusBadge status={r.status} />
+        <button
+          className="btn-ghost"
+          style={{ fontSize: 12 }}
+          onClick={() => navigate(`/requests/${r.animalId}/${r.userId}`, { state: { request: r } })}
+        >
+          Переглянути →
+        </button>
+      </div>
     </div>
   );
 
@@ -379,23 +372,25 @@ const ShelterRequestsTab = () => {
 };
 
 const ShelterAnimalsTab = () => {
-  const [animals, setAnimals] = useState<Animal[]>([]);
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const [animals, setAnimals]         = useState<Animal[]>([]);
+  const [editingId, setEditingId]     = useState<number | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
-  const [editForm, setEditForm] = useState<AnimalFormState>(EMPTY_ANIMAL_FORM);
-  const [addForm,  setAddForm]  = useState<AnimalFormState>(EMPTY_ANIMAL_FORM);
+  const [editForm, setEditForm]       = useState<AnimalFormState>(EMPTY_ANIMAL_FORM);
+  const [addForm,  setAddForm]        = useState<AnimalFormState>(EMPTY_ANIMAL_FORM);
   const [shelterHasPhone, setShelterHasPhone] = useState(true);
+  const [loading, setLoading]         = useState(true);
 
   useEffect(() => {
-    authFetch('http://localhost:8080/api/shelters/me')
-      .then(r => r.json()).then(s => setShelterHasPhone(!!s.phoneNumber)).catch(() => {});
-    authFetch('http://localhost:8080/api/shelters/me/animals')
-      .then(r => r.json()).then(setAnimals).catch(() => {
-        setAnimals([
-          { id: 1, name: 'Барсик', age: 2, height: 30, sex: 'MALE', description: 'Дружелюбний', animalType: 'Кіт' },
-          { id: 2, name: 'Рекс',   age: 4, height: 60, sex: 'MALE', description: 'Активний',    animalType: 'Пес' },
-        ]);
-      });
+    Promise.all([
+      authFetch('http://localhost:8080/api/shelters/me').then(r => r.json()),
+      authFetch('http://localhost:8080/api/shelters/me/animals').then(r => r.json()),
+    ])
+      .then(([shelter, animalList]) => {
+        setShelterHasPhone(!!shelter.phoneNumber);
+        setAnimals(Array.isArray(animalList) ? animalList : []);
+      })
+      .catch(() => { setShelterHasPhone(false); setAnimals([]); })
+      .finally(() => setLoading(false));
   }, []);
 
   const startEdit = (a: Animal) => {
@@ -425,9 +420,14 @@ const ShelterAnimalsTab = () => {
     }
   };
 
+  if (loading)
+    return <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-muted)' }}>Завантаження...</div>;
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      {!shelterHasPhone && <PhoneRequiredNotice message="Вкажіть номер телефону у вкладці «Про притулок» перед тим, як додавати тварин." />}
+      {!shelterHasPhone && (
+        <PhoneRequiredNotice message="Вкажіть номер телефону у вкладці «Про притулок» перед тим, як додавати тварин." />
+      )}
 
       {shelterHasPhone && !showAddForm && (
         <button className="btn-primary" style={{ alignSelf: 'flex-start' }} onClick={() => setShowAddForm(true)}>
@@ -448,27 +448,61 @@ const ShelterAnimalsTab = () => {
       )}
 
       <Grid2>
-        {animals.map(a => (
+        {animals.map(a =>
           editingId === a.id ? (
             <AnimalForm key={a.id} id={a.id} form={editForm} setForm={setEditForm}
               onSave={() => saveEdit(a.id)} onCancel={() => setEditingId(null)} />
           ) : (
-            <div key={a.id} style={{ position: 'relative' }}>
-              <AnimalCard animal={a as any} />
-              <div style={{ position: 'absolute', top: 10, right: 10, display: 'flex', gap: 4 }}>
-                <button className="btn-ghost" style={{ fontSize: 11, padding: '3px 8px' }} onClick={() => startEdit(a)}>✏️</button>
-                <button className="btn-ghost" style={{ color: '#e74c3c', borderColor: '#e74c3c', fontSize: 11, padding: '3px 8px' }}
-                  onClick={() => remove(a.id)}>✕</button>
-              </div>
-            </div>
+            <AnimalCard
+              key={a.id}
+              animal={a as any}
+              shelterMode
+              onEdit={() => startEdit(a)}
+              onDelete={() => remove(a.id)}
+            />
           )
-        ))}
+        )}
       </Grid2>
     </div>
   );
 };
 
-// ── Role config ────────────────────────────────────────────────────────────
+const UserFavoritesTab = ({ favAnimals, favorites, onToggleFavorite, loading }: {
+  favAnimals: FavAnimal[];
+  favorites: Set<number>;
+  onToggleFavorite: (id: number) => void;
+  loading: boolean;
+}) => {
+  if (loading)
+    return (
+      <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-muted)' }}>
+        Завантаження...
+      </div>
+    );
+
+  if (favAnimals.length === 0)
+    return (
+      <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-muted)' }}>
+        <div style={{ fontSize: 40, marginBottom: 12 }}>♡</div>
+        <div style={{ fontSize: 15, fontWeight: 500 }}>Немає уподобаних тварин</div>
+        <div style={{ fontSize: 13, marginTop: 6 }}>Натисніть ♡ на картці тварини, щоб зберегти</div>
+      </div>
+    );
+
+  return (
+    <Grid2>
+      {favAnimals.map(a => (
+        <AnimalCard
+          key={a.id}
+          animal={a as any}
+          isFavorited={favorites.has(a.id)}
+          onToggleFavorite={onToggleFavorite}
+        />
+      ))}
+    </Grid2>
+  );
+};
+
 const ROLE_META: Record<string, { text: string; color: string }> = {
   ROLE_ADMIN: { text: '👑 Адміністратор', color: '#9b59b6' },
   MODERATOR:  { text: '🛡️ Модератор',     color: '#3498db' },
@@ -476,20 +510,67 @@ const ROLE_META: Record<string, { text: string; color: string }> = {
   USER:       { text: '👤 Користувач',     color: '#7f8c8d' },
 };
 
-// ══════════════════════════════════════════════════════════════════════════
-// MAIN ProfilePage
-// ══════════════════════════════════════════════════════════════════════════
 export const ProfilePage = () => {
   const { loggedIn, role } = useAuth();
   const [tab, setTab] = useState(0);
-  const [favorites, setFavorites] = useState<Set<number>>(new Set([1, 2]));
 
-  const toggleFavorite = (id: number) =>
+  const [favorites, setFavorites]     = useState<Set<number>>(new Set());
+  const [favAnimals, setFavAnimals]   = useState<FavAnimal[]>([]);
+  const [favLoading, setFavLoading]   = useState(true);
+
+  useEffect(() => {
+    if (!loggedIn) return;
+    authFetch('http://localhost:8080/api/favorites')
+      .then(r => r.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setFavAnimals(data);
+          setFavorites(new Set(data.map((a: FavAnimal) => a.id)));
+        }
+      })
+      .catch(() => {})
+      .finally(() => setFavLoading(false));
+  }, [loggedIn]);
+
+  const toggleFavorite = async (id: number) => {
+    const isFav = favorites.has(id);
+
     setFavorites(prev => {
       const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
+      isFav ? next.delete(id) : next.add(id);
       return next;
     });
+    if (isFav) {
+      setFavAnimals(prev => prev.filter(a => a.id !== id));
+    }
+
+    try {
+      await authFetch(`http://localhost:8080/api/favorites/${id}`, {
+        method: isFav ? 'DELETE' : 'POST',
+      });
+
+      if (!isFav) {
+        const fresh = await authFetch('http://localhost:8080/api/favorites')
+          .then(r => r.json());
+        if (Array.isArray(fresh)) {
+          setFavAnimals(fresh);
+          setFavorites(new Set(fresh.map((a: FavAnimal) => a.id)));
+        }
+      }
+    } catch {
+      setFavorites(prev => {
+        const next = new Set(prev);
+        isFav ? next.add(id) : next.delete(id);
+        return next;
+      });
+      if (isFav) {
+        authFetch('http://localhost:8080/api/favorites')
+          .then(r => r.json())
+          .then(data => Array.isArray(data) && setFavAnimals(data))
+          .catch(() => {});
+      }
+    }
+  };
 
   if (!loggedIn) return <Navigate to="/" replace />;
 
@@ -502,41 +583,116 @@ export const ProfilePage = () => {
 
   const rl = role ? ROLE_META[role] : null;
 
-  return (
-    <div style={{ minHeight: '100vh', padding: '32px 24px', boxSizing: 'border-box', background: 'var(--bg)' }}>
-      <div style={{ maxWidth: 900, margin: '0 auto' }}>
+ return (
+  <div
+    style={{
+      height: '100vh',
+      display: 'flex',
+      flexDirection: 'column',
+      background: 'var(--bg)',
+      overflow: 'hidden',
+      padding: '32px 24px',
+      boxSizing: 'border-box',
+    }}
+  >
+    <div
+      style={{
+        maxWidth: 900,
+        width: '100%',
+        margin: '0 auto',
+        display: 'flex',
+        flexDirection: 'column',
+        flex: 1,
+        overflow: 'hidden',
+      }}
+    >
+      {/* Фіксований верх */}
+      <div
+        className="header"
+        style={{
+          justifyContent: 'space-between',
+          marginBottom: 28,
+          borderRadius: 12,
+          flexShrink: 0,
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span className="logo" style={{ fontSize: 18 }}>
+            {isShelter ? '🏠' : '👤'}
+          </span>
 
-        <div className="header" style={{ justifyContent: 'space-between', marginBottom: 28, borderRadius: 12, position: 'static' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span className="logo" style={{ fontSize: 18 }}>{isShelter ? '🏠' : '👤'}</span>
-            <span style={{ fontWeight: 700, fontSize: 16 }}>Особистий кабінет</span>
-            {rl && (
-              <span style={{ fontSize: 11, padding: '2px 10px', borderRadius: 12, fontWeight: 600, background: rl.color + '22', color: rl.color }}>
-                {rl.text}
-              </span>
-            )}
-          </div>
+          <span style={{ fontWeight: 700, fontSize: 16 }}>
+            Особистий кабінет
+          </span>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-            {tabs.map((t, i) => (
-              <button key={t.label} onClick={() => setTab(i)} className={'tab-btn' + (tab === i ? ' active' : '')}>
-                <span style={{ marginRight: 5 }}>{t.icon}</span>{t.label}
-              </button>
-            ))}
-          </div>
-
-          <button className="tab-btn" style={{ color: '#e74c3c' }} onClick={handleLogout}>Вийти</button>
+          {rl && (
+            <span
+              style={{
+                fontSize: 11,
+                padding: '2px 10px',
+                borderRadius: 12,
+                fontWeight: 600,
+                background: rl.color + '22',
+                color: rl.color,
+              }}
+            >
+              {rl.text}
+            </span>
+          )}
         </div>
 
-        <div style={{ background: 'var(--surface)', borderRadius: 16, padding: 28, border: '1px solid var(--border)', minHeight: 300 }}>
-          {!isShelter && tab === 0 && <UserInfoTab />}
-          {!isShelter && tab === 1 && <UserFavoritesTab favorites={favorites} onToggleFavorite={toggleFavorite} />}
-          {!isShelter && tab === 2 && <UserRequestsTab />}
-          {isShelter  && tab === 0 && <ShelterInfoTab />}
-          {isShelter  && tab === 1 && <ShelterRequestsTab />}
-          {isShelter  && tab === 2 && <ShelterAnimalsTab />}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          {tabs.map((t, i) => (
+            <button
+              key={t.label}
+              onClick={() => setTab(i)}
+              className={'tab-btn' + (tab === i ? ' active' : '')}
+            >
+              <span style={{ marginRight: 5 }}>{t.icon}</span>
+              {t.label}
+            </button>
+          ))}
         </div>
+
+        <button
+          className="tab-btn"
+          style={{ color: '#e74c3c' }}
+          onClick={handleLogout}
+        >
+          Вийти
+        </button>
+      </div>
+
+      {/* Скролиться тільки ця область */}
+      <div
+        style={{
+          background: 'var(--surface)',
+          borderRadius: 16,
+          padding: 28,
+          border: '1px solid var(--border)',
+          flex: 1,
+          overflowY: 'auto',
+          minHeight: 0,
+        }}
+      >
+        {!isShelter && tab === 0 && <UserInfoTab />}
+
+        {!isShelter && tab === 1 && (
+          <UserFavoritesTab
+            favAnimals={favAnimals}
+            favorites={favorites}
+            onToggleFavorite={toggleFavorite}
+            loading={favLoading}
+          />
+        )}
+
+        {!isShelter && tab === 2 && <UserRequestsTab />}
+
+        {isShelter && tab === 0 && <ShelterInfoTab />}
+        {isShelter && tab === 1 && <ShelterRequestsTab />}
+        {isShelter && tab === 2 && <ShelterAnimalsTab />}
       </div>
     </div>
-  );
+  </div>
+);
 };

@@ -20,9 +20,9 @@ export const lbl: React.CSSProperties = {
 export const section: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 14 };
 export const fieldRow: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 4 };
 
-export type StatusKey = 'PENDING' | 'APPROVED' | 'REJECTED';
+export type StatusKey = 'PENDING' | 'ACCEPTED' | 'REJECTED';
 export const STATUS: Record<StatusKey, { color: string; label: string }> = {
   PENDING:  { color: '#f39c12', label: 'Очікує'   },
-  APPROVED: { color: '#27ae60', label: 'Схвалено'  },
+  ACCEPTED: { color: '#27ae60', label: 'Схвалено'  },
   REJECTED: { color: '#e74c3c', label: 'Відхилено' },
 };

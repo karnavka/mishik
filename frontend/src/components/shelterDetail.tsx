@@ -13,7 +13,6 @@ export const ShelterDetail = ({org,onBack, onLoginRequest}:Props) => {
 
     const mapRef = useRef<HTMLDivElement>(null);
 
-    // Build a search query from available address parts
     const addressQuery = [org.street, org.city, org.region]
         .filter(Boolean)
         .join(', ');

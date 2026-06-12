@@ -49,7 +49,7 @@ export const Header = ({ onLoginClick, dark, onThemeToggle }: Props) => {
               className={'tab-btn' + (location.pathname === '/profile' ? ' active' : '')}
               style={{ textDecoration: 'none' }}
             >
-              👤 Кабінет {role && <span style={{ fontSize: 11, color: '#aaa' }}>({role})</span>}
+              ☺︎ {role && <span style={{ fontSize: 11, color: '#aaa' }}></span>}
             </Link>
             <button className="tab-btn" onClick={handleLogout}>Вийти</button>
           </>

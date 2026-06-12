@@ -49,17 +49,11 @@ export const FormField = ({ label, hint, headerRight, style, ...rest }: Props) =
   </div>
 );
 
-/**
- * Convenience: styled <input> wired for FormField children.
- * Forwards all native input props.
- */
+
 export const FInput = (props: React.InputHTMLAttributes<HTMLInputElement>) => (
   <input style={inp} onFocus={onFocus} onBlur={onBlur} {...props} />
 );
 
-/**
- * Convenience: styled <textarea> wired for FormField children.
- */
 export const FTextarea = ({
   minHeight = 100,
   resize = 'vertical',
@@ -72,9 +66,7 @@ export const FTextarea = ({
   />
 );
 
-/**
- * Convenience: styled <select>.
- */
+
 export const FSelect = (props: React.SelectHTMLAttributes<HTMLSelectElement>) => (
   <select style={{ ...inp }} {...props} />
 );

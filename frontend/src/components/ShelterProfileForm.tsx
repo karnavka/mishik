@@ -21,7 +21,7 @@ export const ShelterProfileForm = ({ form, setForm, onSave, onCancel }: Props) =
     setForm(f => ({ ...f, [key]: val }));
 
   return (
-    <FormCard title="✏️ Редагування профілю" onSave={onSave} onCancel={onCancel} saveLabel="Зберегти зміни">
+    <FormCard title="⛏︎" onSave={onSave} onCancel={onCancel} saveLabel="Зберегти зміни">
       <FormField label="Назва притулку">
         <FInput value={form.name} onChange={e => set('name', e.target.value)} />
       </FormField>
