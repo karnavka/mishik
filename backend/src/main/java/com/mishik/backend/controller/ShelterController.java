@@ -278,10 +278,10 @@ public class ShelterController {
         m.put("name", s.getName());
         m.put("phoneNumber", s.getPhoneNumber());
         m.put("adoptionConditions", s.getAdoptionConditions());
-        m.put("socialLinks", s.getSocialLinks());
-        m.put("phoneVerified", s.isPhoneVerified());
         m.put("donationDetails", toMap(s.getDonationDetails()));
         m.put("imageUrl", s.getImageUrl());
+        m.put("socialLinks", s.getSocialLinks());
+        m.put("phoneVerified", s.isPhoneVerified());
 
         if (s.getAccount() != null) {
             m.put("login", s.getAccount().getLogin());
