@@ -4,25 +4,25 @@ import { logout } from '../utils/auth';
 
 
 type Props = {
-  onLoginClick: () => void;
-  dark: boolean;
-  onThemeToggle: () => void;
+    onLoginClick: () => void;
+    dark: boolean;
+    onThemeToggle: () => void;
 };
 
 export const Header = ({ onLoginClick, dark, onThemeToggle }: Props) => {
-  const { loggedIn, role } = useAuth();
-  const location = useLocation();
+    const { loggedIn, role } = useAuth();
+    const location = useLocation();
 
-  const handleLogout = () => {
-    logout();
-    notifyAuthChange();
-  };
+    const handleLogout = () => {
+        logout();
+        notifyAuthChange();
+    };
 
-  const navLinks = [
-    { to: '/',        label: '🐾 Тварини' },
-    { to: '/shelters', label: '🏠 Притулки' },
-    { to: '/events',   label: '❤️ Події' },
-  ];
+    const navLinks = [
+        { to: '/',        label: '🐾 Тварини' },
+        { to: '/shelters', label: '🏠 Притулки' },
+        { to: '/events',   label: '❤️ Події' },
+    ];
 
   return (
     <header className="header" style={{ justifyContent: 'space-between' }}>
@@ -38,6 +38,14 @@ export const Header = ({ onLoginClick, dark, onThemeToggle }: Props) => {
         ))}
       </div>
        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+           <Link
+               to="/donate"
+               state={{ from: location.pathname + location.search }}
+               className={'tab-btn donate-link' + (location.pathname.startsWith('/donate') ? ' active' : '')}
+               style={{ textDecoration: 'none' }}
+           >
+               Задонатити тваринкам
+           </Link>
       <button className="tab-btn" onClick={onThemeToggle}
           title={dark ? 'Світла тема' : 'Темна тема'}
           style={{ fontSize: 16, padding: '6px 10px' }} >

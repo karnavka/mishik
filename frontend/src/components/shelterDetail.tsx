@@ -1,6 +1,6 @@
 import type {Organization} from "../types";
-import {useRef} from "react";
 import { useNavigate } from 'react-router-dom';
+import { isLoggedIn } from '../utils/auth';
 
 type Props = {
     org: Organization;
@@ -9,9 +9,7 @@ type Props = {
 
 };
 
-export const ShelterDetail = ({org,onBack, onLoginRequest}:Props) => {
-
-    const mapRef = useRef<HTMLDivElement>(null);
+export const ShelterDetail = ({org,onBack,onLoginRequest}:Props) => {
 
     const addressQuery = [org.street, org.city, org.region]
         .filter(Boolean)
@@ -25,6 +23,21 @@ export const ShelterDetail = ({org,onBack, onLoginRequest}:Props) => {
 
     const handleViewAnimals = () => {
         navigate('/', { state: { shelterId: String(org.id) } });
+    };
+
+    const handleDonate = () => {
+        if (!isLoggedIn()) {
+            onLoginRequest?.();
+            return;
+        }
+
+        navigate('/donate', {
+            state: {
+                from: '/shelters',
+                shelterId: org.id,
+                shelterName: org.name,
+            },
+        });
     };
 
     return (
@@ -45,6 +58,9 @@ export const ShelterDetail = ({org,onBack, onLoginRequest}:Props) => {
                 <button className="btn-ghost" onClick={handleViewAnimals}>
                     🐾 Переглянути тварин
                 </button>
+                <button className="btn-primary" onClick={handleDonate}>
+                    Задонатити притулку
+                </button>
 
                 <div className="detail-body">
                     <h2 className="detail-name">{org.name}</h2>
@@ -59,6 +75,8 @@ export const ShelterDetail = ({org,onBack, onLoginRequest}:Props) => {
                         {org.phoneNumber && <Row label="Тел." value={org.phoneNumber}/>}
                         {org.street && <Row label="Адреса" value={[org.street, org.city].filter(Boolean).join(', ')}/>}
                         {org.adoptionConditions && <Row label="Умови" value={org.adoptionConditions}/>}
+                        {org.donationDetails?.recipientName && <Row label="Отримувач" value={org.donationDetails.recipientName}/>}
+                        {org.donationDetails?.iban && <Row label="IBAN" value={org.donationDetails.iban}/>}
                     </div>
 
                     {/* Map */}

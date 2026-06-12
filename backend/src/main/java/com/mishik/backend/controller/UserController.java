@@ -41,6 +41,7 @@ public class UserController {
         res.put("lastName", user.getLastName());
         res.put("patronymic", user.getPatronymic());
         res.put("sex", user.getSex());
+        res.put("donatedAmount", user.getDonatedAmount());
         res.put("login", account.getLogin());
         res.put("phoneNumber", user.getPhoneNumber());
         res.put("phoneVerified", user.isPhoneVerified());

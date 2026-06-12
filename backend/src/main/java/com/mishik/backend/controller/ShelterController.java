@@ -304,6 +304,10 @@ public class ShelterController {
         DonationDetails details = new DonationDetails();
 
         details.setDonationUrl((String) m.get("donationUrl"));
+        details.setRecipientName((String) m.get("recipientName"));
+        details.setIban((String) m.get("iban"));
+        details.setEdrpou((String) m.get("edrpou"));
+        details.setPaymentPurpose((String) m.get("paymentPurpose"));
 
         return details;
     }
@@ -316,6 +320,10 @@ public class ShelterController {
         Map<String, Object> m = new HashMap<>();
 
         m.put("donationUrl", d.getDonationUrl());
+        m.put("recipientName", d.getRecipientName());
+        m.put("iban", d.getIban());
+        m.put("edrpou", d.getEdrpou());
+        m.put("paymentPurpose", d.getPaymentPurpose());
 
         return m;
     }
