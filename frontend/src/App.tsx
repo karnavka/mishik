@@ -10,6 +10,7 @@ import { SheltersPage } from './pages/SheltersPage';
 import { EventsPage }  from './pages/EventsPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { useTheme } from './api/useTheme';
+import { ClinicsPage } from './pages/ClinicsPage';
 
 export default function App() {
   const [showLogin, setShowLogin] = useState(false);
@@ -20,10 +21,11 @@ export default function App() {
       <div className="app">
         <Header onLoginClick={() => setShowLogin(true)} dark={dark} onThemeToggle={toggleTheme} />
 
-        <Routes>
-          <Route path="/"         element={<AnimalsPage  onLoginRequest={() => setShowLogin(true)} />} />
-          <Route path="/shelters" element={<SheltersPage onLoginRequest={() => setShowLogin(true)} />} />
-          <Route path="/events"   element={<EventsPage   onLoginRequest={() => setShowLogin(true)} />} />
+          <Routes>
+            <Route path="/"         element={<AnimalsPage  onLoginRequest={() => setShowLogin(true)} />} />
+            <Route path="/shelters" element={<SheltersPage onLoginRequest={() => setShowLogin(true)} />} />
+            <Route path="/events"   element={<EventsPage   onLoginRequest={() => setShowLogin(true)} />} />
+            <Route path="/clinics" element={<ClinicsPage />} />
           <Route path="/profile"  element={<ProfilePage />} />
         </Routes>
 

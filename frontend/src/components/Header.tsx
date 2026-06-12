@@ -19,9 +19,10 @@ export const Header = ({ onLoginClick, dark, onThemeToggle }: Props) => {
   };
 
   const navLinks = [
-    { to: '/',        label: '🐾 Тварини' },
-    { to: '/shelters', label: '🏠 Притулки' },
-    { to: '/events',   label: '❤️ Події' },
+      { to: '/',        label: '🐾 Тварини' },
+      { to: '/shelters', label: '🏠 Притулки' },
+      {to: '/clinics', label: '🏥 Клініки' },
+      { to: '/events',   label: '❤️ Події' },
   ];
 
   return (

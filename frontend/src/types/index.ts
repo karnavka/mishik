@@ -25,6 +25,7 @@ export interface Organization {
     latitude?: number;
     longitude?: number;
     imageUrl: string;
+    hoursOfOperation?: string;
 }
 
 
