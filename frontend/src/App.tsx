@@ -9,26 +9,30 @@ import { AnimalsPage } from './pages/AnimalsPage';
 import { SheltersPage } from './pages/SheltersPage';
 import { EventsPage }  from './pages/EventsPage';
 import { ProfilePage } from './pages/ProfilePage';
+import { DonatePage } from './pages/DonatePage';
+import { DonateThanksPage } from './pages/DonateThanksPage';
 import { useTheme } from './api/useTheme';
 
 export default function App() {
-  const [showLogin, setShowLogin] = useState(false);
-  const { dark, toggleTheme } = useTheme();
+    const [showLogin, setShowLogin] = useState(false);
+    const { dark, toggleTheme } = useTheme();
 
-  return (
-    <BrowserRouter>
-      <div className="app">
-        <Header onLoginClick={() => setShowLogin(true)} dark={dark} onThemeToggle={toggleTheme} />
+    return (
+        <BrowserRouter>
+            <div className="app">
+                <Header onLoginClick={() => setShowLogin(true)} dark={dark} onThemeToggle={toggleTheme} />
 
-        <Routes>
-          <Route path="/"         element={<AnimalsPage  onLoginRequest={() => setShowLogin(true)} />} />
-          <Route path="/shelters" element={<SheltersPage onLoginRequest={() => setShowLogin(true)} />} />
-          <Route path="/events"   element={<EventsPage   onLoginRequest={() => setShowLogin(true)} />} />
-          <Route path="/profile"  element={<ProfilePage />} />
-        </Routes>
+                <Routes>
+                    <Route path="/"         element={<AnimalsPage  onLoginRequest={() => setShowLogin(true)} />} />
+                    <Route path="/shelters" element={<SheltersPage onLoginRequest={() => setShowLogin(true)} />} />
+                    <Route path="/events"   element={<EventsPage   onLoginRequest={() => setShowLogin(true)} />} />
+                    <Route path="/profile"  element={<ProfilePage />} />
+                    <Route path="/donate" element={<DonatePage />} />
+                    <Route path="/donate/thanks" element={<DonateThanksPage />} />
+                </Routes>
 
-        {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}
-      </div>
-    </BrowserRouter>
-  );
+                {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}
+            </div>
+        </BrowserRouter>
+    );
 }

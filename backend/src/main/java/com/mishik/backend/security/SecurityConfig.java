@@ -58,7 +58,8 @@ public class SecurityConfig {
                         // ========================
                         .requestMatchers(HttpMethod.POST,
                                 "/api/adoption-requests/**",
-                                "/api/volunteering/**"
+                                "/api/volunteering/**",
+                                "/api/donations/**"
                         ).hasRole("USER")
 
                         .requestMatchers(HttpMethod.DELETE,
