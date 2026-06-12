@@ -16,6 +16,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/shelters")
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5173"})
 public class ShelterController {
 
     private final ShelterRepository repository;
@@ -234,17 +235,20 @@ public class ShelterController {
         animal.setHeight(req.getHeight());
         animal.setSex(req.getSex());
         animal.setDescription(req.getDescription());
+
         animal.setShelter(shelter);
 
         if (req.getAnimalTypeId() != null) {
             AnimalType type = animalTypeRepository.findById(req.getAnimalTypeId())
                     .orElseThrow(() -> new RuntimeException("AnimalType not found"));
+
             animal.setAnimalType(type);
         }
 
         Animal saved = animalRepository.save(animal);
         return ResponseEntity.ok(Map.of("status", "created", "animal", toMap(saved)));
     }
+
     //отримати надіслені собі реквести на тварин
     @GetMapping("/api/shelters/me/adoption-requests")
     public List<Map<String, Object>> getShelterRequests(Authentication authentication) {
@@ -300,6 +304,10 @@ public class ShelterController {
         DonationDetails details = new DonationDetails();
 
         details.setDonationUrl((String) m.get("donationUrl"));
+        details.setRecipientName((String) m.get("recipientName"));
+        details.setIban((String) m.get("iban"));
+        details.setEdrpou((String) m.get("edrpou"));
+        details.setPaymentPurpose((String) m.get("paymentPurpose"));
 
         return details;
     }
@@ -312,6 +320,10 @@ public class ShelterController {
         Map<String, Object> m = new HashMap<>();
 
         m.put("donationUrl", d.getDonationUrl());
+        m.put("recipientName", d.getRecipientName());
+        m.put("iban", d.getIban());
+        m.put("edrpou", d.getEdrpou());
+        m.put("paymentPurpose", d.getPaymentPurpose());
 
         return m;
     }

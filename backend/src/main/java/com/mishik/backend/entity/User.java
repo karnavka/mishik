@@ -5,6 +5,8 @@ import com.mishik.backend.enums.Sex;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @Getter
 @Setter
 @Builder
@@ -27,6 +29,7 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     private Sex sex;
+    private BigDecimal donatedAmount = BigDecimal.ZERO;
 
     private String phoneNumber;
     private boolean phoneVerified = false;
@@ -77,5 +80,21 @@ public class User {
 
     public void setSex(Sex sex) {
         this.sex = sex;
+    }
+
+    public BigDecimal getDonatedAmount() {
+        return donatedAmount;
+    }
+
+    public void setDonatedAmount(BigDecimal donatedAmount) {
+        this.donatedAmount = donatedAmount;
+    }
+
+    public void addDonation(BigDecimal amount) {
+        if (donatedAmount == null) {
+            donatedAmount = BigDecimal.ZERO;
+        }
+
+        donatedAmount = donatedAmount.add(amount);
     }
 }

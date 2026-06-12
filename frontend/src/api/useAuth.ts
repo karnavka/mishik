@@ -24,7 +24,8 @@ export const useAuth = () => {
     role,
     isAdmin: role === 'ADMIN',
     isModerator: role === 'ROLE_MODERATOR' || role === 'ROLE_ADMIN',
-    isUser: role === 'ROLE_USER',
+    isUser: role === 'USER',
+    //isUser: role === 'ROLE_USER',
     isShelter: role === 'ROLE_SHELTER',
   };
   

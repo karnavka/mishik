@@ -1,5 +1,8 @@
 package com.mishik.backend.entity;
 import com.mishik.backend.embedded.Address;
+import jakarta.persistence.*;
+import lombok.*;
+
 import com.mishik.backend.embedded.DonationDetails;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -8,8 +11,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
-import jakarta.persistence.*;
-import lombok.*;
 
 @Entity
 @Getter
@@ -32,8 +33,6 @@ public class Shelter {
     private String imageUrl;
 
     private String adoptionConditions;
-
-
     @Embedded
     private DonationDetails donationDetails;
     private String socialLinks;

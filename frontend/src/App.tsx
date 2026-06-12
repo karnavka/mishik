@@ -11,22 +11,28 @@ import { EventsPage }  from './pages/EventsPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { useTheme } from './api/useTheme';
 import { ClinicsPage } from './pages/ClinicsPage';
+import { RequestDetailPage }  from './pages/RequestDetailPage';
+import { DonatePage } from './pages/DonatePage';
+import { DonateThanksPage } from './pages/DonateThanksPage';
 
 export default function App() {
-  const [showLogin, setShowLogin] = useState(false);
-  const { dark, toggleTheme } = useTheme();
+    const [showLogin, setShowLogin] = useState(false);
+    const { dark, toggleTheme } = useTheme();
 
-  return (
-    <BrowserRouter>
-      <div className="app">
-        <Header onLoginClick={() => setShowLogin(true)} dark={dark} onThemeToggle={toggleTheme} />
+    return (
+        <BrowserRouter>
+            <div className="app">
+                <Header onLoginClick={() => setShowLogin(true)} dark={dark} onThemeToggle={toggleTheme} />
 
-          <Routes>
-            <Route path="/"         element={<AnimalsPage  onLoginRequest={() => setShowLogin(true)} />} />
-            <Route path="/shelters" element={<SheltersPage onLoginRequest={() => setShowLogin(true)} />} />
-            <Route path="/events"   element={<EventsPage   onLoginRequest={() => setShowLogin(true)} />} />
+        <Routes>
+          <Route path="/"                          element={<AnimalsPage  onLoginRequest={() => setShowLogin(true)} />} />
+          <Route path="/shelters"                  element={<SheltersPage onLoginRequest={() => setShowLogin(true)} />} />
+          <Route path="/events"                    element={<EventsPage   onLoginRequest={() => setShowLogin(true)} />} />
+          <Route path="/profile"                   element={<ProfilePage />} />
             <Route path="/clinics" element={<ClinicsPage />} />
-          <Route path="/profile"  element={<ProfilePage />} />
+          <Route path="/requests/:animalId/:userId" element={<RequestDetailPage />} />
+          <Route path="/donate" element={<DonatePage />} />
+          <Route path="/donate/thanks" element={<DonateThanksPage />} />
         </Routes>
 
         {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}

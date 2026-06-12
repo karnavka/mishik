@@ -3,13 +3,21 @@ export interface Animal {
     name: string;
     age: number;
     height: number;
-    sex: 'MALE' | 'FEMALE';
+    sex: 'MALE' | 'FEMALE' | 'UNKNOWN';
     description?: string;
     animalTypeId: number;
     animalType: string;
     shelterId: number;
     shelterName: string;
     imageUrl: string;
+}
+
+export interface DonationDetails {
+    donationUrl?: string;
+    recipientName?: string;
+    iban?: string;
+    edrpou?: string;
+    paymentPurpose?: string;
 }
 
 export interface Organization {
@@ -26,6 +34,7 @@ export interface Organization {
     longitude?: number;
     imageUrl: string;
     hoursOfOperation?: string;
+    donationDetails?: DonationDetails | null;
 }
 
 
