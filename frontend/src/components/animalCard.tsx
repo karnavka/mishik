@@ -1,8 +1,9 @@
 // src/components/animalCard.tsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { Animal } from '../types';
 import { RoleGuard } from './RoleGuard';
 import { authFetch } from '../utils/api';
+import { getToken } from '../utils/auth';
 
 const EMOJI: Record<string, string> = {
     кіт: '🐱', cat: '🐱',
@@ -37,6 +38,19 @@ export const AnimalCard = ({
     const [requesting, setRequesting] = useState(false);
     const [requested,  setRequested]  = useState(false);
     const [error,      setError]      = useState<string | null>(null);
+
+    useEffect(() => {
+        if (!getToken() || shelterMode) return;
+        authFetch('http://localhost:8080/api/adoption-requests/my')
+            .then(r => r.json())
+            .then(data => {
+                if (Array.isArray(data)) {
+                    const alreadySent = data.some((r: any) => r.animalId === animal.id);
+                    if (alreadySent) setRequested(true);
+                }
+            })
+            .catch(() => {});
+    }, [animal.id, shelterMode]);
 
     const handleAdopt = async (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -76,10 +90,6 @@ export const AnimalCard = ({
 
             <div className="card-body">
                 <div className="card-title">{animal.name}</div>
-
-                {/*<div className="card-sub">*/}
-                {/*    {[animal.animalType, animal.shelterName].filter(Boolean).join(' · ')}*/}
-                {/*</div>*/}
 
                 <div className="badges">
                     <span className="badge">{animal.animalType}</span>

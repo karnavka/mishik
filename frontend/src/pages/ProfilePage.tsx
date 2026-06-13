@@ -5,6 +5,7 @@ import { logout } from '../utils/auth';
 import { notifyAuthChange } from '../api/useAuth';
 import { authFetch } from '../utils/api';
 import { AnimalCard } from '../components/animalCard';
+import { AnimalDetail } from '../components/animalDetail';
 import { inp, section, fieldRow, lbl, STATUS } from '../utils/Profilestyles';
 import type { StatusKey } from '../utils/Profilestyles';
 import { FormField, FTextarea } from '../components/FormField';
@@ -14,6 +15,7 @@ import { UserProfileForm }    from '../components/UserProfileForm';
 import type { UserProfileFormState } from '../components/UserProfileForm';
 import { ShelterProfileForm } from '../components/ShelterProfileForm';
 import type { ShelterProfileFormState } from '../components/ShelterProfileForm';
+import { useNavigate } from 'react-router-dom';
 
 type UserInfo = {
   id: number; firstName: string; lastName: string;
@@ -266,9 +268,7 @@ const ShelterInfoTab = () => {
       <FormField label="Назва" disabled value={info.name ?? '—'} />
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-        <FormField
-          label="Телефон" disabled value={info.phoneNumber || '—'}
-        />
+        <FormField label="Телефон" disabled value={info.phoneNumber || '—'} />
         <FormField label="Соц. мережі" disabled value={info.socialLinks || '—'} />
       </div>
 
@@ -286,8 +286,6 @@ const ShelterInfoTab = () => {
     </div>
   );
 };
-
-import { useNavigate } from 'react-router-dom';
 
 const ShelterRequestsTab = () => {
   const navigate = useNavigate();
@@ -467,18 +465,33 @@ const ShelterAnimalsTab = () => {
   );
 };
 
-const UserFavoritesTab = ({ favAnimals, favorites, onToggleFavorite, loading }: {
+const UserFavoritesTab = ({ favAnimals, favorites, onToggleFavorite, loading, onLoginRequest }: {
   favAnimals: FavAnimal[];
   favorites: Set<number>;
   onToggleFavorite: (id: number) => void;
   loading: boolean;
+  onLoginRequest: () => void;
 }) => {
+  const [selected, setSelected] = useState<FavAnimal | null>(null);
+
   if (loading)
     return (
       <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-muted)' }}>
         Завантаження...
       </div>
     );
+
+  if (selected) {
+    return (
+      <AnimalDetail
+        animal={selected as any}
+        onBack={() => setSelected(null)}
+        onLoginRequest={onLoginRequest}
+        isFavorited={favorites.has(selected.id)}
+        onToggleFavorite={onToggleFavorite}
+      />
+    );
+  }
 
   if (favAnimals.length === 0)
     return (
@@ -495,8 +508,10 @@ const UserFavoritesTab = ({ favAnimals, favorites, onToggleFavorite, loading }: 
         <AnimalCard
           key={a.id}
           animal={a as any}
+          onClick={() => setSelected(a)}
           isFavorited={favorites.has(a.id)}
           onToggleFavorite={onToggleFavorite}
+          onLoginRequest={onLoginRequest}
         />
       ))}
     </Grid2>
@@ -583,116 +598,117 @@ export const ProfilePage = () => {
 
   const rl = role ? ROLE_META[role] : null;
 
- return (
-  <div
-    style={{
-      height: '100vh',
-      display: 'flex',
-      flexDirection: 'column',
-      background: 'var(--bg)',
-      overflow: 'hidden',
-      padding: '32px 24px',
-      boxSizing: 'border-box',
-    }}
-  >
+  return (
     <div
       style={{
-        maxWidth: 900,
-        width: '100%',
-        margin: '0 auto',
+        height: '100vh',
         display: 'flex',
         flexDirection: 'column',
-        flex: 1,
+        background: 'var(--bg)',
         overflow: 'hidden',
+        padding: '32px 24px',
+        boxSizing: 'border-box',
       }}
     >
-      {/* Фіксований верх */}
-      <div
-        className="header"
-        style={{
-          justifyContent: 'space-between',
-          marginBottom: 28,
-          borderRadius: 12,
-          flexShrink: 0,
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span className="logo" style={{ fontSize: 18 }}>
-            {isShelter ? '🏠' : '👤'}
-          </span>
-
-          <span style={{ fontWeight: 700, fontSize: 16 }}>
-            Особистий кабінет
-          </span>
-
-          {rl && (
-            <span
-              style={{
-                fontSize: 11,
-                padding: '2px 10px',
-                borderRadius: 12,
-                fontWeight: 600,
-                background: rl.color + '22',
-                color: rl.color,
-              }}
-            >
-              {rl.text}
-            </span>
-          )}
-        </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-          {tabs.map((t, i) => (
-            <button
-              key={t.label}
-              onClick={() => setTab(i)}
-              className={'tab-btn' + (tab === i ? ' active' : '')}
-            >
-              <span style={{ marginRight: 5 }}>{t.icon}</span>
-              {t.label}
-            </button>
-          ))}
-        </div>
-
-        <button
-          className="tab-btn"
-          style={{ color: '#e74c3c' }}
-          onClick={handleLogout}
-        >
-          Вийти
-        </button>
-      </div>
-
-      {/* Скролиться тільки ця область */}
       <div
         style={{
-          background: 'var(--surface)',
-          borderRadius: 16,
-          padding: 28,
-          border: '1px solid var(--border)',
+          maxWidth: 900,
+          width: '100%',
+          margin: '0 auto',
+          display: 'flex',
+          flexDirection: 'column',
           flex: 1,
-          overflowY: 'auto',
-          minHeight: 0,
+          overflow: 'hidden',
         }}
       >
-        {!isShelter && tab === 0 && <UserInfoTab />}
+        {/* Фіксований верх */}
+        <div
+          className="header"
+          style={{
+            justifyContent: 'space-between',
+            marginBottom: 28,
+            borderRadius: 12,
+            flexShrink: 0,
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span className="logo" style={{ fontSize: 18 }}>
+              {isShelter ? '🏠' : '👤'}
+            </span>
 
-        {!isShelter && tab === 1 && (
-          <UserFavoritesTab
-            favAnimals={favAnimals}
-            favorites={favorites}
-            onToggleFavorite={toggleFavorite}
-            loading={favLoading}
-          />
-        )}
+            <span style={{ fontWeight: 700, fontSize: 16 }}>
+              Особистий кабінет
+            </span>
 
-        {!isShelter && tab === 2 && <UserRequestsTab />}
+            {rl && (
+              <span
+                style={{
+                  fontSize: 11,
+                  padding: '2px 10px',
+                  borderRadius: 12,
+                  fontWeight: 600,
+                  background: rl.color + '22',
+                  color: rl.color,
+                }}
+              >
+                {rl.text}
+              </span>
+            )}
+          </div>
 
-        {isShelter && tab === 0 && <ShelterInfoTab />}
-        {isShelter && tab === 1 && <ShelterRequestsTab />}
-        {isShelter && tab === 2 && <ShelterAnimalsTab />}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            {tabs.map((t, i) => (
+              <button
+                key={t.label}
+                onClick={() => setTab(i)}
+                className={'tab-btn' + (tab === i ? ' active' : '')}
+              >
+                <span style={{ marginRight: 5 }}>{t.icon}</span>
+                {t.label}
+              </button>
+            ))}
+          </div>
+
+          <button
+            className="tab-btn"
+            style={{ color: '#e74c3c' }}
+            onClick={handleLogout}
+          >
+            Вийти
+          </button>
+        </div>
+
+        {/* Скролиться тільки ця область */}
+        <div
+          style={{
+            background: 'var(--surface)',
+            borderRadius: 16,
+            padding: 28,
+            border: '1px solid var(--border)',
+            flex: 1,
+            overflowY: 'auto',
+            minHeight: 0,
+          }}
+        >
+          {!isShelter && tab === 0 && <UserInfoTab />}
+
+          {!isShelter && tab === 1 && (
+            <UserFavoritesTab
+              favAnimals={favAnimals}
+              favorites={favorites}
+              onToggleFavorite={toggleFavorite}
+              loading={favLoading}
+              onLoginRequest={() => {}}
+            />
+          )}
+
+          {!isShelter && tab === 2 && <UserRequestsTab />}
+
+          {isShelter && tab === 0 && <ShelterInfoTab />}
+          {isShelter && tab === 1 && <ShelterRequestsTab />}
+          {isShelter && tab === 2 && <ShelterAnimalsTab />}
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
 };
