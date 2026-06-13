@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../api/useAuth';
 import { logout } from '../utils/auth';
 import { notifyAuthChange } from '../api/useAuth';
@@ -48,7 +48,7 @@ const PhoneRequiredNotice = ({ message }: { message: string }) => (
     padding: '12px 16px', borderRadius: 10, background: '#f39c1215',
     border: '1px solid #f39c1240', display: 'flex', alignItems: 'center', gap: 10,
   }}>
-    <span style={{ fontSize: 25}}>☏</span>
+    <span style={{ fontSize: 25 }}>☏</span>
     <div>
       <div style={{ fontSize: 13, fontWeight: 600, color: '#f39c12' }}>Потрібен телефон</div>
       <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{message}</div>
@@ -120,23 +120,17 @@ const UserInfoTab = () => {
 
   return (
     <div style={section}>
-      {!hasPhone  && <PhoneRequiredNotice message="Для подачі заявок на усиновлення необхідно вказати та підтвердити номер телефону." />}
-
+      {!hasPhone && <PhoneRequiredNotice message="Для подачі заявок на усиновлення необхідно вказати та підтвердити номер телефону." />}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
         <FormField label="Логін" disabled value={info.login} />
         <FormField label="Стать" disabled
           value={info.sex === 'MALE' ? '♂ Чоловіча' : info.sex === 'FEMALE' ? '♀ Жіноча' : '—'} />
       </div>
-
       <FormField label="Повне ім'я" disabled
         value={[info.firstName, info.lastName, info.patronymic].filter(Boolean).join(' ') || '—'} />
-
       <FormField label="Номер телефону" disabled value={info.phoneNumber || '—'} />
-
       <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-        <button className="btn-ghost" style={{ alignSelf: 'flex-start' }} onClick={startEdit}>
-          ⛏︎
-        </button>
+        <button className="btn-ghost" style={{ alignSelf: 'flex-start' }} onClick={startEdit}>⛏︎</button>
         {saved && <span style={{ color: '#27ae60', fontSize: 13 }}>✓ Збережено</span>}
       </div>
     </div>
@@ -188,21 +182,14 @@ const UserRequestsTab = () => {
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <StatusBadge status={r.status} />
-            <button
-              className="btn-ghost"
-              style={{ fontSize: 12 }}
-              onClick={() => navigate(`/requests/${r.animalId}/my`, { state: { request: r } })}
-            >
+            <button className="btn-ghost" style={{ fontSize: 12 }}
+              onClick={() => navigate(`/requests/${r.animalId}/my`, { state: { request: r } })}>
               Деталі →
             </button>
             {r.status === 'PENDING' && (
-              <button
-                className="btn-ghost"
+              <button className="btn-ghost"
                 style={{ color: '#e74c3c', borderColor: '#e74c3c', fontSize: 12 }}
-                onClick={() => cancelRequest(r.animalId)}
-              >
-                ✕
-              </button>
+                onClick={() => cancelRequest(r.animalId)}>✕</button>
             )}
           </div>
         </div>
@@ -257,30 +244,23 @@ const ShelterInfoTab = () => {
   return (
     <div style={section}>
       {!hasPhone && <PhoneRequiredNotice message="Для додавання тварин у базу необхідно вказати номер телефону притулку." />}
-
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
         <FormField label="Логін" disabled value={info.login} />
         {info.city && (
           <FormField label="Розташування" disabled value={[info.city, info.region].filter(Boolean).join(', ')} />
         )}
       </div>
-
       <FormField label="Назва" disabled value={info.name ?? '—'} />
-
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
         <FormField label="Телефон" disabled value={info.phoneNumber || '—'} />
         <FormField label="Соц. мережі" disabled value={info.socialLinks || '—'} />
       </div>
-
       <div style={fieldRow}>
         <span style={lbl}>Умови усиновлення</span>
         <FTextarea value={info.adoptionConditions ?? '—'} disabled minHeight={80} resize="none" />
       </div>
-
       <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-        <button className="btn-ghost" style={{ alignSelf: 'flex-start' }} onClick={startEdit}>
-          ⛏︎
-        </button>
+        <button className="btn-ghost" style={{ alignSelf: 'flex-start' }} onClick={startEdit}>⛏︎</button>
         {saved && <span style={{ color: '#27ae60', fontSize: 13 }}>✓ Збережено</span>}
       </div>
     </div>
@@ -338,11 +318,8 @@ const ShelterRequestsTab = () => {
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
         <StatusBadge status={r.status} />
-        <button
-          className="btn-ghost"
-          style={{ fontSize: 12 }}
-          onClick={() => navigate(`/requests/${r.animalId}/${r.userId}`, { state: { request: r } })}
-        >
+        <button className="btn-ghost" style={{ fontSize: 12 }}
+          onClick={() => navigate(`/requests/${r.animalId}/${r.userId}`, { state: { request: r } })}>
           Переглянути →
         </button>
       </div>
@@ -426,17 +403,14 @@ const ShelterAnimalsTab = () => {
       {!shelterHasPhone && (
         <PhoneRequiredNotice message="Вкажіть номер телефону у вкладці «Про притулок» перед тим, як додавати тварин." />
       )}
-
       {shelterHasPhone && !showAddForm && (
         <button className="btn-primary" style={{ alignSelf: 'flex-start' }} onClick={() => setShowAddForm(true)}>
           ➕ Додати тварину
         </button>
       )}
-
       {showAddForm && (
         <AnimalForm form={addForm} setForm={setAddForm} onSave={addAnimal} onCancel={() => setShowAddForm(false)} />
       )}
-
       {animals.length === 0 && !showAddForm && (
         <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-muted)' }}>
           <div style={{ fontSize: 40, marginBottom: 12 }}>🐾</div>
@@ -444,7 +418,6 @@ const ShelterAnimalsTab = () => {
           <div style={{ fontSize: 13, marginTop: 6 }}>Натисніть «Додати тварину», щоб розпочати</div>
         </div>
       )}
-
       <Grid2>
         {animals.map(a =>
           editingId === a.id ? (
@@ -465,6 +438,7 @@ const ShelterAnimalsTab = () => {
   );
 };
 
+// ── Уподобані — AnimalDetail на повну сторінку через fixed overlay ──
 const UserFavoritesTab = ({ favAnimals, favorites, onToggleFavorite, loading, onLoginRequest }: {
   favAnimals: FavAnimal[];
   favorites: Set<number>;
@@ -475,13 +449,17 @@ const UserFavoritesTab = ({ favAnimals, favorites, onToggleFavorite, loading, on
   const [selected, setSelected] = useState<FavAnimal | null>(null);
 
   if (loading)
+    return <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-muted)' }}>Завантаження...</div>;
+
+  if (favAnimals.length === 0)
     return (
       <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-muted)' }}>
-        Завантаження...
+        <div style={{ fontSize: 40, marginBottom: 12 }}>♡</div>
+        <div style={{ fontSize: 15, fontWeight: 500 }}>Немає уподобаних тварин</div>
+        <div style={{ fontSize: 13, marginTop: 6 }}>Натисніть ♡ на картці тварини, щоб зберегти</div>
       </div>
     );
-
-  if (selected) {
+    if (selected) {
     return (
       <AnimalDetail
         animal={selected as any}
@@ -493,28 +471,21 @@ const UserFavoritesTab = ({ favAnimals, favorites, onToggleFavorite, loading, on
     );
   }
 
-  if (favAnimals.length === 0)
-    return (
-      <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-muted)' }}>
-        <div style={{ fontSize: 40, marginBottom: 12 }}>♡</div>
-        <div style={{ fontSize: 15, fontWeight: 500 }}>Немає уподобаних тварин</div>
-        <div style={{ fontSize: 13, marginTop: 6 }}>Натисніть ♡ на картці тварини, щоб зберегти</div>
-      </div>
-    );
-
   return (
-    <Grid2>
-      {favAnimals.map(a => (
-        <AnimalCard
-          key={a.id}
-          animal={a as any}
-          onClick={() => setSelected(a)}
-          isFavorited={favorites.has(a.id)}
-          onToggleFavorite={onToggleFavorite}
-          onLoginRequest={onLoginRequest}
-        />
-      ))}
-    </Grid2>
+    <>
+      <Grid2>
+        {favAnimals.map(a => (
+          <AnimalCard
+            key={a.id}
+            animal={a as any}
+            onClick={() => setSelected(a)}
+            isFavorited={favorites.has(a.id)}
+            onToggleFavorite={onToggleFavorite}
+            onLoginRequest={onLoginRequest}
+          />
+        ))}
+      </Grid2>
+    </>
   );
 };
 
@@ -527,11 +498,19 @@ const ROLE_META: Record<string, { text: string; color: string }> = {
 
 export const ProfilePage = () => {
   const { loggedIn, role } = useAuth();
-  const [tab, setTab] = useState(0);
+  const location = useLocation();
 
-  const [favorites, setFavorites]     = useState<Set<number>>(new Set());
-  const [favAnimals, setFavAnimals]   = useState<FavAnimal[]>([]);
-  const [favLoading, setFavLoading]   = useState(true);
+  // Читаємо tab зі state навігації (передається з Header дропдауну)
+  const navState = location.state as { tab?: number } | null;
+  const [tab, setTab] = useState(navState?.tab ?? 0);
+
+  useEffect(() => {
+    if (navState?.tab !== undefined) setTab(navState.tab);
+  }, [navState?.tab]);
+
+  const [favorites, setFavorites]   = useState<Set<number>>(new Set());
+  const [favAnimals, setFavAnimals] = useState<FavAnimal[]>([]);
+  const [favLoading, setFavLoading] = useState(true);
 
   useEffect(() => {
     if (!loggedIn) return;
@@ -549,24 +528,19 @@ export const ProfilePage = () => {
 
   const toggleFavorite = async (id: number) => {
     const isFav = favorites.has(id);
-
     setFavorites(prev => {
       const next = new Set(prev);
       isFav ? next.delete(id) : next.add(id);
       return next;
     });
-    if (isFav) {
-      setFavAnimals(prev => prev.filter(a => a.id !== id));
-    }
+    if (isFav) setFavAnimals(prev => prev.filter(a => a.id !== id));
 
     try {
       await authFetch(`http://localhost:8080/api/favorites/${id}`, {
         method: isFav ? 'DELETE' : 'POST',
       });
-
       if (!isFav) {
-        const fresh = await authFetch('http://localhost:8080/api/favorites')
-          .then(r => r.json());
+        const fresh = await authFetch('http://localhost:8080/api/favorites').then(r => r.json());
         if (Array.isArray(fresh)) {
           setFavAnimals(fresh);
           setFavorites(new Set(fresh.map((a: FavAnimal) => a.id)));
@@ -599,99 +573,49 @@ export const ProfilePage = () => {
   const rl = role ? ROLE_META[role] : null;
 
   return (
-    <div
-      style={{
-        height: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        background: 'var(--bg)',
-        overflow: 'hidden',
-        padding: '32px 24px',
-        boxSizing: 'border-box',
-      }}
-    >
-      <div
-        style={{
-          maxWidth: 900,
-          width: '100%',
-          margin: '0 auto',
-          display: 'flex',
-          flexDirection: 'column',
-          flex: 1,
-          overflow: 'hidden',
-        }}
-      >
-        {/* Фіксований верх */}
-        <div
-          className="header"
-          style={{
-            justifyContent: 'space-between',
-            marginBottom: 28,
-            borderRadius: 12,
-            flexShrink: 0,
-          }}
-        >
+    <div style={{
+      height: '100vh', display: 'flex', flexDirection: 'column',
+      background: 'var(--bg)', overflow: 'hidden',
+      padding: '32px 24px', boxSizing: 'border-box',
+    }}>
+      <div style={{
+        maxWidth: 900, width: '100%', margin: '0 auto',
+        display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden',
+      }}>
+        <div className="header" style={{
+          justifyContent: 'space-between', marginBottom: 28,
+          borderRadius: 12, flexShrink: 0,
+        }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span className="logo" style={{ fontSize: 18 }}>
-              {isShelter ? '🏠' : '👤'}
-            </span>
-
-            <span style={{ fontWeight: 700, fontSize: 16 }}>
-              Особистий кабінет
-            </span>
-
+            <span className="logo" style={{ fontSize: 18 }}>{isShelter ? '🏠' : '👤'}</span>
+            <span style={{ fontWeight: 700, fontSize: 16 }}>Особистий кабінет</span>
             {rl && (
-              <span
-                style={{
-                  fontSize: 11,
-                  padding: '2px 10px',
-                  borderRadius: 12,
-                  fontWeight: 600,
-                  background: rl.color + '22',
-                  color: rl.color,
-                }}
-              >
-                {rl.text}
-              </span>
+              <span style={{
+                fontSize: 11, padding: '2px 10px', borderRadius: 12, fontWeight: 600,
+                background: rl.color + '22', color: rl.color,
+              }}>{rl.text}</span>
             )}
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
             {tabs.map((t, i) => (
-              <button
-                key={t.label}
-                onClick={() => setTab(i)}
-                className={'tab-btn' + (tab === i ? ' active' : '')}
-              >
-                <span style={{ marginRight: 5 }}>{t.icon}</span>
-                {t.label}
+              <button key={t.label} onClick={() => setTab(i)}
+                className={'tab-btn' + (tab === i ? ' active' : '')}>
+                <span style={{ marginRight: 5 }}>{t.icon}</span>{t.label}
               </button>
             ))}
           </div>
 
-          <button
-            className="tab-btn"
-            style={{ color: '#e74c3c' }}
-            onClick={handleLogout}
-          >
+          <button className="tab-btn" style={{ color: '#e74c3c' }} onClick={handleLogout}>
             Вийти
           </button>
         </div>
 
-        {/* Скролиться тільки ця область */}
-        <div
-          style={{
-            background: 'var(--surface)',
-            borderRadius: 16,
-            padding: 28,
-            border: '1px solid var(--border)',
-            flex: 1,
-            overflowY: 'auto',
-            minHeight: 0,
-          }}
-        >
+        <div style={{
+          background: 'var(--surface)', borderRadius: 16, padding: 28,
+          border: '1px solid var(--border)', flex: 1, overflowY: 'auto', minHeight: 0,
+        }}>
           {!isShelter && tab === 0 && <UserInfoTab />}
-
           {!isShelter && tab === 1 && (
             <UserFavoritesTab
               favAnimals={favAnimals}
@@ -701,7 +625,6 @@ export const ProfilePage = () => {
               onLoginRequest={() => {}}
             />
           )}
-
           {!isShelter && tab === 2 && <UserRequestsTab />}
 
           {isShelter && tab === 0 && <ShelterInfoTab />}

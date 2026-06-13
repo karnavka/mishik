@@ -10,15 +10,15 @@ type Props = {
 };
 
 const USER_TABS = [
-    { icon: '', label: 'Про мене',     tab: 0 },
-    { icon: '',  label: 'Уподобані',    tab: 1 },
-    { icon: '', label: 'Мої заявки',   tab: 2 },
+    { icon: '👤', label: 'Про мене',     tab: 0 },
+    { icon: '♡',  label: 'Уподобані',    tab: 1 },
+    { icon: '📋', label: 'Мої заявки',   tab: 2 },
 ];
 
 const SHELTER_TABS = [
-    { icon: '', label: 'Про притулок', tab: 0 },
-    { icon: '', label: 'Заявки',       tab: 1 },
-    { icon: '', label: 'Тварини',      tab: 2 },
+    { icon: '🏠', label: 'Про притулок', tab: 0 },
+    { icon: '📬', label: 'Заявки',       tab: 1 },
+    { icon: '🐾', label: 'Тварини',      tab: 2 },
 ];
 
 export const Header = ({ onLoginClick, dark, onThemeToggle }: Props) => {
@@ -152,7 +152,7 @@ export const Header = ({ onLoginClick, dark, onThemeToggle }: Props) => {
                                     onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg)')}
                                     onMouseLeave={e => (e.currentTarget.style.background = 'none')}
                                 >
-                                    <span style={{ fontSize: 16 }}></span>
+                                    <span style={{ fontSize: 16 }}>🚪</span>
                                     Вийти
                                 </button>
                             </div>
