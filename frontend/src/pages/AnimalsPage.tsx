@@ -1,27 +1,43 @@
-import {useState, useMemo, useEffect} from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import type { Animal } from '../types';
 import { useFetch } from '../api/fetch';
 import { AnimalCard } from '../components/animalCard';
 import { Sidebar } from '../components/Sidebar';
-import {AnimalDetail} from "../components/animalDetail.tsx";
-import {useLocation} from "react-router-dom";
+import { AnimalDetail } from '../components/animalDetail.tsx';
+import { useLocation } from 'react-router-dom';
+import { getToken } from '../utils/auth';
+import { authFetch } from '../utils/api.ts';
 
 type Props = { onLoginRequest: () => void };
 
 export const AnimalsPage = ({ onLoginRequest }: Props) => {
   const [search, setSearch] = useState('');
-  // const [filters, setFilters] = useState<Record<string, string>>({});
   const [selected, setSelected] = useState<Animal | null>(null);
   const location = useLocation();
+
   const [filters, setFilters] = useState<Record<string, string>>(() => {
     const state = location.state as { shelterId?: string } | null;
     return state?.shelterId ? { shelterId: state.shelterId } : {};
   });
 
+  // ── Уподобані ── всі хуки ВГОРІ, до будь-яких return
+  const [favorites, setFavorites] = useState<Set<number>>(new Set());
+
+  useEffect(() => {
+    if (!getToken()) return;
+    authFetch('http://localhost:8080/api/favorites')
+      .then(r => r.json())
+      .then(data => {
+        if (Array.isArray(data))
+          setFavorites(new Set(data.map((a: any) => a.id)));
+      })
+      .catch(() => {});
+  }, []);
+
   useEffect(() => {
     setSelected(null);
     const state = location.state as { shelterId?: string } | null;
-    setFilters(state?.shelterId ? { shelterId: state.shelterId } : {});  // ← not just {}
+    setFilters(state?.shelterId ? { shelterId: state.shelterId } : {});
   }, [location]);
 
   const { data: animalTypes } = useFetch<{ id: number; type: string }>('/api/animal-types');
@@ -30,16 +46,18 @@ export const AnimalsPage = ({ onLoginRequest }: Props) => {
     label: 'Вид',
     opts: animalTypes.map(t => ({ v: String(t.id), l: t.type })),
   };
-  console.log(animalTypes);
-  const filterGroups = [typeFilter,
+
+  const filterGroups = [
+    typeFilter,
     {
       key: 'sex',
       label: 'Стать',
       opts: [
-        { v: 'MALE', l: '♂ Хлопчик' },
+        { v: 'MALE',   l: '♂ Хлопчик' },
         { v: 'FEMALE', l: '♀ Дівчинка' },
       ],
-    },];
+    },
+  ];
 
   const toggle = (key: string, value: string) =>
     setFilters(prev =>
@@ -59,18 +77,41 @@ export const AnimalsPage = ({ onLoginRequest }: Props) => {
     return animals.filter(a => a.name?.toLowerCase().includes(q));
   }, [animals, search]);
 
+  const toggleFavorite = async (id: number) => {
+    const isFav = favorites.has(id);
+    // Оновити UI одразу (optimistic)
+    setFavorites(prev => {
+      const next = new Set(prev);
+      isFav ? next.delete(id) : next.add(id);
+      return next;
+    });
+    // Запит до API
+    await authFetch(`http://localhost:8080/api/favorites/${id}`, {
+      method: isFav ? 'DELETE' : 'POST',
+    }).catch(() => {
+      // Відкотити при помилці
+      setFavorites(prev => {
+        const next = new Set(prev);
+        isFav ? next.add(id) : next.delete(id);
+        return next;
+      });
+    });
+  };
+
+  // ── Умовний return ПІСЛЯ всіх хуків ──
   if (selected) {
     return (
-        <AnimalDetail
-            animal={selected}
-            onBack={() => setSelected(null)}
-            onLoginRequest={onLoginRequest}
-        />
+      <AnimalDetail
+        animal={selected}
+        onBack={() => setSelected(null)}
+        onLoginRequest={onLoginRequest}
+        isFavorited={favorites.has(selected.id)}
+        onToggleFavorite={toggleFavorite}
+      />
     );
   }
 
   return (
-
     <div className="body">
       <Sidebar
         filters={filters}
@@ -89,12 +130,22 @@ export const AnimalsPage = ({ onLoginRequest }: Props) => {
           />
         </div>
         <div className="feed">
-          {loading  ? <div className="empty">Завантаження...</div>
-          : error   ? <div className="empty">Помилка: {error}</div>
-          : visible.length === 0 ? <div className="empty">🐾 Тварин не знайдено</div>
-          : visible.map(a => (
-              <AnimalCard key={a.id} animal={a} onLoginRequest={onLoginRequest} onClick={() => setSelected(a)} />
-            ))
+          {loading
+            ? <div className="empty">Завантаження...</div>
+            : error
+            ? <div className="empty">Помилка: {error}</div>
+            : visible.length === 0
+            ? <div className="empty">🐾 Тварин не знайдено</div>
+            : visible.map(a => (
+                <AnimalCard
+                  key={a.id}
+                  animal={a}
+                  onLoginRequest={onLoginRequest}
+                  onClick={() => setSelected(a)}
+                  isFavorited={favorites.has(a.id)}
+                  onToggleFavorite={toggleFavorite}
+                />
+              ))
           }
         </div>
       </div>
