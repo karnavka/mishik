@@ -62,7 +62,7 @@ export const SheltersPage = ({onLoginRequest}: Props) => {
         {
             key: 'city',
             label: 'Місто',
-            icon: 'src/images/location.png',
+            icon: '/images/location.png',
             opts: cities.map(c => ({v: c, l: c})),
         },
     ];

@@ -92,10 +92,10 @@ export const AnimalsPage = ({onLoginRequest}: Props) => {
         label: 'Вид',
         // opts: animalTypes.map(t => ({v: String(t.id), l: t.type, icon: `src/images/${t.type}.png`})),
         opts: [
-            {v: 2, l: 'кітик', icon: `src/images/Cat.png`},
-            {v: 1,l: 'пес', icon: `src/images/Dog.png`},
-            {v: 3,l:'кролик', icon:`src/images/Rabbit.png`},
-            {v: 4,l:'папужка', icon:`src/images/Parrot.png`}
+            {v: 2, l: 'кітик', icon: `/images/Cat.png`},
+            {v: 1,l: 'пес', icon: `/images/Dog.png`},
+            {v: 3,l:'кролик', icon:`/images/Rabbit.png`},
+            {v: 4,l:'папужка', icon:`/images/Parrot.png`}
         ],
         columns: 2
         // type: 'select' as const,
@@ -104,15 +104,15 @@ export const AnimalsPage = ({onLoginRequest}: Props) => {
             key: 'sex',
             label: 'Стать',
             opts: [
-                {v: 'MALE', l: 'хлопчик', icon: 'src/images/MALE.png'},
-                {v: 'FEMALE', l: 'дівчинка', icon: 'src/images/FEMALE.png'},
+                {v: 'MALE', l: 'хлопчик', icon: '/images/MALE.png'},
+                {v: 'FEMALE', l: 'дівчинка', icon: '/images/FEMALE.png'},
             ],
             columns:2
         },
         {
             key: 'city',
             label: 'Місто',
-            icon: 'src/images/location.png',
+            icon: '/images/location.png',
             type: 'select' as const,
             opts: cities.map(c => ({v: c, l: c})),
 

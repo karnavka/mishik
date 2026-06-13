@@ -32,8 +32,8 @@ export const Header = ({onLoginClick, dark, onThemeToggle}: Props) => {
                     <div className="header-top">
                         <img
                             src={dark
-                                ? '/src/images/logodark.png'
-                                : '/src/images/logo.png'
+                                ? '/images/logodark.png'
+                                : '/images/logo.png'
                             }
                             className="header-logo"
                         />
@@ -69,9 +69,7 @@ export const Header = ({onLoginClick, dark, onThemeToggle}: Props) => {
                                   className={'' + (location.pathname === '/profile' ? ' active' : '')}
                                   style={{textDecoration: 'none', padding: '0  10px 0 0'}}
                             >
-                                {/*src/images/profile1.png*/}
-                                {/*☺︎ {role && <span style={{fontSize: 11, color: '#aaa'}}></span>}*/}
-                                <img src="src/images/profile1.png" className="profile-avatar"/>
+                                <img src="/images/profile1.png" className="profile-avatar"/>
                                 {role && <span style={{ fontSize: 11, color: '#aaa' }} />}
                             </Link>
                             {/*<button className="tab-btn" onClick={handleLogout}>Вийти</button>*/}
