@@ -5,7 +5,7 @@ import {AnimalCard} from '../components/animalCard';
 import {Sidebar} from '../components/Sidebar';
 import {AnimalDetail} from "../components/animalDetail.tsx";
 import {useLocation} from "react-router-dom";
-import maleIcon from '../images/MALE.png';
+//import maleIcon from '../images/MALE.png';
 import {Footer} from "../components/Footer.tsx";
 
 

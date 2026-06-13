@@ -183,7 +183,7 @@ public class ShelterController {
     public Map<String, Object> updateAnimal(
             @PathVariable Long animalId,
             Authentication authentication,
-            @RequestBody Animal req
+            @RequestBody AnimalRequest req
     ) {
 
         String login = authentication.getName();
@@ -206,6 +206,14 @@ public class ShelterController {
         animal.setHeight(req.getHeight());
         animal.setDescription(req.getDescription());
         animal.setSex(req.getSex());
+        animal.setImageUrl(req.getImageUrl());
+
+        if (req.getAnimalTypeId() != null) {
+            AnimalType type = animalTypeRepository.findById(req.getAnimalTypeId())
+                    .orElseThrow(() -> new RuntimeException("AnimalType not found"));
+
+            animal.setAnimalType(type);
+        }
 
         animalRepository.save(animal);
 
@@ -235,6 +243,7 @@ public class ShelterController {
         animal.setHeight(req.getHeight());
         animal.setSex(req.getSex());
         animal.setDescription(req.getDescription());
+        animal.setImageUrl(req.getImageUrl());
 
         animal.setShelter(shelter);
 
@@ -337,9 +346,10 @@ public class ShelterController {
         m.put("height", a.getHeight());
         m.put("sex", a.getSex());
         m.put("description", a.getDescription());
+        m.put("imageUrl", a.getImageUrl());
 
-        m.put("animalTypeId", a.getAnimalType().getId());
-        m.put("animalType", a.getAnimalType().getUsefulInfo());
+        m.put("animalTypeId", a.getAnimalType() != null ? a.getAnimalType().getId() : null);
+        m.put("animalType", a.getAnimalType() != null ? a.getAnimalType().getUsefulInfo() : null);
 
         return m;
     }

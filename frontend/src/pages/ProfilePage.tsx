@@ -9,7 +9,7 @@ import { inp, section, fieldRow, lbl, STATUS } from '../utils/Profilestyles';
 import type { StatusKey } from '../utils/Profilestyles';
 import { FormField, FTextarea } from '../components/FormField';
 import { AnimalForm, EMPTY_ANIMAL_FORM } from '../components/AnimalForm';
-import type { AnimalFormState } from '../components/AnimalForm';
+import type { AnimalFormState, AnimalTypeOption } from '../components/AnimalForm';
 import { UserProfileForm }    from '../components/UserProfileForm';
 import type { UserProfileFormState } from '../components/UserProfileForm';
 import { ShelterProfileForm } from '../components/ShelterProfileForm';
@@ -29,7 +29,7 @@ type ShelterInfo = {
 type Animal = {
   id: number; name: string; age: number; height: number;
   sex: string; description: string; animalType: string;
-  shelterName?: string;
+  animalTypeId?: number; imageUrl?: string; shelterName?: string;
 };
 type Request = {
   userId: number; userLogin: string;
@@ -377,6 +377,7 @@ const ShelterAnimalsTab = () => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [editForm, setEditForm]       = useState<AnimalFormState>(EMPTY_ANIMAL_FORM);
   const [addForm,  setAddForm]        = useState<AnimalFormState>(EMPTY_ANIMAL_FORM);
+  const [animalTypes, setAnimalTypes] = useState<AnimalTypeOption[]>([]);
   const [shelterHasPhone, setShelterHasPhone] = useState(true);
   const [loading, setLoading]         = useState(true);
 
@@ -384,23 +385,58 @@ const ShelterAnimalsTab = () => {
     Promise.all([
       authFetch('http://localhost:8080/api/shelters/me').then(r => r.json()),
       authFetch('http://localhost:8080/api/shelters/me/animals').then(r => r.json()),
+      fetch('/api/animal-types').then(r => r.json()),
     ])
-      .then(([shelter, animalList]) => {
+      .then(([shelter, animalList, typeList]) => {
         setShelterHasPhone(!!shelter.phoneNumber);
         setAnimals(Array.isArray(animalList) ? animalList : []);
+        setAnimalTypes(Array.isArray(typeList) ? typeList : []);
       })
       .catch(() => { setShelterHasPhone(false); setAnimals([]); })
       .finally(() => setLoading(false));
   }, []);
 
+  const toAnimalPayload = (form: AnimalFormState) => ({
+    name: form.name.trim(),
+    age: Number(form.age),
+    height: Number(form.height),
+    sex: form.sex,
+    description: form.description.trim(),
+    imageUrl: form.imageUrl.trim() || null,
+    animalTypeId: form.animalTypeId ? Number(form.animalTypeId) : null,
+  });
+
+  const canSaveAnimal = (form: AnimalFormState) => {
+    if (!form.name.trim() || !form.animalTypeId) {
+      alert('Заповніть назву та тип тварини');
+      return false;
+    }
+
+    return true;
+  };
+
   const startEdit = (a: Animal) => {
     setEditingId(a.id);
-    setEditForm({ name: a.name, age: a.age, height: a.height, description: a.description ?? '', sex: a.sex, animalType: a.animalType });
+    setEditForm({
+      name: a.name,
+      age: a.age,
+      height: a.height,
+      description: a.description ?? '',
+      sex: a.sex,
+      animalTypeId: a.animalTypeId ? String(a.animalTypeId) : '',
+      imageUrl: a.imageUrl ?? '',
+    });
   };
 
   const saveEdit = async (id: number) => {
-    await authFetch(`http://localhost:8080/api/shelters/me/${id}`, { method: 'PUT', body: JSON.stringify(editForm) });
-    setAnimals(list => list.map(a => a.id === id ? { ...a, ...editForm } : a));
+    if (!canSaveAnimal(editForm)) return;
+
+    const res = await authFetch(`http://localhost:8080/api/shelters/me/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(toAnimalPayload(editForm)),
+    });
+    const updated = await res.json();
+    setAnimals(list => list.map(a => a.id === id ? { ...a, ...updated } : a));
     setEditingId(null);
   };
 
@@ -411,12 +447,17 @@ const ShelterAnimalsTab = () => {
   };
 
   const addAnimal = async () => {
-    const res  = await authFetch('http://localhost:8080/api/shelters/me/animals', { method: 'POST', body: JSON.stringify(addForm) });
+    if (!canSaveAnimal(addForm)) return;
+
+    const res  = await authFetch('http://localhost:8080/api/shelters/me/animals', {
+      method: 'POST',
+      body: JSON.stringify(toAnimalPayload(addForm)),
+    });
     const data = await res.json();
     if (data.animal) {
       setAnimals(list => [...list, data.animal]);
       setShowAddForm(false);
-      setAddForm(EMPTY_ANIMAL_FORM);
+      setAddForm({ ...EMPTY_ANIMAL_FORM });
     }
   };
 
@@ -436,7 +477,13 @@ const ShelterAnimalsTab = () => {
       )}
 
       {showAddForm && (
-        <AnimalForm form={addForm} setForm={setAddForm} onSave={addAnimal} onCancel={() => setShowAddForm(false)} />
+        <AnimalForm
+          form={addForm}
+          setForm={setAddForm}
+          animalTypes={animalTypes}
+          onSave={addAnimal}
+          onCancel={() => setShowAddForm(false)}
+        />
       )}
 
       {animals.length === 0 && !showAddForm && (
@@ -451,6 +498,7 @@ const ShelterAnimalsTab = () => {
         {animals.map(a =>
           editingId === a.id ? (
             <AnimalForm key={a.id} id={a.id} form={editForm} setForm={setEditForm}
+              animalTypes={animalTypes}
               onSave={() => saveEdit(a.id)} onCancel={() => setEditingId(null)} />
           ) : (
             <AnimalCard

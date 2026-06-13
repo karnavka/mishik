@@ -12,5 +12,6 @@ public class AnimalRequest {
     private int height;
     private Sex sex;
     private String description;
+    private String imageUrl;
     private Long animalTypeId;
 }
