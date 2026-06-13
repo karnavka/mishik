@@ -106,6 +106,9 @@ public class DataLoader {
                                         Sex.UNKNOWN
                 );
 
+                if(i==0)animal.setImageUrl("/images/dog1.png");
+                if(i==0)animal.setImageUrl("/images/cat1.png");
+
                 animal.setAnimalType(types[i % types.length]);
                 animal.setShelter(shelters[i % shelters.length]);
 

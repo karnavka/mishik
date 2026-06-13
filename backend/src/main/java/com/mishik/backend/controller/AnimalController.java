@@ -48,7 +48,8 @@ public class AnimalController {
     public List<Map<String, Object>> getFiltered(
             @RequestParam(required = false) Sex sex,
             @RequestParam(required = false) Long typeId,
-            @RequestParam(required = false) Long shelterId
+            @RequestParam(required = false) Long shelterId,
+            @RequestParam(required = false) String city
     ) {
 
         List<Animal> animals;
@@ -75,7 +76,7 @@ public class AnimalController {
 //            animals = repository.findAll();
 //        }
 
-        animals = repository.findFiltered(shelterId, sex, typeId);
+        animals = repository.findFiltered(shelterId, sex, typeId, city);
 
         return animals.stream()
                 .map(this::toMap)
@@ -99,6 +100,7 @@ public class AnimalController {
         m.put("shelterName", a.getShelter().getName());
         m.put("imageUrl", a.getImageUrl());
         m.put("shelterDonationDetails", toMap(a.getShelter().getDonationDetails()));
+        m.put("city",a.getShelter().getAddress().getCity());
 
         return m;
     }
