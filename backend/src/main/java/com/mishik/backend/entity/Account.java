@@ -22,6 +22,7 @@ public class Account {
     private String password;
     @Enumerated(EnumType.STRING)
     private Role role;
+    private String imageUrl;
 
    // @Column(name = "id_employee")
   //  private String idEmployee;

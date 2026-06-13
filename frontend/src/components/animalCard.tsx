@@ -77,9 +77,9 @@ export const AnimalCard = ({
             <div className="card-body">
                 <div className="card-title">{animal.name}</div>
 
-                <div className="card-sub">
-                    {[animal.animalType, animal.shelterName].filter(Boolean).join(' · ')}
-                </div>
+                {/*<div className="card-sub">*/}
+                {/*    {[animal.animalType, animal.shelterName].filter(Boolean).join(' · ')}*/}
+                {/*</div>*/}
 
                 <div className="badges">
                     <span className="badge">{animal.animalType}</span>

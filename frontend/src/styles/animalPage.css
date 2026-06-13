@@ -1,0 +1,43 @@
+.animal-filter{
+    /*width: 250px;*/
+    /*min-width: 120px;*/
+    display: flex;
+    position: sticky;
+    top: 0;
+    flex-direction: column;
+    padding: 0 20px 40px 20px;
+    flex:1;
+    overflow-y: auto;
+    height: auto;
+    min-width: 300px;
+}
+
+.footer {
+    width: 100%;
+    border-top: 1px solid var(--border);
+    background: var(--green-light);
+    display: flex;
+    flex-direction: column;
+    font-size: 13px;
+    color: var(--text-muted);
+    flex-shrink: 0;
+}
+.footer-row{
+    padding: 10px 40px 20px;
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    gap: 50px;
+    align-items: flex-end;
+}
+.footer-last{
+    display: flex ;
+    justify-content: space-between;
+    padding: 10px 20px 40px 20px;
+    color: #e9ecca;
+    font-size: large;
+    text-align: center;
+}
+.footer-img{
+    height: 150px;
+}
