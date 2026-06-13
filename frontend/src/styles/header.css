@@ -1,0 +1,62 @@
+header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    transition: background .2s, border-color .2s;
+    padding: 0px 20px 0px 0px;
+}
+
+.header-top {
+    padding: 10px 30px 6px;
+}
+
+.header-logo {
+    height: 50px;
+    width: auto;
+}
+
+.profile-avatar{
+    width:40px;
+    height:40px;
+    border-radius:50%;
+    object-fit:cover;
+    overflow:hidden;
+    border:1px solid var(--border);
+    background:var(--card-avatar-bg);
+    display:block;
+}
+
+.header-btn {
+    padding: 6px 16px;
+    border-radius: 20px;
+    border: 3px solid transparent;
+    background: transparent;
+    cursor: pointer;
+    font-size: 16px;
+    color: var(--text-btn);
+    transition: all .15s;
+}
+.header-btn.active {
+    border-color: var(--pink-primary);
+    color: var(--text);
+    font-weight: 500;
+}
+.header-btn:hover:not(.active) { background: var(--pink-soft); }
+
+.accent-button{
+    border-color: var(--bg);
+    background: var(--pink-primary);
+}
+.accent-button.active{
+    border-color: var(--pink-primary);
+}
+.accent-button:hover:not(.active) {
+    background: var(--pink-primary);
+    border-color: var(--pink-dark);
+}
+
+/*пережитки минулого*/
+.logo { font-weight: 600; font-size: 16px; margin-right: 12px; color: var(--text); }
