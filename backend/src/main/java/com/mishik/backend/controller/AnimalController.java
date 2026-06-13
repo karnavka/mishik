@@ -2,6 +2,7 @@ package com.mishik.backend.controller;
 
 import com.mishik.backend.embedded.DonationDetails;
 import com.mishik.backend.entity.Animal;
+import com.mishik.backend.entity.Shelter;
 import com.mishik.backend.enums.Sex;
 import com.mishik.backend.repository.AnimalRepository;
 import org.springframework.web.bind.annotation.*;
@@ -83,27 +84,27 @@ public class AnimalController {
                 .toList();
     }
 //просто допоміжний метод для конвертації сутності в Map 
-    private Map<String, Object> toMap(Animal a) {
-        Map<String, Object> m = new HashMap<>();
+private Map<String, Object> toMap(Animal a) {
+    Map<String, Object> m = new HashMap<>();
 
-        m.put("id", a.getId());
-        m.put("name", a.getName());
-        m.put("age", a.getAge());
-        m.put("height", a.getHeight());
-        m.put("sex", a.getSex());
-        m.put("description", a.getDescription());
+    m.put("id", a.getId());
+    m.put("name", a.getName());
+    m.put("age", a.getAge());
+    m.put("height", a.getHeight());
+    m.put("sex", a.getSex());
+    m.put("description", a.getDescription());
+    m.put("imageUrl", a.getImageUrl());
+    m.put("animalTypeId", a.getAnimalType() != null ? a.getAnimalType().getId() : null);
+    m.put("animalType", a.getAnimalType() != null ? a.getAnimalType().getUsefulInfo() : null);
 
-        m.put("animalTypeId", a.getAnimalType().getId());
-        m.put("animalType", a.getAnimalType().getUsefulInfo());
+    Shelter s = a.getShelter();
+    m.put("shelterId", s != null ? s.getId() : null);
+    m.put("shelterName", s != null ? s.getName() : null);
+    m.put("shelterDonationDetails", s != null ? toMap(s.getDonationDetails()) : null);
+    m.put("city", s != null && s.getAddress() != null ? s.getAddress().getCity() : null);
 
-        m.put("shelterId", a.getShelter().getId());
-        m.put("shelterName", a.getShelter().getName());
-        m.put("imageUrl", a.getImageUrl());
-        m.put("shelterDonationDetails", toMap(a.getShelter().getDonationDetails()));
-        m.put("city",a.getShelter().getAddress().getCity());
-
-        return m;
-    }
+    return m;
+}
 
     //тварина за id
     private Map<String, Object> toMap(DonationDetails d) {
