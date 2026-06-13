@@ -12,14 +12,13 @@
     --text-btn: #666666;
 
     --filter-sel: #eaf6c6;
-    --filter-hover: #faeaed;
+    --filter-hover: #f8f8f8;
     --input-bg:     #ffffff;
     --btn-hover:    #f5f5f5;
     --badge-border: #B5C56D;
     --badge-text:   #666666;
     --btn-ghost-text: #555555;
     --card-avatar-bg: #f0f0f0;
-    --bg-image: url('/Users/viravoznuk/mishik/frontend/public/images/aaa.jpg');
 
     --pink-dark: #874f5f;
     --pink-primary: #E8A4B5;
@@ -50,7 +49,6 @@
     --badge-text:   #999999;
     --btn-ghost-text: #aaaaaa;
     --card-avatar-bg: #2e2e2e;
-    --bg-image: url('/Users/viravoznuk/mishik/frontend/public/images/bbb.jpg');
     --pink-primary: #874f5f;
     --pink-soft: #977a81;
 }
@@ -68,11 +66,7 @@
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-
-    background-image: var(--bg-image);
-background-size: contain;
-    background-position: center;
-background-repeat: repeat;
+    background: var(--bg);
     color: var(--text);
     transition: background .2s, color .2s;
 }
