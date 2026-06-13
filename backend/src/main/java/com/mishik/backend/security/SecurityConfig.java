@@ -47,9 +47,13 @@ public class SecurityConfig {
                         // PUBLIC READ ONLY
                         // ========================
                         .requestMatchers(HttpMethod.GET,
+                                "/api/animals",
                                 "/api/animals/**",
+                                "/api/shelters",
                                 "/api/shelters/**",
+                                "/api/clinics",
                                 "/api/clinics/**",
+                                "/api/animal-types",
                                 "/api/animal-types/**",
                                 "/images/**"
                         ).permitAll()
@@ -93,6 +97,7 @@ public class SecurityConfig {
                         // ========================
                         // SHELTER ONLY
                         // ========================
+                        .requestMatchers(HttpMethod.POST, "/api/animal-types").hasRole("SHELTER")
                         .requestMatchers("/api/shelters/me/**").hasRole("SHELTER")
                         .requestMatchers("/api/shelters/me/adoption-requests/**")
                         .hasRole("SHELTER")

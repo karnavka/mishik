@@ -9,11 +9,12 @@ export type AnimalFormState = {
   description: string;
   sex: string;
   animalTypeId: string;
+  animalTypeName: string;
   imageUrl: string;
 };
 
 export const EMPTY_ANIMAL_FORM: AnimalFormState = {
-  name: '', age: 0, height: 0, description: '', sex: 'MALE', animalTypeId: '', imageUrl: '',
+  name: '', age: 0, height: 0, description: '', sex: 'MALE', animalTypeId: '', animalTypeName: '', imageUrl: '',
 };
 
 export type AnimalTypeOption = {
@@ -34,6 +35,7 @@ type Props = {
 export const AnimalForm = ({ id, form, setForm, animalTypes, onSave, onCancel }: Props) => {
   const set = <K extends keyof AnimalFormState>(key: K, val: AnimalFormState[K]) =>
     setForm(f => ({ ...f, [key]: val }));
+  const isOtherType = form.animalTypeId === '__other__';
 
   return (
     <FormCard
@@ -68,9 +70,20 @@ export const AnimalForm = ({ id, form, setForm, animalTypes, onSave, onCancel }:
             {animalTypes.map(t => (
               <option key={t.id} value={String(t.id)}>{t.type}</option>
             ))}
+            <option value="__other__">Інший</option>
           </FSelect>
         </FormField>
       </div>
+
+      {isOtherType && (
+        <FormField label="Свій вид">
+          <FInput
+            value={form.animalTypeName}
+            placeholder="Наприклад: хом'як"
+            onChange={e => set('animalTypeName', e.target.value)}
+          />
+        </FormField>
+      )}
 
       <FormField label="Image URL" hint="optional">
         <FInput

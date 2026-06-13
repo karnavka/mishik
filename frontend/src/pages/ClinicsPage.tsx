@@ -93,7 +93,7 @@ export const ClinicsPage = () => {
                             mapRef.current?.setView([pos.coords.latitude, pos.coords.longitude], 14);
                         });
                     }}>
-                        <img src = 'src/images/location.png' style = {{width:'35px', height:'35px', padding: '2px 0 0 0'}}/>
+                        <img src = '/images/location.png' alt='📍' style = {{width:'35px', height:'35px', padding: '2px 0 0 0'}}/>
                         <span> Моя локація </span>
 
                     </button>

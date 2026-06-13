@@ -396,14 +396,14 @@ const ShelterAnimalsTab = () => {
       .finally(() => setLoading(false));
   }, []);
 
-  const toAnimalPayload = (form: AnimalFormState) => ({
+  const toAnimalPayload = (form: AnimalFormState, animalTypeId: number) => ({
     name: form.name.trim(),
     age: Number(form.age),
     height: Number(form.height),
     sex: form.sex,
     description: form.description.trim(),
     imageUrl: form.imageUrl.trim() || null,
-    animalTypeId: form.animalTypeId ? Number(form.animalTypeId) : null,
+    animalTypeId,
   });
 
   const canSaveAnimal = (form: AnimalFormState) => {
@@ -412,7 +412,38 @@ const ShelterAnimalsTab = () => {
       return false;
     }
 
+    if (form.animalTypeId === '__other__' && !form.animalTypeName.trim()) {
+      alert('Вкажіть свій вид тварини');
+      return false;
+    }
+
     return true;
+  };
+
+  const resolveAnimalTypeId = async (form: AnimalFormState) => {
+    if (form.animalTypeId !== '__other__') {
+      return Number(form.animalTypeId);
+    }
+
+    const type = form.animalTypeName.trim();
+    const existing = animalTypes.find(t => t.type.toLowerCase() === type.toLowerCase());
+
+    if (existing) {
+      return existing.id;
+    }
+
+    const res = await authFetch('http://localhost:8080/api/animal-types', {
+      method: 'POST',
+      body: JSON.stringify({ type }),
+    });
+    const created = await res.json();
+
+    if (!res.ok) {
+      throw new Error(created.message ?? 'Не вдалося додати вид тварини');
+    }
+
+    setAnimalTypes(prev => prev.some(t => t.id === created.id) ? prev : [...prev, created]);
+    return Number(created.id);
   };
 
   const startEdit = (a: Animal) => {
@@ -424,6 +455,7 @@ const ShelterAnimalsTab = () => {
       description: a.description ?? '',
       sex: a.sex,
       animalTypeId: a.animalTypeId ? String(a.animalTypeId) : '',
+      animalTypeName: '',
       imageUrl: a.imageUrl ?? '',
     });
   };
@@ -431,9 +463,10 @@ const ShelterAnimalsTab = () => {
   const saveEdit = async (id: number) => {
     if (!canSaveAnimal(editForm)) return;
 
+    const animalTypeId = await resolveAnimalTypeId(editForm);
     const res = await authFetch(`http://localhost:8080/api/shelters/me/${id}`, {
       method: 'PUT',
-      body: JSON.stringify(toAnimalPayload(editForm)),
+      body: JSON.stringify(toAnimalPayload(editForm, animalTypeId)),
     });
     const updated = await res.json();
     setAnimals(list => list.map(a => a.id === id ? { ...a, ...updated } : a));
@@ -449,9 +482,10 @@ const ShelterAnimalsTab = () => {
   const addAnimal = async () => {
     if (!canSaveAnimal(addForm)) return;
 
+    const animalTypeId = await resolveAnimalTypeId(addForm);
     const res  = await authFetch('http://localhost:8080/api/shelters/me/animals', {
       method: 'POST',
-      body: JSON.stringify(toAnimalPayload(addForm)),
+      body: JSON.stringify(toAnimalPayload(addForm, animalTypeId)),
     });
     const data = await res.json();
     if (data.animal) {

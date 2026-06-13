@@ -206,7 +206,7 @@ public class ShelterController {
         animal.setHeight(req.getHeight());
         animal.setDescription(req.getDescription());
         animal.setSex(req.getSex());
-        animal.setImageUrl(req.getImageUrl());
+        animal.setImageUrl(normalizeImageUrl(req.getImageUrl()));
 
         if (req.getAnimalTypeId() != null) {
             AnimalType type = animalTypeRepository.findById(req.getAnimalTypeId())
@@ -243,7 +243,7 @@ public class ShelterController {
         animal.setHeight(req.getHeight());
         animal.setSex(req.getSex());
         animal.setDescription(req.getDescription());
-        animal.setImageUrl(req.getImageUrl());
+        animal.setImageUrl(normalizeImageUrl(req.getImageUrl()));
 
         animal.setShelter(shelter);
 
@@ -352,6 +352,14 @@ public class ShelterController {
         m.put("animalType", a.getAnimalType() != null ? a.getAnimalType().getUsefulInfo() : null);
 
         return m;
+    }
+
+    private String normalizeImageUrl(String imageUrl) {
+        if (imageUrl == null || imageUrl.isBlank()) {
+            return null;
+        }
+
+        return imageUrl.trim();
     }
 
     private Map<String, Object> toMap(Request r) {

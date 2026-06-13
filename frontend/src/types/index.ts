@@ -37,3 +37,10 @@ export interface Organization {
     hoursOfOperation?: string;
     donationDetails?: DonationDetails | null;
 }
+
+export const TYPE_ALIASES: Record<string, string> = {
+    'cat': '2', 'кіт': '2', 'котик': '2', 'кітик': '2',
+    'dog': '1', 'пес': '1', 'собака': '1',
+    'parrot': '4', 'папуга': '4', 'папужка': '4',
+    'rabbit': '3', 'кріль': '3', 'кроль': '3', 'кролик': '3',
+};
