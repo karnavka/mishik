@@ -16,6 +16,7 @@
     --badge-text:   #666666;
     --btn-ghost-text: #555555;
     --card-avatar-bg: #f0f0f0;
+    --bg-image: url('/Users/viravoznuk/mishik/frontend/public/images/aaa.jpg');
 }
 
 [data-theme="dark"] {
@@ -35,6 +36,7 @@
     --badge-text:   #999999;
     --btn-ghost-text: #aaaaaa;
     --card-avatar-bg: #2e2e2e;
+    --bg-image: url('/Users/viravoznuk/mishik/frontend/public/images/bbb.jpg');
 }
 
 /* ── Reset ── */
@@ -42,7 +44,11 @@
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    background: var(--bg);
+
+    background-image: var(--bg-image);
+background-size: contain;
+    background-position: center;
+background-repeat: repeat;
     color: var(--text);
     transition: background .2s, color .2s;
 }
