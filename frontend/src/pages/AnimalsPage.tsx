@@ -8,6 +8,7 @@ import { useLocation } from 'react-router-dom';
 import { getToken } from '../utils/auth';
 import { authFetch } from '../utils/api.ts';
 import { Footer } from '../components/Footer.tsx';
+import {TYPE_ALIASES} from "../types";
 
 type Props = { onLoginRequest: () => void };
 
@@ -21,7 +22,6 @@ export const AnimalsPage = ({ onLoginRequest }: Props) => {
         return state?.shelterId ? { shelterId: state.shelterId } : {};
     });
 
-    // ── Уподобані ── всі хуки ВГОРІ, до будь-яких return
     const [favorites, setFavorites] = useState<Set<number>>(new Set());
 
     useEffect(() => {
@@ -58,19 +58,31 @@ export const AnimalsPage = ({ onLoginRequest }: Props) => {
     const { data: animals, loading, error } = useFetch<Animal>(url);
 
     const visible = useMemo(() => {
-        const q = search.toLowerCase();
+        const q = search.trim().toLowerCase();
         const ageRange = filters['age'];
+        const aliasEntries = Object.entries(TYPE_ALIASES);
 
         return animals.filter(a => {
-            const matchSearch = !q || a.name?.toLowerCase().includes(q);
+            const matchSearch = !q || (() => {
+                const matchedTypeIds = aliasEntries
+                    .filter(([alias]) => alias.startsWith(q))
+                    .map(([, id]) => id);
+
+                if (matchedTypeIds.length > 0) {
+                    return matchedTypeIds.includes(String(a.animalTypeId));
+                }
+                return a.animalType?.toLowerCase().startsWith(q);
+            })();
+
             const matchAge = !ageRange || (() => {
                 const age = a.age;
                 if (ageRange === '0-1') return age < 1;
                 if (ageRange === '1-2') return age >= 1 && age < 2;
                 if (ageRange === '2-5') return age >= 2 && age <= 5;
-                if (ageRange === '5+') return age > 5;
+                if (ageRange === '5+')  return age > 5;
                 return true;
             })();
+
             return matchSearch && matchAge;
         });
     }, [animals, search, filters]);
@@ -102,43 +114,59 @@ export const AnimalsPage = ({ onLoginRequest }: Props) => {
         });
     };
 
-    const filterGroups = [
-        {
-            key: 'typeId',
-            label: 'Вид',
-            opts: animalTypes.map(t => ({ v: String(t.id), l: t.type, icon: `src/images/${t.type}.png` })),
-            columns: 2,
-        },
+    if (selected) {
+        return (
+            <AnimalDetail
+                animal={selected}
+                onBack={() => setSelected(null)}
+                onLoginRequest={onLoginRequest}
+            />
+        );
+    }
+
+    const filterGroups = [{
+        key: 'typeId',
+        label: 'Вид',
+        // opts: animalTypes.map(t => ({v: String(t.id), l: t.type, icon: `src/images/${t.type}.png`})),
+        opts: [
+            {v: 2, l: 'кітик', icon: `src/images/Cat.png`},
+            {v: 1,l: 'пес', icon: `src/images/Dog.png`},
+            {v: 3,l:'кролик', icon:`src/images/Rabbit.png`},
+            {v: 4,l:'папужка', icon:`src/images/Parrot.png`}
+        ],
+        columns: 2
+        // type: 'select' as const,
+    },
         {
             key: 'sex',
             label: 'Стать',
             opts: [
-                { v: 'MALE',   l: 'хлопчик', icon: 'src/images/MALE.png' },
-                { v: 'FEMALE', l: 'дівчинка', icon: 'src/images/FEMALE.png' },
+                {v: 'MALE', l: 'хлопчик', icon: 'src/images/MALE.png'},
+                {v: 'FEMALE', l: 'дівчинка', icon: 'src/images/FEMALE.png'},
             ],
-            columns: 2,
+            columns:2
         },
         {
             key: 'city',
             label: 'Місто',
             icon: 'src/images/location.png',
             type: 'select' as const,
-            opts: cities.map(c => ({ v: c, l: c })),
+            opts: cities.map(c => ({v: c, l: c})),
+
         },
         {
             key: 'age',
             label: 'Вік',
             opts: [
-                { v: '0-1', l: 'До 1 року' },
-                { v: '1-2', l: '1–2 роки' },
-                { v: '2-5', l: '2–5 років' },
-                { v: '5+',  l: 'Більше 5' },
+                {v: '0-1', l: 'До 1 року'},
+                {v: '1-2', l: '1–2 роки'},
+                {v: '2-5', l: '2–5 років'},
+                {v: '5+', l: 'Більше 5'},
             ],
-            columns: 2,
-        },
+            columns:2
+        }
     ];
 
-    // ── Умовний return ПІСЛЯ всіх хуків ──
     if (selected) {
         return (
             <AnimalDetail
@@ -158,7 +186,7 @@ export const AnimalsPage = ({ onLoginRequest }: Props) => {
                     <div className="search-bar">
                         <input
                             type="text"
-                            placeholder="Пошук за ім'ям..."
+                            placeholder="Пошук за видом..."
                             value={search}
                             onChange={e => setSearch(e.target.value)}
                         />
