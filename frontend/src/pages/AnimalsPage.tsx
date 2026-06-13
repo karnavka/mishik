@@ -1,103 +1,159 @@
 import {useState, useMemo, useEffect} from 'react';
-import type { Animal } from '../types';
-import { useFetch } from '../api/fetch';
-import { AnimalCard } from '../components/animalCard';
-import { Sidebar } from '../components/Sidebar';
+import type {Animal} from '../types';
+import {useFetch} from '../api/fetch';
+import {AnimalCard} from '../components/animalCard';
+import {Sidebar} from '../components/Sidebar';
 import {AnimalDetail} from "../components/animalDetail.tsx";
 import {useLocation} from "react-router-dom";
+import maleIcon from '../images/MALE.png';
+import {Footer} from "../components/Footer.tsx";
+
 
 type Props = { onLoginRequest: () => void };
 
-export const AnimalsPage = ({ onLoginRequest }: Props) => {
-  const [search, setSearch] = useState('');
-  // const [filters, setFilters] = useState<Record<string, string>>({});
-  const [selected, setSelected] = useState<Animal | null>(null);
-  const location = useLocation();
-  const [filters, setFilters] = useState<Record<string, string>>(() => {
-    const state = location.state as { shelterId?: string } | null;
-    return state?.shelterId ? { shelterId: state.shelterId } : {};
-  });
+export const AnimalsPage = ({onLoginRequest}: Props) => {
+    const [search, setSearch] = useState('');
+    // const [filters, setFilters] = useState<Record<string, string>>({});
+    const [selected, setSelected] = useState<Animal | null>(null);
+    const location = useLocation();
+    const [filters, setFilters] = useState<Record<string, string>>(() => {
+        const state = location.state as { shelterId?: string } | null;
+        return state?.shelterId ? {shelterId: state.shelterId} : {};
+    });
 
-  useEffect(() => {
-    setSelected(null);
-    const state = location.state as { shelterId?: string } | null;
-    setFilters(state?.shelterId ? { shelterId: state.shelterId } : {});  // ← not just {}
-  }, [location]);
+    useEffect(() => {
+        setSelected(null);
+        const state = location.state as { shelterId?: string } | null;
+        setFilters(state?.shelterId ? {shelterId: state.shelterId} : {});  // ← not just {}
+    }, [location]);
 
-  const { data: animalTypes } = useFetch<{ id: number; type: string }>('/api/animal-types');
-  const typeFilter = {
-    key: 'typeId',
-    label: 'Вид',
-    opts: animalTypes.map(t => ({ v: String(t.id), l: t.type })),
-  };
-  console.log(animalTypes);
-  const filterGroups = [typeFilter,
-    {
-      key: 'sex',
-      label: 'Стать',
-      opts: [
-        { v: 'MALE', l: '♂ Хлопчик' },
-        { v: 'FEMALE', l: '♀ Дівчинка' },
-      ],
-    },];
+    const {data: animalTypes} = useFetch<{ id: number; type: string }>('/api/animal-types');
 
-  const toggle = (key: string, value: string) =>
-    setFilters(prev =>
-      prev[key] === value
-        ? Object.fromEntries(Object.entries(prev).filter(([k]) => k !== key))
-        : { ...prev, [key]: value }
-    );
+    const toggle = (key: string, value: string) =>
+        setFilters(prev =>
+            prev[key] === value || value === ''
+                ? Object.fromEntries(Object.entries(prev).filter(([k]) => k !== key))
+                : {...prev, [key]: value}
+        );
 
-  const query = new URLSearchParams(filters).toString();
-  const url   = '/api/animals' + (query ? '?' + query : '');
+    const query = new URLSearchParams(
+        Object.fromEntries(Object.entries(filters).filter(([k]) => k !== 'age'))
+    ).toString();
+    const url = '/api/animals' + (query ? '?' + query : '');
 
-  const { data: animals, loading, error } = useFetch<Animal>(url);
+    const {data: animals, loading, error} = useFetch<Animal>(url);
 
-  const visible = useMemo(() => {
-    const q = search.toLowerCase();
-    if (!q) return animals;
-    return animals.filter(a => a.name?.toLowerCase().includes(q));
-  }, [animals, search]);
+    const visible = useMemo(() => {
+        const q = search.toLowerCase();
+        const ageRange = filters['age'];
 
-  if (selected) {
+        return animals.filter(a => {
+            const matchSearch = !q || a.name?.toLowerCase().includes(q);
+            const matchAge = !ageRange || (() => {
+                const age = a.age;
+                if (ageRange === '0-1') return age < 1;
+                if (ageRange === '1-2') return age >= 1 && age < 2;
+                if (ageRange === '2-5') return age >= 2 && age <= 5;
+                if (ageRange === '5+') return age > 5;
+                return true;
+            })();
+            return matchSearch && matchAge;
+        });
+    }, [animals, search, filters]);
+
+    const { data: allAnimals } = useFetch<Animal>('/api/animals');
+    const cities = useMemo(() => {
+        const unique = new Set(animals.map(a => a.city).filter(Boolean));
+        return Array.from(unique) as string[];
+    }, [allAnimals]);
+
+
+    if (selected) {
+        return (
+            <AnimalDetail
+                animal={selected}
+                onBack={() => setSelected(null)}
+                onLoginRequest={onLoginRequest}
+            />
+        );
+    }
+
+    const filterGroups = [{
+        key: 'typeId',
+        label: 'Вид',
+        opts: animalTypes.map(t => ({v: String(t.id), l: t.type, icon: `src/images/${t.type}.png`})),
+        columns: 2
+        // type: 'select' as const,
+    },
+        {
+            key: 'sex',
+            label: 'Стать',
+            opts: [
+                {v: 'MALE', l: 'хлопчик', icon: 'src/images/MALE.png'},
+                {v: 'FEMALE', l: 'дівчинка', icon: 'src/images/FEMALE.png'},
+            ],
+            columns:2
+        },
+        {
+            key: 'city',
+            label: 'Місто',
+            icon: 'src/images/location.png',
+            type: 'select' as const,
+            opts: cities.map(c => ({v: c, l: c})),
+
+        },
+        {
+            key: 'age',
+            label: 'Вік',
+            opts: [
+                {v: '0-1', l: 'До 1 року'},
+                {v: '1-2', l: '1–2 роки'},
+                {v: '2-5', l: '2–5 років'},
+                {v: '5+', l: 'Більше 5'},
+            ],
+            columns:2
+        }
+    ];
+
     return (
-        <AnimalDetail
-            animal={selected}
-            onBack={() => setSelected(null)}
-            onLoginRequest={onLoginRequest}
-        />
+
+        <div style={{display: 'flex', flexDirection: 'column', flex: 1, overflow: 'auto'}}>
+            <div className="body">
+                <div className="animal-filter">
+                    <div className="search-bar">
+                        <input
+                            type="text"
+                            placeholder="Пошук за ім'ям..."
+                            value={search}
+                            onChange={e => setSearch(e.target.value)}
+                        />
+                    </div>
+                    <Sidebar
+                        filters={filters}
+                        onToggle={toggle}
+                        filterGroups={filterGroups}
+                        addLabel="+ Додати тварину"
+                        onAdd={onLoginRequest}
+                    />
+                </div>
+
+                <div className="main">
+                    <div className="feed">
+                        {loading ? <div className="empty">Завантаження...</div>
+                            : error ? <div className="empty">Помилка: {error}</div>
+                                : visible.length === 0 ? <div className="empty">🐾 Тварин не знайдено</div>
+                                    : visible.map(a => (
+                                        <AnimalCard key={a.id} animal={a} onLoginRequest={onLoginRequest}
+                                                    onClick={() => setSelected(a)}/>
+                                    ))
+                        }
+                    </div>
+                </div>
+
+            </div>
+            <Footer></Footer>
+
+        </div>
+
     );
-  }
-
-  return (
-
-    <div className="body">
-      <Sidebar
-        filters={filters}
-        onToggle={toggle}
-        filterGroups={filterGroups}
-        addLabel="+ Додати тварину"
-        onAdd={onLoginRequest}
-      />
-      <div className="main">
-        <div className="search-bar">
-          <input
-            type="text"
-            placeholder="Пошук за ім'ям..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-          />
-        </div>
-        <div className="feed">
-          {loading  ? <div className="empty">Завантаження...</div>
-          : error   ? <div className="empty">Помилка: {error}</div>
-          : visible.length === 0 ? <div className="empty">🐾 Тварин не знайдено</div>
-          : visible.map(a => (
-              <AnimalCard key={a.id} animal={a} onLoginRequest={onLoginRequest} onClick={() => setSelected(a)} />
-            ))
-          }
-        </div>
-      </div>
-    </div>
-  );
 };
