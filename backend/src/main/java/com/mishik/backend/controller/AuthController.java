@@ -1,5 +1,6 @@
 package com.mishik.backend.controller;
 import com.mishik.backend.dto.LoginRequest;
+import com.mishik.backend.embedded.Address;
 import com.mishik.backend.entity.Account;
 import com.mishik.backend.entity.Shelter;
 import com.mishik.backend.entity.User;
@@ -92,8 +93,9 @@ public class AuthController {
         String login = (String) req.get("login");
         String password = (String) req.get("password");
         String name = (String) req.get("name");
-        String phoneNumber = (String) req.get("phoneNumber"); // необов'язково
-        String socialLinks = (String) req.get("socialLinks"); // необов'язково
+        String phoneNumber = (String) req.get("phoneNumber");
+        String socialLinks = (String) req.get("socialLinks");
+        String adoptionConditions = (String) req.get("adoptionConditions");
 
         if (login == null || password == null)
             return ResponseEntity.badRequest().body(Map.of("error", "login and password required"));
@@ -115,9 +117,20 @@ public class AuthController {
             shelter.setPhoneNumber(phoneNumber);
             shelter.setPhoneVerified(false);
         }
-        if (socialLinks != null && !socialLinks.isBlank()) {
+        if (socialLinks != null && !socialLinks.isBlank())
             shelter.setSocialLinks(socialLinks);
+        if (adoptionConditions != null && !adoptionConditions.isBlank())
+            shelter.setAdoptionConditions(adoptionConditions);
+
+        Object addressObj = req.get("address");
+        if (addressObj instanceof Map<?, ?> addressMap) {
+            Address address = new Address();
+            address.setCity((String) addressMap.get("city"));
+            address.setRegion((String) addressMap.get("region"));
+            address.setStreet((String) addressMap.get("street"));
+            shelter.setAddress(address);
         }
+
         shelterRepository.save(shelter);
 
         return ResponseEntity.ok(Map.of("status", "registered", "role", "SHELTER"));

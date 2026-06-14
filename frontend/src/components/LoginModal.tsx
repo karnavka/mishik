@@ -25,14 +25,16 @@ export const LoginModal = ({ onClose }: Props) => {
 
   const [shelterName,       setShelterName]       = useState('');
   const [shelterPhone,      setShelterPhone]      = useState('');
-  const [shelterAddress,    setShelterAddress]    = useState('');
+  const [shelterCity,    setShelterCity]    = useState('');
+  const [shelterRegion,  setShelterRegion]  = useState('');
+  const [shelterStreet,  setShelterStreet]  = useState('');
   const [adoptionConditions,setAdoptionConditions]= useState('');
   const [socialLinks,       setSocialLinks]       = useState('');
 
   const reset = () => {
     setUsername(''); setPassword(''); setConfirmPassword(''); setError('');
     setFirstName(''); setLastName(''); setPatronymic(''); setSex('UNKNOWN'); setUserPhone('');
-    setShelterName(''); setShelterPhone(''); setShelterAddress('');
+    setShelterName(''); setShelterPhone(''); setShelterCity(''); setShelterRegion(''); setShelterStreet('');
     setAdoptionConditions(''); setSocialLinks('');
   };
 
@@ -61,10 +63,10 @@ export const LoginModal = ({ onClose }: Props) => {
     if (!username || !password) { setError('Заповніть всі поля'); return; }
     if (password !== confirmPassword) { setError('Паролі не співпадають'); return; }
 
-    if (selectedRole === 'SHELTER') {
-      if (!shelterName)    { setError("Вкажіть назву притулку"); return; }
-      if (!shelterPhone)   { setError("Вкажіть телефон притулку"); return; }
-      if (!shelterAddress) { setError("Вкажіть адресу притулку"); return; }
+   if (selectedRole === 'SHELTER') {
+    if (!shelterName) { setError("Вкажіть назву притулку"); return; }
+    if (!shelterPhone) { setError("Вкажіть телефон притулку"); return; }
+    if (!shelterCity) { setError("Вкажіть місто притулку"); return; } 
     }
 
     setLoading(true); setError('');
@@ -77,9 +79,15 @@ export const LoginModal = ({ onClose }: Props) => {
       const body =
         selectedRole === 'USER'
           ? { login: username, password, firstName, lastName, patronymic, sex, phoneNumber: userPhone || undefined }
-          : { login: username, password, name: shelterName, phoneNumber: shelterPhone,
-              address: shelterAddress, adoptionConditions: adoptionConditions || undefined,
-              socialLinks: socialLinks || undefined };
+          : {login: username,password, name: shelterName, phoneNumber: shelterPhone, address: {        
+        city:   shelterCity,
+        region: shelterRegion || undefined,
+        street: shelterStreet || undefined,
+      },
+            adoptionConditions: adoptionConditions || undefined,
+            socialLinks: socialLinks || undefined,
+            };
+
 
       const res = await fetch(endpoint, {
         method: 'POST',
@@ -194,21 +202,28 @@ export const LoginModal = ({ onClose }: Props) => {
 
             {/* ── SHELTER extra fields ── */}
             {selectedRole === 'SHELTER' && (
-              <>
-                <SectionLabel>Дані притулку</SectionLabel>
-                <input style={inp} placeholder="Назва притулку *" value={shelterName}
-                  onChange={e => setShelterName(e.target.value)} />
-                <input style={inp} placeholder="Телефон *" value={shelterPhone}
-                  onChange={e => setShelterPhone(e.target.value)} />
-                <input style={inp} placeholder="Адреса *" value={shelterAddress}
-                  onChange={e => setShelterAddress(e.target.value)} />
-                <textarea style={{ ...inp, minHeight:72, resize:'vertical' }}
-                  placeholder="Умови усиновлення" value={adoptionConditions}
-                  onChange={e => setAdoptionConditions(e.target.value)} />
-                <input style={inp} placeholder="Соціальні мережі / посилання" value={socialLinks}
-                  onChange={e => setSocialLinks(e.target.value)} />
-              </>
-            )}
+          <>
+          <SectionLabel>Дані притулку</SectionLabel>
+          <input style={inp} placeholder="Назва притулку *" value={shelterName}
+            onChange={e => setShelterName(e.target.value)} />
+          <input style={inp} placeholder="Телефон *" value={shelterPhone}
+            onChange={e => setShelterPhone(e.target.value)} />
+        <input style={inp} placeholder="Місто *" value={shelterCity}
+            onChange={e => setShelterCity(e.target.value)} />
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
+        <input style={inp} placeholder="Область" value={shelterRegion}
+          onChange={e => setShelterRegion(e.target.value)} />
+        <input style={inp} placeholder="Вулиця" value={shelterStreet}
+          onChange={e => setShelterStreet(e.target.value)} />
+        </div>
+
+        <textarea style={{ ...inp, minHeight:72, resize:'vertical' }}
+         placeholder="Умови усиновлення" value={adoptionConditions}
+         onChange={e => setAdoptionConditions(e.target.value)} />
+        <input style={inp} placeholder="Соціальні мережі / посилання" value={socialLinks}
+         onChange={e => setSocialLinks(e.target.value)} />
+        </>
+      )}
           </>
         )}
 

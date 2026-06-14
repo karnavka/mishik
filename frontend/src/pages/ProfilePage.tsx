@@ -25,7 +25,7 @@ type UserInfo = {
 type ShelterInfo = {
   id: number; name: string; phoneNumber: string;
   adoptionConditions: string; login: string;
-  city?: string; region?: string; address?: string;
+  city?: string; region?: string; street?: string;
   socialLinks?: string; phoneVerified?: boolean;
 };
 type Animal = {
@@ -216,7 +216,8 @@ const ShelterInfoTab = () => {
   const [info, setInfo] = useState<ShelterInfo | null>(null);
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState<ShelterProfileFormState>({
-    name: '', phoneNumber: '', address: '', adoptionConditions: '', socialLinks: '',
+    name: '', phoneNumber: '', adoptionConditions: '', socialLinks: '',
+    address: { city: '', region: '', street: '' }, 
   });
   const [saved, setSaved] = useState(false);
 
@@ -225,21 +226,38 @@ const ShelterInfoTab = () => {
       .then(r => r.json()).then(setInfo).catch(() => {});
   }, []);
 
+
   const startEdit = () => {
     if (!info) return;
     setForm({
       name:               info.name               ?? '',
       phoneNumber:        info.phoneNumber        ?? '',
-      address:            info.address            ?? '',
       adoptionConditions: info.adoptionConditions ?? '',
       socialLinks:        info.socialLinks        ?? '',
+      address: {                      
+        city:   info.city   ?? '',
+        region: info.region ?? '',
+        street: info.street ?? '',
+      },
     });
     setEditing(true);
   };
 
-  const save = async () => {
-    await authFetch('http://localhost:8080/api/shelters/me', { method: 'PUT', body: JSON.stringify(form) });
-    setInfo(prev => prev ? { ...prev, ...form } : prev);
+ const save = async () => {
+    await authFetch('http://localhost:8080/api/shelters/me', {
+      method: 'PUT',
+      body: JSON.stringify(form), 
+    });
+    setInfo(prev => prev ? {
+      ...prev,
+      name:               form.name,
+      phoneNumber:        form.phoneNumber,
+      adoptionConditions: form.adoptionConditions,
+      socialLinks:        form.socialLinks,
+      city:               form.address.city,
+      region:             form.address.region,
+      street:             form.address.street,
+    } : prev);
     setEditing(false); setSaved(true);
     setTimeout(() => setSaved(false), 2500);
   };
@@ -278,7 +296,7 @@ const ShelterInfoTab = () => {
       </div>
 
       {/* Address */}
-      <FormField label="Адреса" disabled value={info.address || '—'} />
+      <FormField label="Адреса" disabled value={info.city && info.region && info.street ? [info.city, info.region, info.street].filter(Boolean).join(', ') : '—'} />
 
       {/* Adoption conditions */}
       <div style={fieldRow}>
