@@ -97,6 +97,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/shelters/me/adoption-requests/**")
                         .hasRole("SHELTER")
 
+                        .requestMatchers("/api/favorites/**").hasRole("USER")
+
                         // ========================
                         // EVERYTHING ELSE
                         // ========================

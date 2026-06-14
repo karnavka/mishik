@@ -3,6 +3,7 @@ package com.mishik.backend.controller;
 import java.util.List;
 
 import com.mishik.backend.dto.AnimalRequest;
+import com.mishik.backend.embedded.Address;
 import com.mishik.backend.embedded.DonationDetails;
 import com.mishik.backend.entity.*;
 import com.mishik.backend.repository.*;
@@ -108,7 +109,6 @@ public class ShelterController {
             Authentication authentication,
             @RequestBody Map<String, Object> req
     ) {
-
         String login = authentication.getName();
 
         Account account = accountRepository.findByLogin(login)
@@ -122,15 +122,28 @@ public class ShelterController {
         shelter.setAdoptionConditions((String) req.get("adoptionConditions"));
         shelter.setSocialLinks((String) req.get("socialLinks"));
 
+        Object addressObj = req.get("address");
+        if (addressObj instanceof Map<?, ?> addressMap) {
+            Address address = shelter.getAddress() != null ? shelter.getAddress() : new Address();
+            address.setCity((String) addressMap.get("city"));
+            address.setRegion((String) addressMap.get("region"));
+            address.setStreet((String) addressMap.get("street"));
+            if (addressMap.get("latitude") instanceof Number lat)
+                address.setLatitude(lat.doubleValue());
+            if (addressMap.get("longitude") instanceof Number lng)
+                address.setLongitude(lng.doubleValue());
+            shelter.setAddress(address);
+        }
+
         Object donationDetails = req.get("donationDetails");
         if (donationDetails instanceof Map<?, ?> donationMap) {
             shelter.setDonationDetails(toDonationDetails(donationMap));
         }
 
         repository.save(shelter);
-
         return Map.of("status", "updated");
     }
+
     //отримати своїх тварин
     @GetMapping("/me/animals")
     public List<Map<String, Object>> getMyAnimals(

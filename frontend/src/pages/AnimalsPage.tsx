@@ -1,36 +1,66 @@
-import {useState, useMemo, useEffect} from 'react';
-import type {Animal} from '../types';
-import {useFetch} from '../api/fetch';
-import {AnimalCard} from '../components/animalCard';
-import {Sidebar} from '../components/Sidebar';
-import {AnimalDetail} from "../components/animalDetail.tsx";
-import {useLocation} from "react-router-dom";
-import {Footer} from "../components/Footer.tsx";
-import {TYPE_ALIASES} from "../types";
-
+import { useState, useMemo, useEffect } from 'react';
+import type { Animal } from '../types';
+import { useFetch } from '../api/fetch';
+import { AnimalCard } from '../components/animalCard';
+import { Sidebar } from '../components/Sidebar';
+import { AnimalDetail } from '../components/animalDetail.tsx';
+import { useLocation } from 'react-router-dom';
+import { authFetch } from '../utils/api.ts';
+import { Footer } from '../components/Footer.tsx';
+import { TYPE_ALIASES } from "../types";
+import { useAuth } from '../api/useAuth';
 
 type Props = { onLoginRequest: () => void };
 
-export const AnimalsPage = ({onLoginRequest}: Props) => {
+export const AnimalsPage = ({ onLoginRequest }: Props) => {
     const [search, setSearch] = useState('');
     const [selected, setSelected] = useState<Animal | null>(null);
     const location = useLocation();
+
     const [filters, setFilters] = useState<Record<string, string>>(() => {
         const state = location.state as { shelterId?: string } | null;
-        return state?.shelterId ? {shelterId: state.shelterId} : {};
+        return state?.shelterId ? { shelterId: state.shelterId } : {};
     });
+
+    const [favorites,    setFavorites]    = useState<Set<number>>(new Set());
+    const [requestedIds, setRequestedIds] = useState<Set<number>>(new Set());
+
+    const { isUser } = useAuth();
+    useEffect(() => {
+        if (!isUser) return;
+        authFetch('http://localhost:8080/api/favorites')
+            .then(r => r.json())
+            .then(data => {
+                if (Array.isArray(data))
+                    setFavorites(new Set(data.map((a: any) => a.id)));
+            })
+            .catch(() => {});
+    }, [isUser]);
+
+    useEffect(() => {
+        if (!isUser) return;
+        authFetch('http://localhost:8080/api/adoption-requests/my')
+            .then(r => r.json())
+            .then(data => {
+                if (Array.isArray(data))
+                    setRequestedIds(new Set(data.map((r: any) => r.animalId)));
+            })
+            .catch(() => {});
+    }, [isUser]);
 
     useEffect(() => {
         setSelected(null);
         const state = location.state as { shelterId?: string } | null;
-        setFilters(state?.shelterId ? {shelterId: state.shelterId} : {});  // ← not just {}
+        setFilters(state?.shelterId ? { shelterId: state.shelterId } : {});
     }, [location]);
+
+    const { data: animalTypes } = useFetch<{ id: number; type: string }>('/api/animal-types');
 
     const toggle = (key: string, value: string) =>
         setFilters(prev =>
             prev[key] === value || value === ''
                 ? Object.fromEntries(Object.entries(prev).filter(([k]) => k !== key))
-                : {...prev, [key]: value}
+                : { ...prev, [key]: value }
         );
 
     const query = new URLSearchParams(
@@ -38,7 +68,7 @@ export const AnimalsPage = ({onLoginRequest}: Props) => {
     ).toString();
     const url = '/api/animals' + (query ? '?' + query : '');
 
-    const {data: animals, loading, error} = useFetch<Animal>(url);
+    const { data: animals, loading, error } = useFetch<Animal>(url);
 
     const visible = useMemo(() => {
         const q = search.trim().toLowerCase();
@@ -50,10 +80,8 @@ export const AnimalsPage = ({onLoginRequest}: Props) => {
                 const matchedTypeIds = aliasEntries
                     .filter(([alias]) => alias.startsWith(q))
                     .map(([, id]) => id);
-
-                if (matchedTypeIds.length > 0) {
+                if (matchedTypeIds.length > 0)
                     return matchedTypeIds.includes(String(a.animalTypeId));
-                }
                 return a.animalType?.toLowerCase().startsWith(q);
             })();
 
@@ -72,10 +100,27 @@ export const AnimalsPage = ({onLoginRequest}: Props) => {
 
     const { data: allAnimals } = useFetch<Animal>('/api/animals');
     const cities = useMemo(() => {
-        const unique = new Set(animals.map(a => a.city).filter(Boolean));
+        const unique = new Set(allAnimals.map(a => a.city).filter(Boolean));
         return Array.from(unique) as string[];
     }, [allAnimals]);
 
+    const toggleFavorite = async (id: number) => {
+        const isFav = favorites.has(id);
+        setFavorites(prev => {
+            const next = new Set(prev);
+            isFav ? next.delete(id) : next.add(id);
+            return next;
+        });
+        await authFetch(`http://localhost:8080/api/favorites/${id}`, {
+            method: isFav ? 'DELETE' : 'POST',
+        }).catch(() => {
+            setFavorites(prev => {
+                const next = new Set(prev);
+                isFav ? next.add(id) : next.delete(id);
+                return next;
+            });
+        });
+    };
 
     if (selected) {
         return (
@@ -107,32 +152,42 @@ export const AnimalsPage = ({onLoginRequest}: Props) => {
                 {v: 'MALE', l: 'хлопчик', icon: '/images/MALE.png'},
                 {v: 'FEMALE', l: 'дівчинка', icon: '/images/FEMALE.png'},
             ],
-            columns:2
+            columns: 2,
         },
         {
             key: 'city',
             label: 'Місто',
             icon: '/images/location.png',
             type: 'select' as const,
-            opts: cities.map(c => ({v: c, l: c})),
-
+            opts: cities.map(c => ({ v: c, l: c })),
         },
         {
             key: 'age',
             label: 'Вік',
             opts: [
-                {v: '0-1', l: 'До 1 року'},
-                {v: '1-2', l: '1–2 роки'},
-                {v: '2-5', l: '2–5 років'},
-                {v: '5+', l: 'Більше 5'},
+                { v: '0-1', l: 'До 1 року'   },
+                { v: '1-2', l: '1–2 роки'    },
+                { v: '2-5', l: '2–5 років'   },
+                { v: '5+',  l: 'Більше 5'    },
             ],
-            columns:2
-        }
+            columns: 2,
+        },
     ];
 
-    return (
+    if (selected) {
+        return (
+            <AnimalDetail
+                animal={selected}
+                onBack={() => setSelected(null)}
+                onLoginRequest={onLoginRequest}
+                isFavorited={favorites.has(selected.id)}
+                onToggleFavorite={toggleFavorite}
+            />
+        );
+    }
 
-        <div style={{display: 'flex', flexDirection: 'column', flex: 1, overflow: 'auto'}}>
+    return (
+        <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'auto' }}>
             <div className="body">
                 <div className="animal-filter">
                     <div className="search-bar">
@@ -154,21 +209,28 @@ export const AnimalsPage = ({onLoginRequest}: Props) => {
 
                 <div className="main">
                     <div className="feed">
-                        {loading ? <div className="empty">Завантаження...</div>
-                            : error ? <div className="empty">Помилка: {error}</div>
-                                : visible.length === 0 ? <div className="empty">🐾 Тварин не знайдено</div>
-                                    : visible.map(a => (
-                                        <AnimalCard key={a.id} animal={a} onLoginRequest={onLoginRequest}
-                                                    onClick={() => setSelected(a)}/>
-                                    ))
+                        {loading
+                            ? <div className="empty">Завантаження...</div>
+                            : error
+                            ? <div className="empty">Помилка: {error}</div>
+                            : visible.length === 0
+                            ? <div className="empty">🐾 Тварин не знайдено</div>
+                            : visible.map(a => (
+                                <AnimalCard
+                                    key={a.id}
+                                    animal={a}
+                                    onLoginRequest={onLoginRequest}
+                                    onClick={() => setSelected(a)}
+                                    isFavorited={favorites.has(a.id)}
+                                    onToggleFavorite={toggleFavorite}
+                                    requestedIds={requestedIds}
+                                />
+                            ))
                         }
                     </div>
                 </div>
-
             </div>
-            <Footer></Footer>
-
+            <Footer />
         </div>
-
     );
 };
