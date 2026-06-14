@@ -1,9 +1,8 @@
 // src/components/animalCard.tsx
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import type { Animal } from '../types';
 import { RoleGuard } from './RoleGuard';
 import { authFetch } from '../utils/api';
-import { getToken } from '../utils/auth';
 
 const EMOJI: Record<string, string> = {
     кіт: '🐱', cat: '🐱',
@@ -18,7 +17,7 @@ type Props = {
     onClick?: () => void;
     isFavorited?: boolean;
     onToggleFavorite?: (id: number) => void;
-    // режим кабінету притулку
+    requestedIds?: Set<number>;
     shelterMode?: boolean;
     onEdit?: () => void;
     onDelete?: () => void;
@@ -30,27 +29,17 @@ export const AnimalCard = ({
     onClick,
     isFavorited = false,
     onToggleFavorite,
+    requestedIds,
     shelterMode = false,
     onEdit,
     onDelete,
 }: Props) => {
     const [hovered,    setHovered]    = useState(false);
     const [requesting, setRequesting] = useState(false);
-    const [requested,  setRequested]  = useState(false);
+    const [justRequested, setJustRequested] = useState(false);
     const [error,      setError]      = useState<string | null>(null);
 
-    useEffect(() => {
-        if (!getToken() || shelterMode) return;
-        authFetch('http://localhost:8080/api/adoption-requests/my')
-            .then(r => r.json())
-            .then(data => {
-                if (Array.isArray(data)) {
-                    const alreadySent = data.some((r: any) => r.animalId === animal.id);
-                    if (alreadySent) setRequested(true);
-                }
-            })
-            .catch(() => {});
-    }, [animal.id, shelterMode]);
+    const requested = justRequested || (requestedIds?.has(animal.id) ?? false);
 
     const handleAdopt = async (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -65,9 +54,9 @@ export const AnimalCard = ({
             const text = await res.text();
             const data = text ? JSON.parse(text) : {};
             if (res.status === 403) { setError(data.message ?? 'Потрібен телефон'); return; }
-            if (res.status === 409) { setRequested(true); return; }
+            if (res.status === 409) { setJustRequested(true); return; }
             if (!res.ok)            { setError(data.message ?? 'Помилка сервера'); return; }
-            setRequested(true);
+            setJustRequested(true);
         } catch {
             setError('Помилка з\'єднання. Спробуйте ще раз.');
         } finally {
@@ -152,6 +141,7 @@ export const AnimalCard = ({
                                     </button>
                                 }
                             >
+                                <RoleGuard roles={['ROLE_USER']}>
                                 <button
                                     className="btn-primary"
                                     onClick={handleAdopt}
@@ -165,9 +155,10 @@ export const AnimalCard = ({
                                 >
                                     {requesting ? 'Надсилання...' : requested ? '✓ Заявку подано' : 'Подати заявку'}
                                 </button>
+                              </RoleGuard>
                             </RoleGuard>
 
-                            <RoleGuard requireAuth>
+                            <RoleGuard requireAuth roles={['ROLE_USER']}>
                                 <button
                                     className="btn-ghost"
                                     onClick={(e) => { e.stopPropagation(); onToggleFavorite?.(animal.id); }}

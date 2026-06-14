@@ -11,7 +11,7 @@ import type { StatusKey } from '../utils/Profilestyles';
 import { FormField, FTextarea } from '../components/FormField';
 import { AnimalForm, EMPTY_ANIMAL_FORM } from '../components/AnimalForm';
 import type { AnimalFormState } from '../components/AnimalForm';
-import { UserProfileForm }    from '../components/UserProfileForm';
+import { UserProfileForm } from '../components/UserProfileForm';
 import type { UserProfileFormState } from '../components/UserProfileForm';
 import { ShelterProfileForm } from '../components/ShelterProfileForm';
 import type { ShelterProfileFormState } from '../components/ShelterProfileForm';
@@ -25,7 +25,7 @@ type UserInfo = {
 type ShelterInfo = {
   id: number; name: string; phoneNumber: string;
   adoptionConditions: string; login: string;
-  city?: string; region?: string;
+  city?: string; region?: string; address?: string;
   socialLinks?: string; phoneVerified?: boolean;
 };
 type Animal = {
@@ -77,7 +77,7 @@ const UserInfoTab = () => {
   const [info, setInfo] = useState<UserInfo | null>(null);
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState<UserProfileFormState>({
-    firstName: '', lastName: '', patronymic: '', phoneNumber: '',
+    firstName: '', lastName: '', patronymic: '', sex: 'UNKNOWN', phoneNumber: '',
   });
   const [saved, setSaved] = useState(false);
 
@@ -92,6 +92,7 @@ const UserInfoTab = () => {
       firstName:   info.firstName   ?? '',
       lastName:    info.lastName    ?? '',
       patronymic:  info.patronymic  ?? '',
+      sex:         (info.sex as any) ?? 'UNKNOWN',
       phoneNumber: info.phoneNumber ?? '',
     });
     setEditing(true);
@@ -118,17 +119,30 @@ const UserInfoTab = () => {
       />
     );
 
+  const sexLabel = info.sex === 'MALE' ? '♂ Чоловіча' : info.sex === 'FEMALE' ? '♀ Жіноча' : '—';
+
   return (
     <div style={section}>
       {!hasPhone && <PhoneRequiredNotice message="Для подачі заявок на усиновлення необхідно вказати та підтвердити номер телефону." />}
+
+      {/* Row 1: login + sex */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
         <FormField label="Логін" disabled value={info.login} />
-        <FormField label="Стать" disabled
-          value={info.sex === 'MALE' ? '♂ Чоловіча' : info.sex === 'FEMALE' ? '♀ Жіноча' : '—'} />
+        <FormField label="Стать" disabled value={sexLabel} />
       </div>
-      <FormField label="Повне ім'я" disabled
-        value={[info.firstName, info.lastName, info.patronymic].filter(Boolean).join(' ') || '—'} />
+
+      {/* Row 2: first + last name */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+        <FormField label="Ім'я" disabled value={info.firstName || '—'} />
+        <FormField label="Прізвище" disabled value={info.lastName || '—'} />
+      </div>
+
+      {/* Patronymic */}
+      <FormField label="По батькові" disabled value={info.patronymic || '—'} />
+
+      {/* Phone */}
       <FormField label="Номер телефону" disabled value={info.phoneNumber || '—'} />
+
       <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
         <button className="btn-ghost" style={{ alignSelf: 'flex-start' }} onClick={startEdit}>⛏︎</button>
         {saved && <span style={{ color: '#27ae60', fontSize: 13 }}>✓ Збережено</span>}
@@ -202,7 +216,7 @@ const ShelterInfoTab = () => {
   const [info, setInfo] = useState<ShelterInfo | null>(null);
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState<ShelterProfileFormState>({
-    name: '', phoneNumber: '', adoptionConditions: '', socialLinks: '',
+    name: '', phoneNumber: '', address: '', adoptionConditions: '', socialLinks: '',
   });
   const [saved, setSaved] = useState(false);
 
@@ -216,6 +230,7 @@ const ShelterInfoTab = () => {
     setForm({
       name:               info.name               ?? '',
       phoneNumber:        info.phoneNumber        ?? '',
+      address:            info.address            ?? '',
       adoptionConditions: info.adoptionConditions ?? '',
       socialLinks:        info.socialLinks        ?? '',
     });
@@ -244,21 +259,33 @@ const ShelterInfoTab = () => {
   return (
     <div style={section}>
       {!hasPhone && <PhoneRequiredNotice message="Для додавання тварин у базу необхідно вказати номер телефону притулку." />}
+
+      {/* Row 1: login + location */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
         <FormField label="Логін" disabled value={info.login} />
-        {info.city && (
-          <FormField label="Розташування" disabled value={[info.city, info.region].filter(Boolean).join(', ')} />
+        {(info.city || info.region) && (
+          <FormField label="Місто / Регіон" disabled value={[info.city, info.region].filter(Boolean).join(', ')} />
         )}
       </div>
-      <FormField label="Назва" disabled value={info.name ?? '—'} />
+
+      {/* Name */}
+      <FormField label="Назва притулку" disabled value={info.name ?? '—'} />
+
+      {/* Row 2: phone + social */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
         <FormField label="Телефон" disabled value={info.phoneNumber || '—'} />
         <FormField label="Соц. мережі" disabled value={info.socialLinks || '—'} />
       </div>
+
+      {/* Address */}
+      <FormField label="Адреса" disabled value={info.address || '—'} />
+
+      {/* Adoption conditions */}
       <div style={fieldRow}>
         <span style={lbl}>Умови усиновлення</span>
         <FTextarea value={info.adoptionConditions ?? '—'} disabled minHeight={80} resize="none" />
       </div>
+
       <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
         <button className="btn-ghost" style={{ alignSelf: 'flex-start' }} onClick={startEdit}>⛏︎</button>
         {saved && <span style={{ color: '#27ae60', fontSize: 13 }}>✓ Збережено</span>}
@@ -438,7 +465,6 @@ const ShelterAnimalsTab = () => {
   );
 };
 
-// ── Уподобані — AnimalDetail на повну сторінку через fixed overlay ──
 const UserFavoritesTab = ({ favAnimals, favorites, onToggleFavorite, loading, onLoginRequest }: {
   favAnimals: FavAnimal[];
   favorites: Set<number>;
@@ -459,7 +485,8 @@ const UserFavoritesTab = ({ favAnimals, favorites, onToggleFavorite, loading, on
         <div style={{ fontSize: 13, marginTop: 6 }}>Натисніть ♡ на картці тварини, щоб зберегти</div>
       </div>
     );
-    if (selected) {
+
+  if (selected) {
     return (
       <AnimalDetail
         animal={selected as any}
@@ -472,20 +499,18 @@ const UserFavoritesTab = ({ favAnimals, favorites, onToggleFavorite, loading, on
   }
 
   return (
-    <>
-      <Grid2>
-        {favAnimals.map(a => (
-          <AnimalCard
-            key={a.id}
-            animal={a as any}
-            onClick={() => setSelected(a)}
-            isFavorited={favorites.has(a.id)}
-            onToggleFavorite={onToggleFavorite}
-            onLoginRequest={onLoginRequest}
-          />
-        ))}
-      </Grid2>
-    </>
+    <Grid2>
+      {favAnimals.map(a => (
+        <AnimalCard
+          key={a.id}
+          animal={a as any}
+          onClick={() => setSelected(a)}
+          isFavorited={favorites.has(a.id)}
+          onToggleFavorite={onToggleFavorite}
+          onLoginRequest={onLoginRequest}
+        />
+      ))}
+    </Grid2>
   );
 };
 
@@ -497,10 +522,8 @@ const ROLE_META: Record<string, { text: string; color: string }> = {
 };
 
 export const ProfilePage = () => {
-  const { loggedIn, role } = useAuth();
   const location = useLocation();
 
-  // Читаємо tab зі state навігації (передається з Header дропдауну)
   const navState = location.state as { tab?: number } | null;
   const [tab, setTab] = useState(navState?.tab ?? 0);
 
@@ -511,10 +534,10 @@ export const ProfilePage = () => {
   const [favorites, setFavorites]   = useState<Set<number>>(new Set());
   const [favAnimals, setFavAnimals] = useState<FavAnimal[]>([]);
   const [favLoading, setFavLoading] = useState(true);
-
+  const { loggedIn, role, isUser } = useAuth();
   useEffect(() => {
-    if (!loggedIn) return;
-    authFetch('http://localhost:8080/api/favorites')
+  if (!isUser) return;  
+   authFetch('http://localhost:8080/api/favorites')
       .then(r => r.json())
       .then(data => {
         if (Array.isArray(data)) {
@@ -524,7 +547,7 @@ export const ProfilePage = () => {
       })
       .catch(() => {})
       .finally(() => setFavLoading(false));
-  }, [loggedIn]);
+  }, [isUser]);
 
   const toggleFavorite = async (id: number) => {
     const isFav = favorites.has(id);

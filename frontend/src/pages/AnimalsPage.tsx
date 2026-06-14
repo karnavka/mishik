@@ -5,10 +5,10 @@ import { AnimalCard } from '../components/animalCard';
 import { Sidebar } from '../components/Sidebar';
 import { AnimalDetail } from '../components/animalDetail.tsx';
 import { useLocation } from 'react-router-dom';
-import { getToken } from '../utils/auth';
 import { authFetch } from '../utils/api.ts';
 import { Footer } from '../components/Footer.tsx';
-import {TYPE_ALIASES} from "../types";
+import { TYPE_ALIASES } from "../types";
+import { useAuth } from '../api/useAuth';
 
 type Props = { onLoginRequest: () => void };
 
@@ -22,10 +22,12 @@ export const AnimalsPage = ({ onLoginRequest }: Props) => {
         return state?.shelterId ? { shelterId: state.shelterId } : {};
     });
 
-    const [favorites, setFavorites] = useState<Set<number>>(new Set());
+    const [favorites,    setFavorites]    = useState<Set<number>>(new Set());
+    const [requestedIds, setRequestedIds] = useState<Set<number>>(new Set());
 
+    const { isUser } = useAuth();
     useEffect(() => {
-        if (!getToken()) return;
+        if (!isUser) return;
         authFetch('http://localhost:8080/api/favorites')
             .then(r => r.json())
             .then(data => {
@@ -33,7 +35,18 @@ export const AnimalsPage = ({ onLoginRequest }: Props) => {
                     setFavorites(new Set(data.map((a: any) => a.id)));
             })
             .catch(() => {});
-    }, []);
+    }, [isUser]);
+
+    useEffect(() => {
+        if (!isUser) return;
+        authFetch('http://localhost:8080/api/adoption-requests/my')
+            .then(r => r.json())
+            .then(data => {
+                if (Array.isArray(data))
+                    setRequestedIds(new Set(data.map((r: any) => r.animalId)));
+            })
+            .catch(() => {});
+    }, [isUser]);
 
     useEffect(() => {
         setSelected(null);
@@ -67,10 +80,8 @@ export const AnimalsPage = ({ onLoginRequest }: Props) => {
                 const matchedTypeIds = aliasEntries
                     .filter(([alias]) => alias.startsWith(q))
                     .map(([, id]) => id);
-
-                if (matchedTypeIds.length > 0) {
+                if (matchedTypeIds.length > 0)
                     return matchedTypeIds.includes(String(a.animalTypeId));
-                }
                 return a.animalType?.toLowerCase().startsWith(q);
             })();
 
@@ -95,17 +106,14 @@ export const AnimalsPage = ({ onLoginRequest }: Props) => {
 
     const toggleFavorite = async (id: number) => {
         const isFav = favorites.has(id);
-        // Оновити UI одразу (optimistic)
         setFavorites(prev => {
             const next = new Set(prev);
             isFav ? next.delete(id) : next.add(id);
             return next;
         });
-        // Запит до API
         await authFetch(`http://localhost:8080/api/favorites/${id}`, {
             method: isFav ? 'DELETE' : 'POST',
         }).catch(() => {
-            // Відкотити при помилці
             setFavorites(prev => {
                 const next = new Set(prev);
                 isFav ? next.add(id) : next.delete(id);
@@ -114,57 +122,45 @@ export const AnimalsPage = ({ onLoginRequest }: Props) => {
         });
     };
 
-    if (selected) {
-        return (
-            <AnimalDetail
-                animal={selected}
-                onBack={() => setSelected(null)}
-                onLoginRequest={onLoginRequest}
-            />
-        );
-    }
-
-    const filterGroups = [{
-        key: 'typeId',
-        label: 'Вид',
-        // opts: animalTypes.map(t => ({v: String(t.id), l: t.type, icon: `src/images/${t.type}.png`})),
-        opts: [
-            {v: 2, l: 'кітик', icon: `src/images/Cat.png`},
-            {v: 1,l: 'пес', icon: `src/images/Dog.png`},
-            {v: 3,l:'кролик', icon:`src/images/Rabbit.png`},
-            {v: 4,l:'папужка', icon:`src/images/Parrot.png`}
-        ],
-        columns: 2
-        // type: 'select' as const,
-    },
+    const filterGroups = [
+        {
+            key: 'typeId',
+            label: 'Вид',
+            opts: [
+                { v: 2, l: 'кітик',   icon: 'src/images/Cat.png'    },
+                { v: 1, l: 'пес',     icon: 'src/images/Dog.png'    },
+                { v: 3, l: 'кролик',  icon: 'src/images/Rabbit.png' },
+                { v: 4, l: 'папужка', icon: 'src/images/Parrot.png' },
+            ],
+            columns: 2,
+        },
         {
             key: 'sex',
             label: 'Стать',
             opts: [
-                {v: 'MALE', l: 'хлопчик', icon: 'src/images/MALE.png'},
-                {v: 'FEMALE', l: 'дівчинка', icon: 'src/images/FEMALE.png'},
+                { v: 'MALE',   l: 'хлопчик', icon: 'src/images/MALE.png'   },
+                { v: 'FEMALE', l: 'дівчинка', icon: 'src/images/FEMALE.png' },
             ],
-            columns:2
+            columns: 2,
         },
         {
             key: 'city',
             label: 'Місто',
             icon: 'src/images/location.png',
             type: 'select' as const,
-            opts: cities.map(c => ({v: c, l: c})),
-
+            opts: cities.map(c => ({ v: c, l: c })),
         },
         {
             key: 'age',
             label: 'Вік',
             opts: [
-                {v: '0-1', l: 'До 1 року'},
-                {v: '1-2', l: '1–2 роки'},
-                {v: '2-5', l: '2–5 років'},
-                {v: '5+', l: 'Більше 5'},
+                { v: '0-1', l: 'До 1 року'   },
+                { v: '1-2', l: '1–2 роки'    },
+                { v: '2-5', l: '2–5 років'   },
+                { v: '5+',  l: 'Більше 5'    },
             ],
-            columns:2
-        }
+            columns: 2,
+        },
     ];
 
     if (selected) {
@@ -216,6 +212,7 @@ export const AnimalsPage = ({ onLoginRequest }: Props) => {
                                     onClick={() => setSelected(a)}
                                     isFavorited={favorites.has(a.id)}
                                     onToggleFavorite={toggleFavorite}
+                                    requestedIds={requestedIds}
                                 />
                             ))
                         }
