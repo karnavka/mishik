@@ -491,6 +491,11 @@ const ShelterAnimalsTab = () => {
       return false;
     }
 
+    if(Number(form.age) < 0 || Number(form.height) < 0 ){
+        alert('Не можна від\'ємні поля');
+        return false;
+    }
+
     return true;
   };
 
