@@ -43,14 +43,22 @@ public class SecurityConfig {
                         .requestMatchers("/images/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
 
+                        .requestMatchers(HttpMethod.GET, "/api/volunteering/me")
+                        .hasAnyRole("USER", "SHELTER")
+
                         // ========================
                         // PUBLIC READ ONLY
                         // ========================
                         .requestMatchers(HttpMethod.GET,
+                                "/api/animals",
                                 "/api/animals/**",
+                                "/api/shelters",
                                 "/api/shelters/**",
+                                "/api/clinics",
                                 "/api/clinics/**",
+                                "/api/animal-types",
                                 "/api/animal-types/**",
+                                "/api/volunteering",
                                 "/images/**"
                         ).permitAll()
 
@@ -59,9 +67,11 @@ public class SecurityConfig {
                         // ========================
                         .requestMatchers(HttpMethod.POST,
                                 "/api/adoption-requests/**",
-                                "/api/volunteering/**",
                                 "/api/donations/**"
                         ).hasRole("USER")
+
+                        .requestMatchers(HttpMethod.POST, "/api/volunteering/**")
+                        .hasAnyRole("USER", "SHELTER")
 
                         .requestMatchers(HttpMethod.DELETE,
                                 "/api/adoption-requests/**",
@@ -93,6 +103,7 @@ public class SecurityConfig {
                         // ========================
                         // SHELTER ONLY
                         // ========================
+                        .requestMatchers(HttpMethod.POST, "/api/animal-types").hasRole("SHELTER")
                         .requestMatchers("/api/shelters/me/**").hasRole("SHELTER")
                         .requestMatchers("/api/shelters/me/adoption-requests/**")
                         .hasRole("SHELTER")

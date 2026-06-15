@@ -8,14 +8,15 @@ import { AnimalCard } from '../components/animalCard';
 import { AnimalDetail } from '../components/animalDetail';
 import { inp, section, fieldRow, lbl, STATUS } from '../utils/Profilestyles';
 import type { StatusKey } from '../utils/Profilestyles';
-import { FormField, FTextarea } from '../components/FormField';
+import {FInput, FormField, FTextarea } from '../components/FormField';
 import { AnimalForm, EMPTY_ANIMAL_FORM } from '../components/AnimalForm';
-import type { AnimalFormState } from '../components/AnimalForm';
-import { UserProfileForm } from '../components/UserProfileForm';
+import type { AnimalFormState, AnimalTypeOption } from '../components/AnimalForm';
+import { UserProfileForm }    from '../components/UserProfileForm';
 import type { UserProfileFormState } from '../components/UserProfileForm';
 import { ShelterProfileForm } from '../components/ShelterProfileForm';
 import type { ShelterProfileFormState } from '../components/ShelterProfileForm';
 import { useNavigate } from 'react-router-dom';
+
 
 type UserInfo = {
   id: number; firstName: string; lastName: string;
@@ -31,7 +32,7 @@ type ShelterInfo = {
 type Animal = {
   id: number; name: string; age: number; height: number;
   sex: string; description: string; animalType: string;
-  shelterName?: string;
+  animalTypeId?: number; imageUrl?: string; shelterName?: string;
 };
 type Request = {
   userId: number; userLogin: string;
@@ -41,6 +42,19 @@ type Request = {
 type FavAnimal = {
   id: number; name: string; animalType: string; shelterId: number;
   sex: string; age?: number; description?: string; shelterName?: string;
+};
+type Event = {
+    id: number;
+    name: string;
+    description: string;
+    dateOfEvent: string;
+    city?: string;
+    organizerName?: string;
+};
+const EMPTY_EVENT = {
+    name: '',
+    description: '',
+    dateOfEvent: '',
 };
 
 const PhoneRequiredNotice = ({ message }: { message: string }) => (
@@ -217,7 +231,7 @@ const ShelterInfoTab = () => {
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState<ShelterProfileFormState>({
     name: '', phoneNumber: '', adoptionConditions: '', socialLinks: '',
-    address: { city: '', region: '', street: '' }, 
+    address: { city: '', region: '', street: '' },
   });
   const [saved, setSaved] = useState(false);
 
@@ -234,7 +248,7 @@ const ShelterInfoTab = () => {
       phoneNumber:        info.phoneNumber        ?? '',
       adoptionConditions: info.adoptionConditions ?? '',
       socialLinks:        info.socialLinks        ?? '',
-      address: {                      
+      address: {
         city:   info.city   ?? '',
         region: info.region ?? '',
         street: info.street ?? '',
@@ -246,7 +260,7 @@ const ShelterInfoTab = () => {
  const save = async () => {
     await authFetch('http://localhost:8080/api/shelters/me', {
       method: 'PUT',
-      body: JSON.stringify(form), 
+      body: JSON.stringify(form),
     });
     setInfo(prev => prev ? {
       ...prev,
@@ -397,6 +411,7 @@ const ShelterAnimalsTab = () => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [editForm, setEditForm]       = useState<AnimalFormState>(EMPTY_ANIMAL_FORM);
   const [addForm,  setAddForm]        = useState<AnimalFormState>(EMPTY_ANIMAL_FORM);
+  const [animalTypes, setAnimalTypes] = useState<AnimalTypeOption[]>([]);
   const [shelterHasPhone, setShelterHasPhone] = useState(true);
   const [loading, setLoading]         = useState(true);
 
@@ -404,23 +419,91 @@ const ShelterAnimalsTab = () => {
     Promise.all([
       authFetch('http://localhost:8080/api/shelters/me').then(r => r.json()),
       authFetch('http://localhost:8080/api/shelters/me/animals').then(r => r.json()),
+      fetch('/api/animal-types').then(r => r.json()),
     ])
-      .then(([shelter, animalList]) => {
+      .then(([shelter, animalList, typeList]) => {
         setShelterHasPhone(!!shelter.phoneNumber);
         setAnimals(Array.isArray(animalList) ? animalList : []);
+        setAnimalTypes(Array.isArray(typeList) ? typeList : []);
       })
       .catch(() => { setShelterHasPhone(false); setAnimals([]); })
       .finally(() => setLoading(false));
   }, []);
 
+  const toAnimalPayload = (form: AnimalFormState, animalTypeId: number) => ({
+    name: form.name.trim(),
+    age: Number(form.age),
+    height: Number(form.height),
+    sex: form.sex,
+    description: form.description.trim(),
+    imageUrl: form.imageUrl.trim() || null,
+    animalTypeId,
+  });
+
+  const canSaveAnimal = (form: AnimalFormState) => {
+    if (!form.name.trim() || !form.animalTypeId) {
+      alert('Заповніть назву та тип тварини');
+      return false;
+    }
+
+    if (form.animalTypeId === '__other__' && !form.animalTypeName.trim()) {
+      alert('Вкажіть свій вид тварини');
+      return false;
+    }
+
+    return true;
+  };
+
+  const resolveAnimalTypeId = async (form: AnimalFormState) => {
+    if (form.animalTypeId !== '__other__') {
+      return Number(form.animalTypeId);
+    }
+
+    const type = form.animalTypeName.trim();
+    const existing = animalTypes.find(t => t.type.toLowerCase() === type.toLowerCase());
+
+    if (existing) {
+      return existing.id;
+    }
+
+    const res = await authFetch('http://localhost:8080/api/animal-types', {
+      method: 'POST',
+      body: JSON.stringify({ type }),
+    });
+    const created = await res.json();
+
+    if (!res.ok) {
+      throw new Error(created.message ?? 'Не вдалося додати вид тварини');
+    }
+
+    setAnimalTypes(prev => prev.some(t => t.id === created.id) ? prev : [...prev, created]);
+    return Number(created.id);
+  };
+
   const startEdit = (a: Animal) => {
     setEditingId(a.id);
-    setEditForm({ name: a.name, age: a.age, height: a.height, description: a.description ?? '', sex: a.sex, animalType: a.animalType });
+    setEditForm({
+      name: a.name,
+      age: a.age,
+      height: a.height,
+      description: a.description ?? '',
+      sex: a.sex,
+      animalTypeId: a.animalTypeId ? String(a.animalTypeId) : '',
+      animalTypeName: '',
+      imageUrl: a.imageUrl ?? '',
+    });
   };
 
   const saveEdit = async (id: number) => {
-    await authFetch(`http://localhost:8080/api/shelters/me/${id}`, { method: 'PUT', body: JSON.stringify(editForm) });
-    setAnimals(list => list.map(a => a.id === id ? { ...a, ...editForm } : a));
+    if (!canSaveAnimal(editForm)) return;
+
+    const animalTypeId = await resolveAnimalTypeId(editForm);
+    const res = await authFetch(`http://localhost:8080/api/shelters/me/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(toAnimalPayload(editForm, animalTypeId)),
+    });
+    const updated = await res.json();
+    setAnimals(list => list.map(a => a.id === id ? { ...a, ...updated } : a));
     setEditingId(null);
   };
 
@@ -431,12 +514,18 @@ const ShelterAnimalsTab = () => {
   };
 
   const addAnimal = async () => {
-    const res  = await authFetch('http://localhost:8080/api/shelters/me/animals', { method: 'POST', body: JSON.stringify(addForm) });
+    if (!canSaveAnimal(addForm)) return;
+
+    const animalTypeId = await resolveAnimalTypeId(addForm);
+    const res  = await authFetch('http://localhost:8080/api/shelters/me/animals', {
+      method: 'POST',
+      body: JSON.stringify(toAnimalPayload(addForm, animalTypeId)),
+    });
     const data = await res.json();
     if (data.animal) {
       setAnimals(list => [...list, data.animal]);
       setShowAddForm(false);
-      setAddForm(EMPTY_ANIMAL_FORM);
+      setAddForm({ ...EMPTY_ANIMAL_FORM });
     }
   };
 
@@ -454,7 +543,13 @@ const ShelterAnimalsTab = () => {
         </button>
       )}
       {showAddForm && (
-        <AnimalForm form={addForm} setForm={setAddForm} onSave={addAnimal} onCancel={() => setShowAddForm(false)} />
+        <AnimalForm
+          form={addForm}
+          setForm={setAddForm}
+          animalTypes={animalTypes}
+          onSave={addAnimal}
+          onCancel={() => setShowAddForm(false)}
+        />
       )}
       {animals.length === 0 && !showAddForm && (
         <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-muted)' }}>
@@ -467,6 +562,7 @@ const ShelterAnimalsTab = () => {
         {animals.map(a =>
           editingId === a.id ? (
             <AnimalForm key={a.id} id={a.id} form={editForm} setForm={setEditForm}
+              animalTypes={animalTypes}
               onSave={() => saveEdit(a.id)} onCancel={() => setEditingId(null)} />
           ) : (
             <AnimalCard
@@ -531,7 +627,210 @@ const UserFavoritesTab = ({ favAnimals, favorites, onToggleFavorite, loading, on
     </Grid2>
   );
 };
+const ShelterEventsTab = () => {
+    const [events, setEvents] = useState<Event[]>([]);
+    const [showAdd, setShowAdd] = useState(false);
 
+    const [form, setForm] = useState({
+        name: '',
+        description: '',
+        dateOfEvent: '',
+    });
+
+    useEffect(() => {
+        authFetch('http://localhost:8080/api/volunteering/me')
+            .then(r => r.json())
+            .then(data => setEvents(Array.isArray(data) ? data : []))
+            .catch(() => {});
+    }, []);
+
+    const addEvent = async () => {
+        const payload = {
+            name: form.name,
+            description: form.description,
+            dateOfEvent: form.dateOfEvent,
+            address: {
+                city: form.city,
+                region: form.region,
+                street: form.street,
+            },
+        };
+
+        const res = await authFetch(
+            'http://localhost:8080/api/volunteering',
+            {
+                method: 'POST',
+                body: JSON.stringify(payload),
+            }
+        );
+
+        const data = await res.json();
+
+        if (data.event) {
+            setEvents(prev => [...prev, data.event]);
+
+            setForm({
+                name: '',
+                description: '',
+                dateOfEvent: '',
+                city: '',
+                region: '',
+                street: '',
+            });
+
+            setShowAdd(false);
+        }
+    };
+
+    return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {!showAdd && (
+                <button
+                    className="btn-primary"
+                    style={{ alignSelf: 'flex-start' }}
+                    onClick={() => setShowAdd(true)}
+                >
+                    ➕ Додати подію
+                </button>
+            )}
+
+            {showAdd && (
+                <div style={section}>
+                    <div style={fieldRow}>
+                        <span style={lbl}>Назва</span>
+                        <FInput
+                            value={form.name}
+                            onChange={e =>
+                                setForm({
+                                    ...form,
+                                    name: e.target.value,
+                                })
+                            }
+                        />
+                    </div>
+                    <div style={fieldRow}>
+                        <span style={lbl}>Дата</span>
+                        <FInput
+                            type = 'date'
+                            value={form.dateOfEvent}
+                            onChange={e =>
+                                setForm({
+                                    ...form,
+                                    dateOfEvent: e.target.value,
+                                })
+                            }
+                        />
+                    </div>
+                    <div style={fieldRow}>
+                        <span style={lbl}>Місто</span>
+                        <FInput
+                            value={form.city}
+                            onChange={e =>
+                                setForm({ ...form, city: e.target.value })
+                            }
+                        />
+                    </div>
+
+                    <div style={fieldRow}>
+                        <span style={lbl}>Область</span>
+                        <FInput
+                            value={form.region}
+                            onChange={e =>
+                                setForm({ ...form, region: e.target.value })
+                            }
+                        />
+                    </div>
+
+                    <div style={fieldRow}>
+                        <span style={lbl}>Вулиця</span>
+                        <FInput
+                            value={form.street}
+                            onChange={e =>
+                                setForm({ ...form, street: e.target.value })
+                            }
+                        />
+                    </div>
+
+                    <div style={fieldRow}>
+                        <span style={lbl}>Опис</span>
+                        <FTextarea
+                            value={form.description}
+                            onChange={e =>
+                                setForm({
+                                    ...form,
+                                    description: e.target.value,
+                                })
+                            }
+                        />
+                    </div>
+
+                    <div style={{ display: 'flex', gap: 8 }}>
+                        <button
+                            className="btn-primary"
+                            onClick={addEvent}
+                        >
+                            Зберегти
+                        </button>
+
+                        <button
+                            className="btn-ghost"
+                            onClick={() => setShowAdd(false)}
+                        >
+                            Скасувати
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {events.length === 0 && !showAdd && (
+                <div
+                    style={{
+                        textAlign: 'center',
+                        padding: '40px 20px',
+                        color: 'var(--text-muted)',
+                    }}
+                >
+                    Немає створених подій
+                </div>
+            )}
+
+            <Grid2>
+                {events.map(ev => (
+                    <div
+                        key={ev.id}
+                        style={{
+                            border: '1px solid var(--border)',
+                            borderRadius: 12,
+                            padding: 16,
+                            background: 'var(--surface)',
+                        }}
+                    >
+                        <div
+                            style={{
+                                fontWeight: 600,
+                                marginBottom: 8,
+                            }}
+                        >
+                            📅 {ev.name}
+                        </div>
+
+                        <div
+                            style={{
+                                fontSize: 13,
+                                color: 'var(--text-muted)',
+                                marginBottom: 8,
+                            }}
+                        >
+                            {new Date(ev.dateOfEvent).toLocaleDateString('uk-UA')}
+                        </div>
+
+                        <div>{ev.description}</div>
+                    </div>
+                ))}
+            </Grid2>
+        </div>
+    );
+};
 const ROLE_META: Record<string, { text: string; color: string }> = {
   ROLE_ADMIN: { text: '👑 Адміністратор', color: '#9b59b6' },
   MODERATOR:  { text: '🛡️ Модератор',     color: '#3498db' },
@@ -554,7 +853,7 @@ export const ProfilePage = () => {
   const [favLoading, setFavLoading] = useState(true);
   const { loggedIn, role, isUser } = useAuth();
   useEffect(() => {
-  if (!isUser) return;  
+  if (!isUser) return;
    authFetch('http://localhost:8080/api/favorites')
       .then(r => r.json())
       .then(data => {
@@ -608,8 +907,8 @@ export const ProfilePage = () => {
 
   const isShelter = role === 'ROLE_SHELTER';
   const tabs = isShelter
-    ? [{ label: 'Про притулок', icon: '🏠' }, { label: 'Заявки', icon: '📬' }, { label: 'Тварини', icon: '🐾' }]
-    : [{ label: 'Про мене', icon: '👤' }, { label: 'Уподобані', icon: '♡' }, { label: 'Мої заявки', icon: '📋' }];
+    ? [{ label: 'Про притулок', icon: '🏠' }, { label: 'Заявки', icon: '📬' }, { label: 'Тварини', icon: '🐾' }, { label: 'Мої події', icon: '📅' }]
+    : [{ label: 'Про мене', icon: '👤' }, { label: 'Уподобані', icon: '♡' }, { label: 'Мої заявки', icon: '📋' },  { label: 'Мої події', icon: '📅' }] ;
 
   const rl = role ? ROLE_META[role] : null;
 
@@ -652,27 +951,37 @@ export const ProfilePage = () => {
           {/*</button>*/}
         </div>
 
-        <div style={{
-          background: 'var(--surface)', borderRadius: 16, padding: 28,
-          border: '1px solid var(--border)', flex: 1, overflowY: 'auto', minHeight: 0,
-        }}>
-          {!isShelter && tab === 0 && <UserInfoTab />}
-          {!isShelter && tab === 1 && (
-            <UserFavoritesTab
-              favAnimals={favAnimals}
-              favorites={favorites}
-              onToggleFavorite={toggleFavorite}
-              loading={favLoading}
-              onLoginRequest={() => {}}
-            />
-          )}
-          {!isShelter && tab === 2 && <UserRequestsTab />}
+      {/* Скролиться тільки ця область */}
+      <div
+        style={{
+          background: 'var(--surface)',
+          borderRadius: 16,
+          padding: 28,
+          border: '1px solid var(--border)',
+          flex: 1,
+          overflowY: 'auto',
+          minHeight: 0,
+        }}
+      >
+        {!isShelter && tab === 0 && <UserInfoTab />}
 
-          {isShelter && tab === 0 && <ShelterInfoTab />}
-          {isShelter && tab === 1 && <ShelterRequestsTab />}
-          {isShelter && tab === 2 && <ShelterAnimalsTab />}
-        </div>
+        {!isShelter && tab === 1 && (
+          <UserFavoritesTab
+            favAnimals={favAnimals}
+            favorites={favorites}
+            onToggleFavorite={toggleFavorite}
+            loading={favLoading}
+          />
+        )}
+
+        {!isShelter && tab === 2 && <UserRequestsTab />}
+          {isShelter && tab === 3 && <ShelterEventsTab />}
+          {!isShelter && tab === 3 && <ShelterEventsTab />}
+        {isShelter && tab === 0 && <ShelterInfoTab />}
+        {isShelter && tab === 1 && <ShelterRequestsTab />}
+        {isShelter && tab === 2 && <ShelterAnimalsTab />}
       </div>
     </div>
-  );
+  </div>
+);
 };

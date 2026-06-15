@@ -1,13 +1,12 @@
-import { useState, useMemo, useEffect } from 'react';
-import type {Animal, Organization} from '../types';
-import { useFetch } from '../api/fetch';
-import { AnimalCard } from '../components/animalCard';
-import { Sidebar } from '../components/Sidebar';
-import { AnimalDetail } from '../components/animalDetail.tsx';
-import { useLocation } from 'react-router-dom';
-import { authFetch } from '../utils/api.ts';
-import { Footer } from '../components/Footer.tsx';
-import { TYPE_ALIASES } from "../types";
+import {useState, useMemo, useEffect} from 'react';
+import type {Animal} from '../types';
+import {useFetch} from '../api/fetch';
+import {AnimalCard} from '../components/animalCard';
+import {Sidebar} from '../components/Sidebar';
+import {AnimalDetail} from "../components/animalDetail.tsx";
+import {useLocation} from "react-router-dom";
+import {Footer} from "../components/Footer.tsx";
+import {TYPE_ALIASES} from "../types";
 import { useAuth } from '../api/useAuth';
 
 type Props = { onLoginRequest: () => void };
@@ -90,10 +89,9 @@ export const AnimalsPage = ({ onLoginRequest }: Props) => {
                 if (ageRange === '0-1') return age < 1;
                 if (ageRange === '1-2') return age >= 1 && age < 2;
                 if (ageRange === '2-5') return age >= 2 && age <= 5;
-                if (ageRange === '5+')  return age > 5;
+                if (ageRange === '5+') return age > 5;
                 return true;
             })();
-
             return matchSearch && matchAge;
         });
     }, [animals, search, filters]);
