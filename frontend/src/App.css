@@ -380,3 +380,16 @@ body {
         grid-template-columns: 1fr;
     }
 }
+
+.animal-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    align-content: start;
+}
+
+@media (max-width: 700px) {
+    .animal-grid {
+        grid-template-columns: 1fr;
+    }
+}

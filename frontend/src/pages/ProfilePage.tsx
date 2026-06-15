@@ -71,9 +71,9 @@ const PhoneRequiredNotice = ({ message }: { message: string }) => (
 );
 
 const Grid2 = ({ children }: { children: React.ReactNode }) => (
-  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 16 }}>
-    {children}
-  </div>
+    <div className="animal-grid">
+      {children}
+    </div>
 );
 
 const StatusBadge = ({ status }: { status: string }) => {
@@ -270,10 +270,25 @@ useEffect(() => {
     setEditing(true);
   };
 
+  const normalizeCity = (value: string) =>
+      value.trim().toLowerCase().split(/\s+/)
+          .map(
+              word =>
+                  word.charAt(0).toUpperCase() +
+                  word.slice(1)
+          )
+          .join(' ');
+
   const save = async () => {
+    const normalizedCity = normalizeCity(form.address.city);
     const payload = {
       ...form,
-    socialLinks: [form.instagram, form.facebook, form.telegram].join('|'),    };
+      address: {
+        ...form.address,
+        city: normalizedCity,
+      },
+      socialLinks: [form.instagram, form.facebook, form.telegram].join('|'),
+    };
     await authFetch('http://localhost:8080/api/shelters/me', {
       method: 'PUT',
       body: JSON.stringify(payload),
@@ -286,7 +301,7 @@ useEffect(() => {
       instagram:          form.instagram,
       facebook:           form.facebook,
       telegram:           form.telegram,
-      city:               form.address.city,
+      city:               normalizeCity(form.address.city),
       region:             form.address.region,
       street:             form.address.street,
     } : prev);
@@ -474,6 +489,11 @@ const ShelterAnimalsTab = () => {
     if (form.animalTypeId === '__other__' && !form.animalTypeName.trim()) {
       alert('Вкажіть свій вид тварини');
       return false;
+    }
+
+    if(Number(form.age) < 0 || Number(form.height) < 0 ){
+        alert('Не можна від\'ємні поля');
+        return false;
     }
 
     return true;

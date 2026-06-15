@@ -1,5 +1,5 @@
 import {useState, useMemo, useEffect} from 'react';
-import type {Animal} from '../types';
+import type {Animal, Organization} from '../types';
 import {useFetch} from '../api/fetch';
 import {AnimalCard} from '../components/animalCard';
 import {Sidebar} from '../components/Sidebar';
@@ -192,7 +192,7 @@ export const AnimalsPage = ({ onLoginRequest }: Props) => {
                 adoptedIds={adoptedIds}
                 myApprovedIds={myApprovedIds}
                 onRequestAdded={handleRequestAdded}
-                requestedIds={requestedIds}  
+                requestedIds={requestedIds}
             />
         );
     }
