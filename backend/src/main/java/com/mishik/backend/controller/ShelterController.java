@@ -115,7 +115,9 @@ public class ShelterController {
         shelter.setPhoneNumber((String) req.get("phoneNumber"));
         shelter.setAdoptionConditions((String) req.get("adoptionConditions"));
         shelter.setSocialLinks((String) req.get("socialLinks"));
-
+        shelter.setImageUrl(
+                normalizeImageUrl((String) req.get("imageUrl"))
+        );
         Object addressObj = req.get("address");
         if (addressObj instanceof Map<?, ?> addressMap) {
             Address address = shelter.getAddress() != null ? shelter.getAddress() : new Address();
