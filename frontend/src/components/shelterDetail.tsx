@@ -117,8 +117,6 @@ export const ShelterDetail = ({ org, onBack, onLoginRequest }: Props) => {
                 )}
             </div>
 )}
-
-                    {/* Кнопки дій */}
                     <div className="card-actions" style={{ marginTop: 'auto', paddingTop: 16 }}>
                         <button className="btn-ghost" onClick={handleViewAnimals}>
                             🐾 Переглянути тварин

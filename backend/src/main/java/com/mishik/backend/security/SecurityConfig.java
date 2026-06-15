@@ -42,6 +42,7 @@ public class SecurityConfig {
                         // ========================
                         .requestMatchers("/images/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/adoption-requests/adopted-animal-ids").permitAll()
 
                         .requestMatchers(HttpMethod.GET, "/api/volunteering/me")
                         .hasAnyRole("USER", "SHELTER")

@@ -1,4 +1,3 @@
-// src/components/animalCard.tsx
 import { useState } from 'react';
 import type { Animal } from '../types';
 import { RoleGuard } from './RoleGuard';
@@ -8,7 +7,7 @@ const EMOJI: Record<string, string> = {
     кіт: '🐱', cat: '🐱', кітик:'🐱',
     пес: '🐶', dog: '🐶', песик: '🐶',
     rabbit: '🐰', кролик: '🐰', кріль: '🐰',
-    parrot: '🦜',папужка: '🦜',
+    parrot: '🦜', папужка: '🦜',
 };
 const animalEmoji = (s: string) => EMOJI[s?.toLowerCase()] ?? '🐾';
 
@@ -19,6 +18,8 @@ type Props = {
     isFavorited?: boolean;
     onToggleFavorite?: (id: number) => void;
     requestedIds?: Set<number>;
+    adoptedIds?: Set<number>;
+    myApprovedIds?: Set<number>;
     shelterMode?: boolean;
     onEdit?: () => void;
     onDelete?: () => void;
@@ -31,20 +32,25 @@ export const AnimalCard = ({
     isFavorited = false,
     onToggleFavorite,
     requestedIds,
+    adoptedIds,
+    myApprovedIds,
     shelterMode = false,
     onEdit,
     onDelete,
 }: Props) => {
-    const [hovered,    setHovered]    = useState(false);
-    const [requesting, setRequesting] = useState(false);
+    const [hovered,       setHovered]       = useState(false);
+    const [requesting,    setRequesting]    = useState(false);
     const [justRequested, setJustRequested] = useState(false);
-    const [error,      setError]      = useState<string | null>(null);
+    const [error,         setError]         = useState<string | null>(null);
 
-    const requested = justRequested || (requestedIds?.has(animal.id) ?? false);
+    const isAdopted  = adoptedIds?.has(animal.id)   ?? false;
+    const myApproved = myApprovedIds?.has(animal.id) ?? false;
+    const requested  = justRequested || (requestedIds?.has(animal.id) ?? false);
+    const isBlocked  = isAdopted || myApproved || requested || requesting;
 
     const handleAdopt = async (e: React.MouseEvent) => {
         e.stopPropagation();
-        if (requested || requesting) return;
+        if (isBlocked) return;
         setRequesting(true);
         setError(null);
         try {
@@ -64,6 +70,12 @@ export const AnimalCard = ({
             setRequesting(false);
         }
     };
+
+    const adoptBtnLabel = requesting   ? 'Надсилання...'
+                        : myApproved   ? '✓ Заявку схвалено'
+                        : isAdopted    ? 'Вже знайшла дім'
+                        : requested    ? '✓ Заявку подано'
+                        : 'Подати заявку';
 
     return (
         <div
@@ -110,7 +122,6 @@ export const AnimalCard = ({
                 )}
 
                 <div className="card-actions">
-                    {/* ── Режим кабінету притулку ── */}
                     {shelterMode ? (
                         <>
                             <button
@@ -125,11 +136,10 @@ export const AnimalCard = ({
                                 style={{ color: '#e74c3c', borderColor: '#e74c3c', fontSize: 12, padding: '6px 12px' }}
                                 onClick={(e) => { e.stopPropagation(); onDelete?.(); }}
                             >
-                                🗑 Видалити
+                                Видалити
                             </button>
                         </>
                     ) : (
-                        /* ── Звичайний режим ── */
                         <>
                             <RoleGuard
                                 requireAuth
@@ -138,25 +148,25 @@ export const AnimalCard = ({
                                         className="btn-primary"
                                         onClick={(e) => { e.stopPropagation(); onLoginRequest?.(); }}
                                     >
-                                        Увійти щоб зв'язатись
+                                        {isAdopted ? 'Вже знайшла дім' : 'Увійти щоб зв\'язатись'}
                                     </button>
                                 }
                             >
                                 <RoleGuard roles={['ROLE_USER']}>
-                                <button
-                                    className="btn-primary"
-                                    onClick={handleAdopt}
-                                    disabled={requesting || requested}
-                                    style={{
-                                        opacity:     requested ? 0.75 : 1,
-                                        background:  requested ? '#27ae60' : undefined,
-                                        borderColor: requested ? '#27ae60' : undefined,
-                                        cursor:      requested ? 'default' : undefined,
-                                    }}
-                                >
-                                    {requesting ? 'Надсилання...' : requested ? '✓ Заявку подано' : 'Подати заявку'}
-                                </button>
-                              </RoleGuard>
+                                    <button
+                                        className="btn-primary"
+                                        onClick={handleAdopt}
+                                        disabled={isBlocked}
+                                        style={{
+                                            opacity:     isBlocked ? 0.75 : 1,
+                                            background:  isBlocked ? '#27ae60' : undefined,
+                                            borderColor: isBlocked ? '#27ae60' : undefined,
+                                            cursor:      isBlocked ? 'default' : undefined,
+                                        }}
+                                    >
+                                        {adoptBtnLabel}
+                                    </button>
+                                </RoleGuard>
                             </RoleGuard>
 
                             <RoleGuard requireAuth roles={['ROLE_USER']}>

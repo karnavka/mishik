@@ -656,11 +656,14 @@ const ShelterEventsTab = () => {
     const [events, setEvents] = useState<Event[]>([]);
     const [showAdd, setShowAdd] = useState(false);
 
-    const [form, setForm] = useState({
-        name: '',
-        description: '',
-        dateOfEvent: '',
-    });
+   const [form, setForm] = useState({
+    name: '',
+    description: '',
+    dateOfEvent: '',
+    city: '',
+    region: '',
+    street: '',
+});
 
     useEffect(() => {
         authFetch('http://localhost:8080/api/volunteering/me')
@@ -932,8 +935,8 @@ export const ProfilePage = () => {
 
   const isShelter = role === 'ROLE_SHELTER';
   const tabs = isShelter
-    ? [{ label: 'Про притулок', icon: '🏠' }, { label: 'Заявки', icon: '📬' }, { label: 'Тварини', icon: '🐾' }, { label: 'Мої події', icon: '📅' }]
-    : [{ label: 'Про мене', icon: '👤' }, { label: 'Уподобані', icon: '♡' }, { label: 'Мої заявки', icon: '📋' },  { label: 'Мої події', icon: '📅' }] ;
+    ? [{ label: 'Про притулок', icon: '' }, { label: 'Заявки', icon: '' }, { label: 'Тварини', icon: '' }, { label: 'Мої події', icon: '' }]
+    : [{ label: 'Про мене', icon: '' }, { label: 'Уподобані', icon: '' }, { label: 'Мої заявки', icon: '' },  { label: 'Мої події', icon: '' }] ;
 
   const rl = role ? ROLE_META[role] : null;
 

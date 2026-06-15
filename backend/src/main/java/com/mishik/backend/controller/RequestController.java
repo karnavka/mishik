@@ -182,7 +182,6 @@ public class RequestController {
         return ResponseEntity.ok(Map.of("status", "updated", "newStatus",  body.status()));
     }
 
-
     @GetMapping("/{animalId}/{userId}/contact")
     public ResponseEntity<?> getContactLinks(
             @PathVariable Long animalId,
@@ -344,6 +343,23 @@ public class RequestController {
         result.put("user", userMap);
 
         return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/adopted-animal-ids")
+    public Set<Long> getAdoptedAnimalIds() {
+        return requestRepository.findByStatus(RequestStatus.ACCEPTED)
+                .stream()
+                .map(r -> r.getAnimal().getId())
+                .collect(java.util.stream.Collectors.toSet());
+    }
+
+    @GetMapping("/my-approved-animal-ids")
+    public Set<Long> getMyApprovedAnimalIds(Authentication authentication) {
+        User user = resolveUser(authentication);
+        return requestRepository.findByUser_IdAndStatus(user.getId(), RequestStatus.ACCEPTED)
+                .stream()
+                .map(r -> r.getAnimal().getId())
+                .collect(java.util.stream.Collectors.toSet());
     }
 
 }

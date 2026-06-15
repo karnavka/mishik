@@ -19,9 +19,17 @@ type Props = {
     isFavorited?: boolean;
     onToggleFavorite?: (id: number) => void;
     requestedIds?: Set<number>;
+    adoptedIds?: Set<number>;
+    myApprovedIds?: Set<number>;
+    onRequestAdded?: (animalId: number) => void;
 };
 
-export const AnimalDetail = ({animal, onBack, onLoginRequest, isFavorited = false, onToggleFavorite, requestedIds}: Props) => {
+export const AnimalDetail = ({
+    animal, onBack, onLoginRequest,
+    isFavorited = false, onToggleFavorite,
+    requestedIds, adoptedIds, myApprovedIds,
+    onRequestAdded
+}: Props) => {
     const navigate = useNavigate();
 
     const [photoIndex, setPhotoIndex] = useState(0);
@@ -29,15 +37,24 @@ export const AnimalDetail = ({animal, onBack, onLoginRequest, isFavorited = fals
     const prev = () => setPhotoIndex(i => (i - 1 + photos.length) % photos.length);
     const next = () => setPhotoIndex(i => (i + 1) % photos.length);
 
-    const [hovered,      setHovered]      = useState(false);
-    const [requesting,   setRequesting]   = useState(false);
+    const [hovered,       setHovered]       = useState(false);
+    const [requesting,    setRequesting]    = useState(false);
     const [justRequested, setJustRequested] = useState(false);
-    const [error,        setError]        = useState<string | null>(null);
+    const [error,         setError]         = useState<string | null>(null);
 
-    const requested = justRequested || (requestedIds?.has(animal.id) ?? false);
+    const isAdopted  = adoptedIds?.has(animal.id)   ?? false;
+    const myApproved = myApprovedIds?.has(animal.id) ?? false;
+    const requested  = justRequested || (requestedIds?.has(animal.id) ?? false);
+    const isBlocked  = isAdopted || myApproved || requested || requesting;
+
+    const adoptBtnLabel = requesting ? 'Надсилання...'
+                        : myApproved ? '✓ Заявку схвалено'
+                        : isAdopted  ? 'Вже знайшла дім'
+                        : requested  ? '✓ Заявку подано'
+                        : 'Подати заявку';
 
     const handleAdopt = async () => {
-        if (requested || requesting) return;
+        if (isBlocked) return;
         setRequesting(true);
         setError(null);
         try {
@@ -51,6 +68,8 @@ export const AnimalDetail = ({animal, onBack, onLoginRequest, isFavorited = fals
             if (res.status === 409) { setJustRequested(true); return; }
             if (!res.ok)            { setError(data.message ?? 'Помилка сервера'); return; }
             setJustRequested(true);
+            setJustRequested(true);
+            onRequestAdded?.(animal.id);
         } catch {
             setError("Помилка з'єднання. Спробуйте ще раз.");
         } finally {
@@ -60,7 +79,6 @@ export const AnimalDetail = ({animal, onBack, onLoginRequest, isFavorited = fals
 
     return (
         <div className="detail-page">
-
             <button className="detail-back" onClick={onBack}>
                 <CancelIcon/>
             </button>
@@ -93,7 +111,6 @@ export const AnimalDetail = ({animal, onBack, onLoginRequest, isFavorited = fals
 
                 {/* RIGHT */}
                 <div className="detail-body">
-
                     <div className="detail-header">
                         <h2 className="detail-name">{animal.name}</h2>
                         <BadgeWithIcon id={animal.animalTypeId} label={animal.animalType}/>
@@ -143,12 +160,18 @@ export const AnimalDetail = ({animal, onBack, onLoginRequest, isFavorited = fals
                     )}
 
                     <div className="card-actions" style={{marginTop: '16px'}}>
-                        {/* ── Не авторизований ── */}
                         <RoleGuard
                             requireAuth
                             fallback={
-                                <button className="btn-primary" onClick={onLoginRequest}>
-                                    Увійти щоб зв'язатись
+                                <button className="btn-primary" onClick={onLoginRequest}
+                                    style={{
+                                        opacity: isAdopted ? 0.75 : 1,
+                                        background: isAdopted ? '#27ae60' : undefined,
+                                        borderColor: isAdopted ? '#27ae60' : undefined,
+                                        cursor: isAdopted ? 'default' : undefined,
+                                    }}
+                                >
+                                    {isAdopted ? 'Вже знайшла дім' : 'Увійти щоб зв\'язатись'}
                                 </button>
                             }
                         >
@@ -156,15 +179,15 @@ export const AnimalDetail = ({animal, onBack, onLoginRequest, isFavorited = fals
                                 <button
                                     className="btn-primary"
                                     onClick={handleAdopt}
-                                    disabled={requesting || requested}
+                                    disabled={isBlocked}
                                     style={{
-                                        opacity:     requested ? 0.75 : 1,
-                                        background:  requested ? '#27ae60' : undefined,
-                                        borderColor: requested ? '#27ae60' : undefined,
-                                        cursor:      requested ? 'default' : undefined,
+                                        opacity:     isBlocked ? 0.75 : 1,
+                                        background:  isBlocked ? '#27ae60' : undefined,
+                                        borderColor: isBlocked ? '#27ae60' : undefined,
+                                        cursor:      isBlocked ? 'default' : undefined,
                                     }}
                                 >
-                                    {requesting ? 'Надсилання...' : requested ? '✓ Заявку подано' : 'Подати заявку'}
+                                    {adoptBtnLabel}
                                 </button>
 
                                 <button
