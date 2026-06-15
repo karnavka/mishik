@@ -1,8 +1,8 @@
 import {useRef, useState} from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import {MapContainer, TileLayer, Marker, Popup, useMap} from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { useFetch } from '../api/fetch';
+import {useFetch} from '../api/fetch';
 
 
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
@@ -19,7 +19,7 @@ L.Icon.Default.mergeOptions({
 
 export const ClinicsPage = () => {
 
-    const { data: clinics, loading, error } = useFetch<Organization>('/api/clinics');
+    const {data: clinics, loading, error} = useFetch<Organization>('/api/clinics');
     const [selected, setSelected] = useState<Organization | null>(null);
     const [cityInput, setCityInput] = useState('');
 
@@ -70,53 +70,59 @@ export const ClinicsPage = () => {
 
         <div className="clinics-layout">
 
-            <div className="sidebar">
-                <div className="clinics-search">
+            <div className="clinics-filter">
+                <div className="sidebar">
+                    <div className="clinics-search">
 
-                    <input className="clinics-input"
-                        type="text"
-                        placeholder="пошук за адресою..."
-                        value={cityInput}
-                        onChange={e => setCityInput(e.target.value)}
-                        onKeyDown={e => e.key === 'Enter' && handleGoToCity()}
-                    />
-                    <button className="clinics-search-btn" onClick={handleGoToCity}>
-                        →
+                        <input className="clinics-input"
+                               type="text"
+                               placeholder="пошук за адресою..."
+                               value={cityInput}
+                               onChange={e => setCityInput(e.target.value)}
+                               onKeyDown={e => e.key === 'Enter' && handleGoToCity()}
+                        />
+                        <button className="clinics-search-btn" onClick={handleGoToCity}>
+                            →
+                        </button>
+                    </div>
+
+                    <button className="filter-opt my-loc"
+                            style ={{display:'flex', gap: '5px', flexDirection:'row', alignItems: 'center'}}
+                            onClick={() => {
+                        navigator.geolocation?.getCurrentPosition(pos => {
+                            mapRef.current?.setView([pos.coords.latitude, pos.coords.longitude], 14);
+                        });
+                    }}>
+                        <img src = '/images/location.png' alt='📍' style = {{width:'35px', height:'35px', padding: '2px 0 0 0'}}/>
+                        <span> Моя локація </span>
+
                     </button>
                 </div>
-
-                <button className="filter-opt" onClick={() => {
-                    navigator.geolocation?.getCurrentPosition(pos => {
-                        mapRef.current?.setView([pos.coords.latitude, pos.coords.longitude], 14);
-                    });
-                }}>
-                    📍 Моя локація
-                </button>
             </div>
 
             {/* ── Map ── */}
             <div className="clinics-map">
                 {loading && <div className="empty">Завантаження...</div>}
-                {error   && <div className="empty">Помилка: {error}</div>}
+                {error && <div className="empty">Помилка: {error}</div>}
                 {!loading && !error && (
                     <MapContainer
                         ref={mapRef}
                         center={defaultCenter}
                         zoom={12}
-                        style={{ width: '100%', height: '100%' }}
+                        style={{width: '100%', height: '100%'}}
                     >
                         <TileLayer
                             attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>'
                             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                         />
 
-                        <UserLocationMarker />
+                        <UserLocationMarker/>
 
                         {mapped.map(clinic => (
                             <Marker
                                 key={clinic.id}
                                 position={[clinic.latitude!, clinic.longitude!]}
-                                eventHandlers={{ click: () => handleMarkerClick(clinic) }}
+                                eventHandlers={{click: () => handleMarkerClick(clinic)}}
                             >
                                 <Popup>{clinic.name}</Popup>
                             </Marker>
@@ -135,19 +141,20 @@ export const ClinicsPage = () => {
                         </div>
 
                         <div className="clinics-info">
-                            <div className="badges" style={{ margin: '8px 0 12px' }}>
-                                {selected.city   && <span className="badge">{selected.city}</span>}
+                            <div className="badges" style={{margin: '8px 0 12px'}}>
+                                {selected.city && <span className="badge">{selected.city}</span>}
                                 {selected.region && <span className="badge">{selected.region}</span>}
                                 {selected.street && <span className="badge">{selected.street}</span>}
                             </div>
 
                             <div className="detail-fields">
-                                {selected.phoneNumber      && <Row label="Тел."    value={selected.phoneNumber} />}
-                                {selected.hoursOfOperation && <Row label="Години"  value={selected.hoursOfOperation} />}
+                                {selected.phoneNumber && <Row label="Тел." value={selected.phoneNumber}/>}
+                                {selected.hoursOfOperation && <Row label="Години" value={selected.hoursOfOperation}/>}
                             </div>
 
-                            <div className="card-actions" style={{ marginTop: '16px' }}>
-                                {selected.phoneNumber && (<button className="btn-primary" onClick={() => window.location.href = `tel:${selected.phoneNumber}`}>
+                            <div className="card-actions" style={{marginTop: '16px'}}>
+                                {selected.phoneNumber && (<button className="btn-primary"
+                                                                  onClick={() => window.location.href = `tel:${selected.phoneNumber}`}>
                                     Зателефонувати
                                 </button>)}
                             </div>
@@ -170,7 +177,7 @@ const UserLocationMarker = () => {
     return null;
 };
 
-const Row = ({ label, value }: { label: string; value: string }) => (
+const Row = ({label, value}: { label: string; value: string }) => (
     <div className="card-field">
         <span>{label}</span>{value}
     </div>

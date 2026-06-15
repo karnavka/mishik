@@ -3,6 +3,7 @@ package com.mishik.backend.controller;
 import java.util.List;
 
 import com.mishik.backend.dto.AnimalRequest;
+import com.mishik.backend.embedded.Address;
 import com.mishik.backend.embedded.DonationDetails;
 import com.mishik.backend.entity.*;
 import com.mishik.backend.repository.*;
@@ -33,8 +34,6 @@ public class ShelterController {
         this.requestRepository = requestRepository;
 
     }
-
-    //--- тут спочатку публічні: ---
 
      // -------------------------------
     // приклад : GET /shelters?city=Kyiv
@@ -84,10 +83,6 @@ public class ShelterController {
         return toMap(shelter);
     }
 
-
-
-    //--- далі методи для авторизованого притулку: ---
-
     //зяти інфу про себе
     @GetMapping("/me")
     public Map<String, Object> getMe(Authentication authentication) {
@@ -108,7 +103,6 @@ public class ShelterController {
             Authentication authentication,
             @RequestBody Map<String, Object> req
     ) {
-
         String login = authentication.getName();
 
         Account account = accountRepository.findByLogin(login)
@@ -122,15 +116,28 @@ public class ShelterController {
         shelter.setAdoptionConditions((String) req.get("adoptionConditions"));
         shelter.setSocialLinks((String) req.get("socialLinks"));
 
+        Object addressObj = req.get("address");
+        if (addressObj instanceof Map<?, ?> addressMap) {
+            Address address = shelter.getAddress() != null ? shelter.getAddress() : new Address();
+            address.setCity((String) addressMap.get("city"));
+            address.setRegion((String) addressMap.get("region"));
+            address.setStreet((String) addressMap.get("street"));
+            if (addressMap.get("latitude") instanceof Number lat)
+                address.setLatitude(lat.doubleValue());
+            if (addressMap.get("longitude") instanceof Number lng)
+                address.setLongitude(lng.doubleValue());
+            shelter.setAddress(address);
+        }
+
         Object donationDetails = req.get("donationDetails");
         if (donationDetails instanceof Map<?, ?> donationMap) {
             shelter.setDonationDetails(toDonationDetails(donationMap));
         }
 
         repository.save(shelter);
-
         return Map.of("status", "updated");
     }
+
     //отримати своїх тварин
     @GetMapping("/me/animals")
     public List<Map<String, Object>> getMyAnimals(
@@ -183,7 +190,7 @@ public class ShelterController {
     public Map<String, Object> updateAnimal(
             @PathVariable Long animalId,
             Authentication authentication,
-            @RequestBody Animal req
+            @RequestBody AnimalRequest req
     ) {
 
         String login = authentication.getName();
@@ -206,6 +213,14 @@ public class ShelterController {
         animal.setHeight(req.getHeight());
         animal.setDescription(req.getDescription());
         animal.setSex(req.getSex());
+        animal.setImageUrl(normalizeImageUrl(req.getImageUrl()));
+
+        if (req.getAnimalTypeId() != null) {
+            AnimalType type = animalTypeRepository.findById(req.getAnimalTypeId())
+                    .orElseThrow(() -> new RuntimeException("AnimalType not found"));
+
+            animal.setAnimalType(type);
+        }
 
         animalRepository.save(animal);
 
@@ -235,6 +250,7 @@ public class ShelterController {
         animal.setHeight(req.getHeight());
         animal.setSex(req.getSex());
         animal.setDescription(req.getDescription());
+        animal.setImageUrl(normalizeImageUrl(req.getImageUrl()));
 
         animal.setShelter(shelter);
 
@@ -267,8 +283,6 @@ public class ShelterController {
                 .toList();
     }
 
-
-    //***** допоміжне ****
 
     // просто допоміжний метод для конвертації сутності в Map
     private Map<String, Object> toMap(Shelter s) {
@@ -337,11 +351,20 @@ public class ShelterController {
         m.put("height", a.getHeight());
         m.put("sex", a.getSex());
         m.put("description", a.getDescription());
+        m.put("imageUrl", a.getImageUrl());
 
-        m.put("animalTypeId", a.getAnimalType().getId());
-        m.put("animalType", a.getAnimalType().getUsefulInfo());
+        m.put("animalTypeId", a.getAnimalType() != null ? a.getAnimalType().getId() : null);
+        m.put("animalType", a.getAnimalType() != null ? a.getAnimalType().getUsefulInfo() : null);
 
         return m;
+    }
+
+    private String normalizeImageUrl(String imageUrl) {
+        if (imageUrl == null || imageUrl.isBlank()) {
+            return null;
+        }
+
+        return imageUrl.trim();
     }
 
     private Map<String, Object> toMap(Request r) {

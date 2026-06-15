@@ -10,6 +10,9 @@ export interface Animal {
     shelterId: number;
     shelterName: string;
     imageUrl: string;
+    imageUrl2?: string;
+    imageUrl3?: string;
+    city: string;
 }
 
 export interface DonationDetails {
@@ -37,50 +40,9 @@ export interface Organization {
     donationDetails?: DonationDetails | null;
 }
 
-
-// // Base type returned from Spring Boot: List<Map<String,Object>>
-// export type ApiRecord = Record<string, unknown>;
-//
-// // Normalized Animal — field names match what your backend returns
-// export interface Animal {
-//     id: string | number;
-//     name: string;
-//     species?: string;   // кіт, пес, кролик...
-//     breed?: string;
-//     age?: string;
-//     gender?: string;
-//     size?: string;
-//     status?: string;    // available, adopted...
-//     description?: string;
-//     imageUrl?: string;
-//     shelterName?: string;
-//     vaccinated?: boolean;
-// }
-//
-// // Normalized Organization
-// export interface Organization {
-//     id: string | number;
-//     name: string;
-//     type?: string;// притулок | клініка ...
-//     city?: string;
-//     address?: string;
-//     phone?: string;
-//     email?: string;
-//     website?: string;
-//     description?: string;
-//     logoUrl?: string;
-//     rating?: number;
-//     schedule?: string;
-// }
-//
-// // filter option used by Sidebar
-// export interface FilterOption {
-//     value: string;
-//     label: string;
-// }
-//
-// export interface FilterGroup {
-//     key: string;
-//     label: string;
-//     options: FilterOption[];
-// }
+export const TYPE_ALIASES: Record<string, string> = {
+    'cat': '2', 'кіт': '2', 'котик': '2', 'кітик': '2',
+    'dog': '1', 'пес': '1', 'собака': '1',
+    'parrot': '4', 'папуга': '4', 'папужка': '4',
+    'rabbit': '3', 'кріль': '3', 'кроль': '3', 'кролик': '3',
+};

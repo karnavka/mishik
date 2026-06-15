@@ -22,22 +22,6 @@ public class RequestId implements Serializable {
         this.animalId = animalId;
     }
 
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
-    public Long getAnimalId() {
-        return animalId;
-    }
-
-    public void setAnimalId(Long animalId) {
-        this.animalId = animalId;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

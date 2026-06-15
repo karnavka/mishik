@@ -19,24 +19,19 @@ public interface AnimalRepository extends JpaRepository<Animal, Long> {
 
     List<Animal> findBySex(Sex sex);
 
-//    List<Animal> findByAnimalType_Id(Long typeId);
-//
-//    List<Animal> findBySexAndAnimalType_Id(Sex sex, Long typeId);
 
     List<Animal> findByShelterId(Long shelterId);
-
-//    List<Animal> findByShelterIdAndSex(Long id, Sex sex);
-//
-//    List<Animal> findByShelterIdAndSexAndAnimalType_Id(Long id, Sex sex, Long typeId);
 
     @Query("SELECT a FROM Animal a WHERE " +
             "(:shelterId IS NULL OR a.shelter.id = :shelterId) AND " +
             "(:sex IS NULL OR a.sex = :sex) AND " +
-            "(:typeId IS NULL OR a.animalType.id = :typeId)")
+            "(:typeId IS NULL OR a.animalType.id = :typeId) AND" +
+            "(:city IS NULL OR a.shelter.address.city = :city) ORDER BY a.id DESC")
     List<Animal> findFiltered(
             @Param("shelterId") Long shelterId,
             @Param("sex") Sex sex,
-            @Param("typeId") Long typeId
+            @Param("typeId") Long typeId,
+            @Param("city") String city
     );
 
 }

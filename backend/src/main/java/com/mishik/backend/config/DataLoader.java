@@ -48,12 +48,7 @@ public class DataLoader {
                 account.setLogin("user" + i);
                 account.setPassword(passwordEncoder.encode("1234"));
                 account.setRole(Role.ROLE_USER);
-
-                //   System.out.println("Before save: " + account.getRole());
-
                 account = accountRepository.save(account);
-
-                //   System.out.println("After save: " + account.getRole());
 
                 User user = new User();
                 user.setAccount(account);
@@ -105,6 +100,9 @@ public class DataLoader {
                                 i % 3 == 1 ? Sex.FEMALE :
                                         Sex.UNKNOWN
                 );
+
+                if(i==0)animal.setImageUrl("/images/dog1.png");
+                if(i==0)animal.setImageUrl("/images/cat1.png");
 
                 animal.setAnimalType(types[i % types.length]);
                 animal.setShelter(shelters[i % shelters.length]);

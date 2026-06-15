@@ -2,6 +2,7 @@ package com.mishik.backend.controller;
 
 import com.mishik.backend.embedded.DonationDetails;
 import com.mishik.backend.entity.Animal;
+import com.mishik.backend.entity.Shelter;
 import com.mishik.backend.enums.Sex;
 import com.mishik.backend.repository.AnimalRepository;
 import org.springframework.web.bind.annotation.*;
@@ -27,10 +28,10 @@ public class AnimalController {
         this.repository = repository;
     }
 
- // -------------------------------
+    // -------------------------------
     // Приклад : GET /animals/shelter/1
     // Знаходження всіх тварин, які знаходяться в конкретному притулку
- // -------------------------------
+    // -------------------------------
     @GetMapping("/shelter/{id}")
     public List<Map<String, Object>> getByShelter(@PathVariable Long id) {
 
@@ -48,42 +49,20 @@ public class AnimalController {
     public List<Map<String, Object>> getFiltered(
             @RequestParam(required = false) Sex sex,
             @RequestParam(required = false) Long typeId,
-            @RequestParam(required = false) Long shelterId
+            @RequestParam(required = false) Long shelterId,
+            @RequestParam(required = false) String city
     ) {
 
         List<Animal> animals;
-
-//        if (shelterId != null && sex != null && typeId != null){
-//            animals = repository.findByShelterIdAndSexAndAnimalType_Id(shelterId,sex,typeId);
-//        }
-//        else if(shelterId != null && sex != null){
-//            animals = repository.findByShelterIdAndSex(shelterId,sex);
-//        }
-//        else if (shelterId != null) {
-//            animals = repository.findByShelter_Id(shelterId);
-//        }
-//        else if (sex != null && typeId != null) {
-//            animals = repository.findBySexAndAnimalType_Id(sex, typeId);
-//        }
-//        else if (sex != null) {
-//            animals = repository.findBySex(sex);
-//        }
-//        else if (typeId != null) {
-//            animals = repository.findByAnimalType_Id(typeId);
-//        }
-//        else {
-//            animals = repository.findAll();
-//        }
-
-        animals = repository.findFiltered(shelterId, sex, typeId);
+        animals = repository.findFiltered(shelterId, sex, typeId, city);
 
         return animals.stream()
                 .map(this::toMap)
                 .toList();
     }
-//просто допоміжний метод для конвертації сутності в Map 
-    private Map<String, Object> toMap(Animal a) {
-        Map<String, Object> m = new HashMap<>();
+//просто допоміжний метод для конвертації сутності в Map
+private Map<String, Object> toMap(Animal a) {
+    Map<String, Object> m = new HashMap<>();
 
         m.put("id", a.getId());
         m.put("name", a.getName());
@@ -91,17 +70,20 @@ public class AnimalController {
         m.put("height", a.getHeight());
         m.put("sex", a.getSex());
         m.put("description", a.getDescription());
-
-        m.put("animalTypeId", a.getAnimalType().getId());
-        m.put("animalType", a.getAnimalType().getUsefulInfo());
-
-        m.put("shelterId", a.getShelter().getId());
-        m.put("shelterName", a.getShelter().getName());
         m.put("imageUrl", a.getImageUrl());
-        m.put("shelterDonationDetails", toMap(a.getShelter().getDonationDetails()));
+        m.put("imageUrl2", a.getImageUrl2());
+        m.put("imageUrl3", a.getImageUrl3());
+        m.put("animalTypeId", a.getAnimalType() != null ? a.getAnimalType().getId() : null);
+        m.put("animalType", a.getAnimalType() != null ? a.getAnimalType().getUsefulInfo() : null);
 
-        return m;
-    }
+        Shelter s = a.getShelter();
+        m.put("shelterId", s != null ? s.getId() : null);
+        m.put("shelterName", s != null ? s.getName() : null);
+        m.put("shelterDonationDetails", s != null ? toMap(s.getDonationDetails()) : null);
+        m.put("city", s != null && s.getAddress() != null ? s.getAddress().getCity() : null);
+
+    return m;
+}
 
     //тварина за id
     private Map<String, Object> toMap(DonationDetails d) {

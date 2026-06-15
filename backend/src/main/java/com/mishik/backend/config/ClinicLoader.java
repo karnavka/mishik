@@ -20,8 +20,6 @@ public class ClinicLoader {
     ) {
 
         return args -> {
-
-            // не завантажувати повторно
             if (clinicRepository.count() > 0) {
                System.out.println("Clinics already exist. Skipping import.");
                return;
