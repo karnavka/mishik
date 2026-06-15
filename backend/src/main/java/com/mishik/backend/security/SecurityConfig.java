@@ -27,19 +27,14 @@ public class SecurityConfig {
         http
                 .cors(cors -> {
                 })
-                // JWT → CSRF не потрібен
                 .csrf(csrf -> csrf.disable())
 
-                // Stateless API
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
 
                 .authorizeHttpRequests(auth -> auth
 
-                        // ========================
-                        // PUBLIC AUTH
-                        // ========================
                         .requestMatchers("/images/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/adoption-requests/adopted-animal-ids").permitAll()
@@ -47,9 +42,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/volunteering/me")
                         .hasAnyRole("USER", "SHELTER")
 
-                        // ========================
-                        // PUBLIC READ ONLY
-                        // ========================
+
                         .requestMatchers(HttpMethod.GET,
                                 "/api/animals",
                                 "/api/animals/**",
@@ -63,9 +56,7 @@ public class SecurityConfig {
                                 "/images/**"
                         ).permitAll()
 
-                        // ========================
-                        // USER ONLY ACTIONS
-                        // ========================
+
                         .requestMatchers(HttpMethod.POST,
                                 "/api/adoption-requests/**",
                                 "/api/donations/**"
@@ -78,7 +69,7 @@ public class SecurityConfig {
                                 "/api/adoption-requests/**",
                                 "/api/volunteering/**"
                         ).hasRole("USER")
-                        // PATCH статус і GET деталі для притулку
+
                         .requestMatchers(HttpMethod.GET,
                                 "/api/adoption-requests/shelter",
                                 "/api/adoption-requests/*/contact"
@@ -91,19 +82,13 @@ public class SecurityConfig {
                                 "/api/adoption-requests/my",
                                 "/api/adoption-requests/my/*"
                         ).hasRole("USER")
-                        // GET мої заявки для юзера
+
                         .requestMatchers(HttpMethod.GET,
                                 "/api/adoption-requests/my"
                         ).hasRole("USER")
 
-                        // ========================
-                        // USER PROFILE
-                        // ========================
                         .requestMatchers("/api/users/me/**").hasAnyRole("USER", "SHELTER")
 
-                        // ========================
-                        // SHELTER ONLY
-                        // ========================
                         .requestMatchers(HttpMethod.POST, "/api/animal-types").hasRole("SHELTER")
                         .requestMatchers("/api/shelters/me/**").hasRole("SHELTER")
                         .requestMatchers("/api/shelters/me/adoption-requests/**")
@@ -111,15 +96,10 @@ public class SecurityConfig {
 
                         .requestMatchers("/api/favorites/**").hasRole("USER")
 
-                        // ========================
-                        // EVERYTHING ELSE
-                        // ========================
-                        // SecurityConfig — додай перед anyRequest()
                         .requestMatchers(HttpMethod.GET, "/api/adoption-requests/debug").permitAll()
                         .anyRequest().authenticated()
                 )
 
-                // JWT filter
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
