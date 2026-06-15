@@ -54,29 +54,6 @@ public class AnimalController {
     ) {
 
         List<Animal> animals;
-
-//        if (shelterId != null && sex != null && typeId != null){
-//            animals = repository.findByShelterIdAndSexAndAnimalType_Id(shelterId,sex,typeId);
-//        }
-//        else if(shelterId != null && sex != null){
-//            animals = repository.findByShelterIdAndSex(shelterId,sex);
-//        }
-//        else if (shelterId != null) {
-//            animals = repository.findByShelter_Id(shelterId);
-//        }
-//        else if (sex != null && typeId != null) {
-//            animals = repository.findBySexAndAnimalType_Id(sex, typeId);
-//        }
-//        else if (sex != null) {
-//            animals = repository.findBySex(sex);
-//        }
-//        else if (typeId != null) {
-//            animals = repository.findByAnimalType_Id(typeId);
-//        }
-//        else {
-//            animals = repository.findAll();
-//        }
-
         animals = repository.findFiltered(shelterId, sex, typeId, city);
 
         return animals.stream()

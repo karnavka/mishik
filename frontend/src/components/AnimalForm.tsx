@@ -23,7 +23,6 @@ export type AnimalTypeOption = {
 };
 
 type Props = {
-  /** Present → edit mode; absent → add mode */
   id?: number;
   form: AnimalFormState;
   setForm: React.Dispatch<React.SetStateAction<AnimalFormState>>;

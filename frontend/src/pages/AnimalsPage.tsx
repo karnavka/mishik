@@ -8,7 +8,8 @@ import {useLocation} from "react-router-dom";
 import {Footer} from "../components/Footer.tsx";
 import {TYPE_ALIASES} from "../types";
 import { useAuth } from '../api/useAuth';
-import {authFetch} from "../utils/api.ts";
+import { authFetch } from '../utils/api';
+//import {authFetch} from "../utils/api.ts";
 
 type Props = { onLoginRequest: () => void };
 
@@ -22,10 +23,14 @@ export const AnimalsPage = ({ onLoginRequest }: Props) => {
         return state?.shelterId ? { shelterId: state.shelterId } : {};
     });
 
-    const [favorites,    setFavorites]    = useState<Set<number>>(new Set());
-    const [requestedIds, setRequestedIds] = useState<Set<number>>(new Set());
-
+    const [favorites,      setFavorites]      = useState<Set<number>>(new Set());
+    const [requestedIds,   setRequestedIds]   = useState<Set<number>>(new Set());
+    const [adoptedIds,     setAdoptedIds]     = useState<Set<number>>(new Set());
+    const [myApprovedIds,  setMyApprovedIds]  = useState<Set<number>>(new Set());
     const { isUser } = useAuth();
+    const handleRequestAdded = (animalId: number) => {
+    setRequestedIds(prev => new Set(prev).add(animalId));
+    };
     useEffect(() => {
         if (!isUser) return;
         authFetch('http://localhost:8080/api/favorites')
@@ -49,12 +54,25 @@ export const AnimalsPage = ({ onLoginRequest }: Props) => {
     }, [isUser]);
 
     useEffect(() => {
+        fetch('http://localhost:8080/api/adoption-requests/adopted-animal-ids')
+            .then(r => r.json())
+            .then((ids: number[]) => setAdoptedIds(new Set(ids)))
+            .catch(() => {});
+    }, []);
+
+    useEffect(() => {
+        if (!isUser) return;
+        authFetch('http://localhost:8080/api/adoption-requests/my-approved-animal-ids')
+            .then(r => r.json())
+            .then((ids: number[]) => setMyApprovedIds(new Set(ids)))
+            .catch(() => {});
+    }, [isUser]);
+
+    useEffect(() => {
         setSelected(null);
         const state = location.state as { shelterId?: string } | null;
         setFilters(state?.shelterId ? { shelterId: state.shelterId } : {});
     }, [location]);
-
-    // const { data: animalTypes } = useFetch<{ id: number; type: string }>('/api/animal-types');
 
     const toggle = (key: string, value: string) =>
         setFilters(prev =>
@@ -104,7 +122,6 @@ export const AnimalsPage = ({ onLoginRequest }: Props) => {
     }, [allAnimals]);
     const { data: shelters } = useFetch<Organization>('/api/shelters');
 
-
     const toggleFavorite = async (id: number) => {
         const isFav = favorites.has(id);
         setFavorites(prev => {
@@ -136,64 +153,44 @@ export const AnimalsPage = ({ onLoginRequest }: Props) => {
     const filterGroups = [{
         key: 'typeId',
         label: 'Вид',
-        // opts: animalTypes.map(t => ({v: String(t.id), l: t.type, icon: `src/images/${t.type}.png`})),
         opts: [
             {v: 2, l: 'кітик', icon: `/images/Cat.png`},
-            {v: 1,l: 'пес', icon: `/images/Dog.png`},
-            {v: 3,l:'кролик', icon:`/images/Rabbit.png`},
-            {v: 4,l:'папужка', icon:`/images/Parrot.png`}
+            {v: 1, l: 'пес',   icon: `/images/Dog.png`},
+            {v: 3, l: 'кролик', icon: `/images/Rabbit.png`},
+            {v: 4, l: 'папужка', icon: `/images/Parrot.png`}
         ],
         columns: 2
-        // type: 'select' as const,
-    },
-        {
-            key: 'sex',
-            label: 'Стать',
-            opts: [
-                {v: 'MALE', l: 'хлопчик', icon: '/images/MALE.png'},
-                {v: 'FEMALE', l: 'дівчинка', icon: '/images/FEMALE.png'},
-            ],
-            columns: 2,
-        },
-        {
-            key: 'city',
-            label: 'Місто',
-            icon: '/images/location.png',
-            type: 'select' as const,
-            opts: cities.map(c => ({ v: c, l: c })),
-        },
-        {
-            key: 'shelterId',
-            label: 'Притулок',
-            icon: '/images/shelters.png',
-            type: 'select' as const,
-            opts: shelters.map(s => ({ v: String(s.id), l: s.name })),
-        },
-        {
-            key: 'age',
-            label: 'Вік',
-            opts: [
-                { v: '0-1', l: 'До 1 року'   },
-                { v: '1-2', l: '1–2 роки'    },
-                { v: '2-5', l: '2–5 років'   },
-                { v: '5+',  l: 'Більше 5'    },
-            ],
-            columns: 2,
-        },
-    ];
-
-    // if (selected) {
-    //     return (
-    //         <AnimalDetail
-    //             animal={selected}
-    //             onBack={() => setSelected(null)}
-    //             onLoginRequest={onLoginRequest}
-    //         />
-    //     );
-    // }
-
-    console.log('shelterId filter:', filters['shelterId']);
-    console.log('shelter opts:', shelters.map(s => String(s.id)));
+    }, {
+        key: 'sex',
+        label: 'Стать',
+        opts: [
+            {v: 'MALE',   l: 'хлопчик', icon: '/images/MALE.png'},
+            {v: 'FEMALE', l: 'дівчинка', icon: '/images/FEMALE.png'},
+        ],
+        columns: 2,
+    }, {
+        key: 'city',
+        label: 'Місто',
+        icon: '/images/location.png',
+        type: 'select' as const,
+        opts: cities.map(c => ({ v: c, l: c })),
+    }, {
+        key: 'shelterId',
+        label: 'Притулок',
+        icon: '/images/shelters.png',
+        type: 'select' as const,
+        opts: shelters.map(s => ({ v: String(s.id), l: s.name })),
+    }, {
+        key: 'age',
+        label: 'Вік',
+        opts: [
+            { v: '0-1', l: 'До 1 року' },
+            { v: '1-2', l: '1–2 роки'  },
+            { v: '2-5', l: '2–5 років' },
+            { v: '5+',  l: 'Більше 5'  },
+        ],
+        columns: 2,
+    }];
 
     if (selected) {
         return (
@@ -203,6 +200,10 @@ export const AnimalsPage = ({ onLoginRequest }: Props) => {
                 onLoginRequest={onLoginRequest}
                 isFavorited={favorites.has(selected.id)}
                 onToggleFavorite={toggleFavorite}
+                adoptedIds={adoptedIds}
+                myApprovedIds={myApprovedIds}
+                onRequestAdded={handleRequestAdded}
+                requestedIds={requestedIds}
             />
         );
     }
@@ -245,6 +246,8 @@ export const AnimalsPage = ({ onLoginRequest }: Props) => {
                                     isFavorited={favorites.has(a.id)}
                                     onToggleFavorite={toggleFavorite}
                                     requestedIds={requestedIds}
+                                    adoptedIds={adoptedIds}
+                                    myApprovedIds={myApprovedIds}
                                 />
                             ))
                         }

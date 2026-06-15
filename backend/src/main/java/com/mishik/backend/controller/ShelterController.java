@@ -35,8 +35,6 @@ public class ShelterController {
 
     }
 
-    //--- тут спочатку публічні: ---
-
      // -------------------------------
     // приклад : GET /shelters?city=Kyiv
     // приклад : GET /shelters?region=Kyivska
@@ -84,10 +82,6 @@ public class ShelterController {
 
         return toMap(shelter);
     }
-
-
-
-    //--- далі методи для авторизованого притулку: ---
 
     //зяти інфу про себе
     @GetMapping("/me")
@@ -289,8 +283,6 @@ public class ShelterController {
                 .toList();
     }
 
-
-    //***** допоміжне ****
 
     // просто допоміжний метод для конвертації сутності в Map
     private Map<String, Object> toMap(Shelter s) {

@@ -9,7 +9,6 @@ type Props = {
   onCancel: () => void;
   saveLabel?: string;
   cancelLabel?: string;
-  /** Extra style overrides on the outer container */
   style?: React.CSSProperties;
 };
 

@@ -50,9 +50,9 @@ export const UserProfileForm = ({ form, setForm, onSave, onCancel }: Props) => {
             outline: 'none', cursor: 'pointer',
           }}
         >
-          <option value="UNKNOWN">— Не вказано</option>
-          <option value="MALE">♂ Чоловіча</option>
-          <option value="FEMALE">♀ Жіноча</option>
+          <option value="UNKNOWN">Не вказано</option>
+          <option value="MALE">Чоловіча</option>
+          <option value="FEMALE">Жіноча</option>
         </select>
       </FormField>
 

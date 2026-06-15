@@ -182,7 +182,6 @@ public class RequestController {
         return ResponseEntity.ok(Map.of("status", "updated", "newStatus",  body.status()));
     }
 
-
     @GetMapping("/{animalId}/{userId}/contact")
     public ResponseEntity<?> getContactLinks(
             @PathVariable Long animalId,
@@ -206,20 +205,17 @@ public class RequestController {
             ));
         }
 
-        // Нормалізуємо номер: залишаємо тільки цифри, додаємо "+" на початку
         String digits   = phone.replaceAll("\\D", "");
         String e164     = "+" + digits;
 
         List<Map<String, String>> links = new ArrayList<>();
 
-        // Telegram  універсальне посилання за номером
         links.add(Map.of(
                 "service", "telegram",
                 "label",   "Telegram",
                 "url",     "https://t.me/" + e164
         ));
 
-        // Viber
         links.add(Map.of(
                 "service", "viber",
                 "label",   "Viber",
@@ -265,11 +261,9 @@ public class RequestController {
     private Map<String, Object> toMapFull(Request r) {
         Map<String, Object> m = new HashMap<>();
 
-        // заявка
         m.put("status",      r.getStatus());
         m.put("createdDate", r.getCreatedDate());
 
-        // тварина
         Animal a = r.getAnimal();
         Map<String, Object> animal = new HashMap<>();
         animal.put("id",          a.getId());
@@ -283,7 +277,6 @@ public class RequestController {
         animal.put("shelterName", a.getShelter() != null ? a.getShelter().getName() : null);
         m.put("animal", animal);
 
-        // юзер
         User u = r.getUser();
         Map<String, Object> user = new HashMap<>();
         user.put("id",          u.getId());
@@ -344,6 +337,23 @@ public class RequestController {
         result.put("user", userMap);
 
         return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/adopted-animal-ids")
+    public Set<Long> getAdoptedAnimalIds() {
+        return requestRepository.findByStatus(RequestStatus.ACCEPTED)
+                .stream()
+                .map(r -> r.getAnimal().getId())
+                .collect(java.util.stream.Collectors.toSet());
+    }
+
+    @GetMapping("/my-approved-animal-ids")
+    public Set<Long> getMyApprovedAnimalIds(Authentication authentication) {
+        User user = resolveUser(authentication);
+        return requestRepository.findByUser_IdAndStatus(user.getId(), RequestStatus.ACCEPTED)
+                .stream()
+                .map(r -> r.getAnimal().getId())
+                .collect(java.util.stream.Collectors.toSet());
     }
 
 }
