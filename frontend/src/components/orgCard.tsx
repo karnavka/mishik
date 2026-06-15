@@ -1,3 +1,4 @@
+import {useState} from "react";
 import type {Organization} from "../types";
 import {orgEmoji} from "./elements.ts";
 
@@ -7,10 +8,15 @@ type Props = {
 }
 
 export function OrgCard({ org, onClick }: Props) {
+    const [imageFailed, setImageFailed] = useState(false);
+    const imageUrl = org.imageUrl?.trim();
+
     return (
         <div className="card" onClick={onClick} style={{ cursor: onClick ? 'pointer' : undefined }}>
             <div className="card-avatar">{
-                org.imageUrl ? <img src={org.imageUrl} /> : orgEmoji(org.type)}
+                imageUrl && !imageFailed
+                    ? <img src={imageUrl} alt={org.name} onError={() => setImageFailed(true)} />
+                    : orgEmoji(org.type)}
             </div>
             <div className="card-body">
                 <div className="card-title">{org.name}</div>

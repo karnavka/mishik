@@ -1,4 +1,5 @@
 import type { Organization } from "../types";
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { isLoggedIn } from '../utils/auth';
 import { BadgeWithIcon, CancelIcon } from "../styles/elements.tsx";
@@ -11,6 +12,8 @@ type Props = {
 
 export const ShelterDetail = ({ org, onBack, onLoginRequest }: Props) => {
     const navigate = useNavigate();
+    const [imageFailed, setImageFailed] = useState(false);
+    const imageUrl = org.imageUrl?.trim();
 
     const [instagram, facebook, telegram] = (() => {
         if (!org.socialLinks) return [null, null, null];
@@ -19,6 +22,7 @@ export const ShelterDetail = ({ org, onBack, onLoginRequest }: Props) => {
     })();
 
     const addressParts = [org.street, org.city, org.region].filter(Boolean);
+    const primaryAddress = addressParts[0];
     const addressQuery = addressParts.join(', ');
 
     const mapSrc = addressQuery
@@ -71,15 +75,15 @@ export const ShelterDetail = ({ org, onBack, onLoginRequest }: Props) => {
 
                     <div className="shelter-header">
                         <div className="shelter-logo">
-                            {org.imageUrl
-                                ? <img src={org.imageUrl} alt={org.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 12 }} />
-                                : <img src='\images\shelters.png' alt={org.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 12 }}/>
+                            {imageUrl && !imageFailed
+                                ? <img src={imageUrl} alt={org.name} onError={() => setImageFailed(true)} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 12 }} />
+                                : <img src="/images/shelters.png" alt={org.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 12 }}/>
                             }
                         </div>
                         <div className="shelter-header-text">
                             <h2 className="detail-name" style={{ marginBottom: 4 }}>{org.name}</h2>
-                            {addressParts.length > 0 && (
-                                <BadgeWithIcon imgsrc="/images/location.png" label={addressParts[0]} />
+                            {primaryAddress && (
+                                <BadgeWithIcon imgsrc="/images/location.png" label={primaryAddress} />
                             )}
                         </div>
                     </div>

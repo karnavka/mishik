@@ -30,6 +30,7 @@ public class Shelter {
     private Account account;
     @Embedded
     private Address address;
+    @Column(name = "image_url", length = 2048)
     private String imageUrl;
 
     private String adoptionConditions;

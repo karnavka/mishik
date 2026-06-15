@@ -289,18 +289,22 @@ const ShelterInfoTab = () => {
 
     const save = async () => {
         const normalizedCity = normalizeCity(form.address.city);
+        const normalizedImageUrl = form.imageUrl.trim() || null;
         const payload = {
             ...form,
+            imageUrl: normalizedImageUrl,
             address: {
                 ...form.address,
                 city: normalizedCity,
             },
             socialLinks: [form.instagram, form.facebook, form.telegram].join('|'),
         };
-        await authFetch('http://localhost:8080/api/shelters/me', {
+        const res = await authFetch('http://localhost:8080/api/shelters/me', {
             method: 'PUT',
             body: JSON.stringify(payload),
         });
+        if (!res.ok) throw new Error('Failed to update shelter profile');
+        const savedShelter = await res.json();
         setInfo(prev => prev ? {
             ...prev,
             name: form.name,
@@ -309,7 +313,7 @@ const ShelterInfoTab = () => {
             instagram: form.instagram,
             facebook: form.facebook,
             telegram: form.telegram,
-            imageUrl: form.imageUrl,
+            imageUrl: savedShelter.imageUrl ?? normalizedImageUrl ?? '',
             city: normalizeCity(form.address.city),
             region: form.address.region,
             street: form.address.street,
