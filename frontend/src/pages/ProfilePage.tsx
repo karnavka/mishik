@@ -616,11 +616,22 @@ const ShelterEventsTab = () => {
     }, []);
 
     const addEvent = async () => {
+        const payload = {
+            name: form.name,
+            description: form.description,
+            dateOfEvent: form.dateOfEvent,
+            address: {
+                city: form.city,
+                region: form.region,
+                street: form.street,
+            },
+        };
+
         const res = await authFetch(
             'http://localhost:8080/api/volunteering',
             {
                 method: 'POST',
-                body: JSON.stringify(form),
+                body: JSON.stringify(payload),
             }
         );
 
@@ -633,6 +644,9 @@ const ShelterEventsTab = () => {
                 name: '',
                 description: '',
                 dateOfEvent: '',
+                city: '',
+                region: '',
+                street: '',
             });
 
             setShowAdd(false);
@@ -668,13 +682,42 @@ const ShelterEventsTab = () => {
                     <div style={fieldRow}>
                         <span style={lbl}>Дата</span>
                         <FInput
-                            type="date"
+                            type = 'date'
                             value={form.dateOfEvent}
                             onChange={e =>
                                 setForm({
                                     ...form,
                                     dateOfEvent: e.target.value,
                                 })
+                            }
+                        />
+                    </div>
+                    <div style={fieldRow}>
+                        <span style={lbl}>Місто</span>
+                        <FInput
+                            value={form.city}
+                            onChange={e =>
+                                setForm({ ...form, city: e.target.value })
+                            }
+                        />
+                    </div>
+
+                    <div style={fieldRow}>
+                        <span style={lbl}>Область</span>
+                        <FInput
+                            value={form.region}
+                            onChange={e =>
+                                setForm({ ...form, region: e.target.value })
+                            }
+                        />
+                    </div>
+
+                    <div style={fieldRow}>
+                        <span style={lbl}>Вулиця</span>
+                        <FInput
+                            value={form.street}
+                            onChange={e =>
+                                setForm({ ...form, street: e.target.value })
                             }
                         />
                     </div>

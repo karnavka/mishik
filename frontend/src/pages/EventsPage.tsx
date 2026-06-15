@@ -101,7 +101,15 @@ export const EventsPage = ({ onLoginRequest }: Props) => {
                                     <div className="card-title">{ev.name}</div>
 
                                     <div className="card-sub">
-                                        {ev.organizerName} · {ev.city}
+                                        {ev.organizerName}
+                                        {ev.city || ev.region || ev.street ? (
+                                            <>
+                                                {' · '}
+                                                {[ev.city, ev.region, ev.street]
+                                                    .filter(Boolean)
+                                                    .join(', ')}
+                                            </>
+                                        ) : null}
                                     </div>
 
                                     <div className="badges">
@@ -119,42 +127,7 @@ export const EventsPage = ({ onLoginRequest }: Props) => {
                                         </div>
                                     </div>
 
-                                    <div className="card-actions">
-                                        <RoleGuard
-                                            requireAuth
-                                            fallback={
-                                                <button
-                                                    className="btn-primary"
-                                                    onClick={onLoginRequest}
-                                                >
-                                                    Увійти щоб записатись
-                                                </button>
-                                            }
-                                        >
-                                            <button
-                                                className="btn-primary"
-                                                onClick={() => alert('TODO')}
-                                            >
-                                                Записатись
-                                            </button>
-                                        </RoleGuard>
 
-                                        <button
-                                            className="btn-ghost"
-                                            onClick={() => alert('TODO')}
-                                        >
-                                            Поділитись
-                                        </button>
-
-                                        <RoleGuard roles={['MODERATOR', 'ADMIN', 'SHELTER']}>
-                                            <button
-                                                className="btn-ghost"
-                                                onClick={() => alert('TODO')}
-                                            >
-                                                ✏️ Редагувати
-                                            </button>
-                                        </RoleGuard>
-                                    </div>
                                 </div>
                             </div>
                         ))
