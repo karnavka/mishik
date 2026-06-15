@@ -5,7 +5,7 @@ import jakarta.persistence.Embeddable;
 @Embeddable
 public class Address {
 
-    private String region; // необов'язкова область
+    private String region;
 
     private String city;
 
