@@ -5,9 +5,10 @@ import { RoleGuard } from './RoleGuard';
 import { authFetch } from '../utils/api';
 
 const EMOJI: Record<string, string> = {
-    кіт: '🐱', cat: '🐱',
-    пес: '🐶', dog: '🐶',
-    rabbit: '🐰', parrot: '🦜',
+    кіт: '🐱', cat: '🐱', кітик:'🐱',
+    пес: '🐶', dog: '🐶', песик: '🐶',
+    rabbit: '🐰', кролик: '🐰', кріль: '🐰',
+    parrot: '🦜',папужка: '🦜',
 };
 const animalEmoji = (s: string) => EMOJI[s?.toLowerCase()] ?? '🐾';
 

@@ -1,6 +1,8 @@
-import type { Animal } from '../types';
-import { RoleGuard } from './RoleGuard';
-import { useNavigate } from 'react-router-dom';
+import type {Animal} from '../types';
+import {RoleGuard} from './RoleGuard';
+import {useNavigate} from 'react-router-dom';
+import {useState} from "react";
+import {CancelIcon, BadgeWithIcon} from "../styles/elements.tsx";
 
 const EMOJI: Record<string, string> = {
     кіт: '🐱', cat: '🐱',
@@ -15,60 +17,97 @@ type Props = {
     onLoginRequest?: () => void;
 };
 
-export const AnimalDetail = ({ animal, onBack, onLoginRequest }: Props) => {
+export const AnimalDetail = ({animal, onBack, onLoginRequest}: Props) => {
     const navigate = useNavigate();
-    return(
+
+    const [photoIndex, setPhotoIndex] = useState(0);
+    const photos = [animal.imageUrl, animal.imageUrl2, animal.imageUrl3].filter(Boolean) as string[];
+    const prev = () => setPhotoIndex(i => (i - 1 + photos.length) % photos.length);
+    const next = () => setPhotoIndex(i => (i + 1) % photos.length);
+
+    return (
         <div className="detail-page">
 
-            {/* Back button */}
             <button className="detail-back" onClick={onBack}>
-                ←
+                <CancelIcon/>
             </button>
 
             <div className="detail-card">
 
-                <div className="detail-photo">
-                    {animal.imageUrl
-                        ? <img src={animal.imageUrl} />
-                        : <span className="detail-photo-placeholder">{animalEmoji(animal.animalType)}</span>
-                    }
-                </div>
+                {/* LEFT  */}
+                <div className="detail-left">
+                    <div className='detail-images'>
+                        {photos.length > 0 ? (<>
 
-                {/* Info */}
-                <div className="detail-body">
-                    <h2 className="detail-name">{animal.name}</h2>
-                    <p className="detail-sub">{animal.animalType}</p>
+                            <img src={photos[photoIndex]} alt={animal.name} className="detail-carousel-img"/>
 
-                    <div className="badges" style={{ marginBottom: '12px' }}>
+                            {photos.length > 1 && (<>
+                                <button className="carousel-arrow carousel-arrow--left" onClick={prev}>‹</button>
+                                <button className="carousel-arrow carousel-arrow--right" onClick={next}>›</button>
 
-                    {animal.sex !== 'UNKNOWN' && (
-                        <span className="badge">
-                            {animal.sex === 'MALE'
-                                ? '♂ Хлопчик'
-                                : '♀ Дівчинка'}
-                        </span>
-                    )}
-                </div>
+                                <div className="carousel-dots">
+                                    {photos.map((_, i) => (
+                                        <button
+                                            key={i}
+                                            className={'carousel-dot' + (i === photoIndex ? ' carousel-dot--active' : '')}
+                                            onClick={() => setPhotoIndex(i)}
+                                        />))}
+                                </div>
+                            </>)}
 
-                    <div className="detail-fields">
-                        {animal.age        && <Row label="Вік"      value={`${animal.age} р.`} />}
-                        {animal.height     && <Row label="Висота"   value={`${animal.height} см`} />}
-                        {animal.description && <Row label="Опис"    value={animal.description} />}
+                        </>) : (
+                            <span className="detail-photo-placeholder">{animalEmoji(animal.animalType)}</span>
+                        )}
                     </div>
 
-                    {/* Shelter block */}
+                </div>
+
+                {/* RIGhT*/}
+                <div className="detail-body">
+
+                    <div className="detail-header">
+                        <h2 className="detail-name">{animal.name}</h2>
+                        <BadgeWithIcon
+                            id = {animal.animalTypeId}
+                            label = {animal.animalType}
+                        />
+                    </div>
+
+                    <div className="detail-general">
+                        <div className="detail-general-row">
+                            <span className="detail-general-label">Вік</span>
+                            <span>{animal.age ? `${animal.age} р.` : '—'}</span>
+                        </div>
+                        <div className="detail-general-row">
+                            <span className="detail-general-label">Висота</span>
+                            <span>{animal.height ? `${animal.height} см` : '—'}</span>
+                        </div>
+                        <div className="detail-general-row">
+                            <span className="detail-general-label">Стать</span>
+                            <span>
+                                {animal.sex === 'MALE' ? '♂ Хлопчик'
+                                    : animal.sex === 'FEMALE' ? '♀ Дівчинка'
+                                        : '—'}
+                            </span>
+                        </div>
+                    </div>
+
+                    {animal.description && (
+                        <p className="detail-description">{animal.description}</p>
+                    )}
+
                     {animal.shelterName && (
                         <div className="detail-shelter"
-                             onClick={() => navigate('/shelters', { state: { shelterId: animal.shelterId } })}
-                             style={{ cursor: 'pointer' }}
+                             onClick={() => navigate('/shelters', {state: {shelterId: animal.shelterId}})}
+                             style={{cursor: 'pointer'}}
                         >
                             <div className="detail-shelter-title">🏠 Притулок</div>
                             <div className="detail-shelter-name">{animal.shelterName}</div>
                         </div>
+
                     )}
 
-                    {/* Actions */}
-                    <div className="card-actions" style={{ marginTop: '16px' }}>
+                    <div className="card-actions" style={{marginTop: '16px'}}>
                         <RoleGuard
                             requireAuth
                             fallback={
@@ -93,9 +132,3 @@ export const AnimalDetail = ({ animal, onBack, onLoginRequest }: Props) => {
         </div>
     );
 }
-
-const Row = ({ label, value }: { label: string; value: string }) => (
-    <div className="card-field">
-        <span>{label}</span>{value}
-    </div>
-);

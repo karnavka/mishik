@@ -95,6 +95,8 @@ public class AnimalController {
         m.put("sex", a.getSex());
         m.put("description", a.getDescription());
         m.put("imageUrl", a.getImageUrl());
+        m.put("imageUrl2", a.getImageUrl2());
+        m.put("imageUrl3", a.getImageUrl3());
         m.put("animalTypeId", a.getAnimalType() != null ? a.getAnimalType().getId() : null);
         m.put("animalType", a.getAnimalType() != null ? a.getAnimalType().getUsefulInfo() : null);
 

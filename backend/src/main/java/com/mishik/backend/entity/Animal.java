@@ -22,6 +22,8 @@ public class Animal {
     private byte age;
     private String description;
     private String imageUrl;
+    private String imageUrl2;
+    private String imageUrl3;
 
     @Enumerated(EnumType.STRING)
     private Sex sex;
@@ -102,7 +104,17 @@ public class Animal {
         return imageUrl;
     }
 
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
+    public void setImageUrl(String imageUrl) {this.imageUrl = imageUrl;}
+
+    public String getImageUrl2() {
+        return imageUrl2;
     }
+
+    public void setImageUrl2(String imageUrl) {this.imageUrl2 = imageUrl;}
+
+    public String getImageUrl3() {
+        return imageUrl3;
+    }
+
+    public void setImageUrl3(String imageUrl) {this.imageUrl3 = imageUrl;}
 }

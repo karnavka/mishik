@@ -54,26 +54,27 @@ export const Header = ({ onLoginClick, dark, onThemeToggle }: Props) => {
     const tabs = isShelter ? SHELTER_TABS : USER_TABS;
 
     const navLinks = [
-        { to: '/',         label: '🐾 Тварини'  },
-        { to: '/shelters', label: '🏠 Притулки'  },
-        { to: '/clinics',  label: '🏥 Клініки'   },
-        { to: '/events',   label: '❤️ Події'      },
+        { to: '/',         label: 'тварини', icon: "/images/animals.png"  },
+        { to: '/shelters', label: 'притулки',icon: "/images/shelters.png"  },
+        { to: '/clinics',  label: 'клініки', icon: "/images/clinics.png"   },
+        { to: '/events',   label: 'події' ,icon: "/images/events.png"},
     ];
 
     return (
         <header className="header">
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                 <div className="header-top">
                     <img
-                        src={dark ? '/src/images/logodark.png' : '/src/images/logo.png'}
+                        src={dark ? '/images/logodark.png' : '/images/logo.png'}
                         className="header-logo"
                     />
                 </div>
-                {navLinks.map(({ to, label }) => (
+                {navLinks.map(({ to, label, icon }) => (
                     <Link key={to} to={to}
+                          style ={{ textDecoration: 'none', display:'flex', gap: '5px', flexDirection:'row', alignItems: 'center'}}
                         className={'header-btn' + (location.pathname === to ? ' active' : '')}
-                        style={{ textDecoration: 'none' }}
                     >
+                        {<img src={icon} style={{width:'30px', height:'30px', padding: '0'}}/>}
                         {label}
                     </Link>
                 ))}
@@ -91,7 +92,7 @@ export const Header = ({ onLoginClick, dark, onThemeToggle }: Props) => {
 
                 <button className="header-btn" onClick={onThemeToggle}
                     title={dark ? 'Світла тема' : 'Темна тема'}
-                    style={{ fontSize: 16, padding: '6px 10px' }}>
+                    style={{ fontSize: 30, padding: '6px 10px', justifyContent:'center' }}>
                     {dark ? '☀' : '☁︎'}
                 </button>
 
@@ -105,7 +106,7 @@ export const Header = ({ onLoginClick, dark, onThemeToggle }: Props) => {
                                 padding: '0 10px 0 0', display: 'flex', alignItems: 'center',
                             }}
                         >
-                            <img src="src/images/profile1.png" className="profile-avatar" />
+                            <img src="/images/profile1.png" className="profile-avatar" />
                         </button>
 
                         {/* Дропдаун */}

@@ -628,8 +628,8 @@ export const ProfilePage = () => {
           borderRadius: 12, flexShrink: 0,
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span className="logo" style={{ fontSize: 18 }}>{isShelter ? '🏠' : '👤'}</span>
-            <span style={{ fontWeight: 700, fontSize: 16 }}>Особистий кабінет</span>
+            {/*<span className="logo" style={{ fontSize: 18 }}>{isShelter ? '🏠' : '👤'}</span>*/}
+            <span style={{ fontWeight: 700, fontSize: 16, padding: '10px 10px 16px 10px'}}>Особистий кабінет</span>
             {rl && (
               <span style={{
                 fontSize: 11, padding: '2px 10px', borderRadius: 12, fontWeight: 600,
@@ -647,9 +647,9 @@ export const ProfilePage = () => {
             ))}
           </div>
 
-          <button className="tab-btn" style={{ color: '#e74c3c' }} onClick={handleLogout}>
-            Вийти
-          </button>
+          {/*<button className="tab-btn" style={{ color: '#e74c3c' }} onClick={handleLogout}>*/}
+          {/*  Вийти*/}
+          {/*</button>*/}
         </div>
 
         <div style={{
