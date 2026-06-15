@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import type { Animal } from '../types';
+import type {Animal, Organization} from '../types';
 import { useFetch } from '../api/fetch';
 import { AnimalCard } from '../components/animalCard';
 import { Sidebar } from '../components/Sidebar';
@@ -54,7 +54,7 @@ export const AnimalsPage = ({ onLoginRequest }: Props) => {
         setFilters(state?.shelterId ? { shelterId: state.shelterId } : {});
     }, [location]);
 
-    const { data: animalTypes } = useFetch<{ id: number; type: string }>('/api/animal-types');
+    // const { data: animalTypes } = useFetch<{ id: number; type: string }>('/api/animal-types');
 
     const toggle = (key: string, value: string) =>
         setFilters(prev =>
@@ -103,6 +103,8 @@ export const AnimalsPage = ({ onLoginRequest }: Props) => {
         const unique = new Set(allAnimals.map(a => a.city).filter(Boolean));
         return Array.from(unique) as string[];
     }, [allAnimals]);
+    const { data: shelters } = useFetch<Organization>('/api/shelters');
+
 
     const toggleFavorite = async (id: number) => {
         const isFav = favorites.has(id);
@@ -162,6 +164,13 @@ export const AnimalsPage = ({ onLoginRequest }: Props) => {
             opts: cities.map(c => ({ v: c, l: c })),
         },
         {
+            key: 'shelterId',
+            label: 'Притулок',
+            icon: '/images/shelters.png',
+            type: 'select' as const,
+            opts: shelters.map(s => ({ v: String(s.id), l: s.name })),
+        },
+        {
             key: 'age',
             label: 'Вік',
             opts: [
@@ -173,6 +182,19 @@ export const AnimalsPage = ({ onLoginRequest }: Props) => {
             columns: 2,
         },
     ];
+
+    // if (selected) {
+    //     return (
+    //         <AnimalDetail
+    //             animal={selected}
+    //             onBack={() => setSelected(null)}
+    //             onLoginRequest={onLoginRequest}
+    //         />
+    //     );
+    // }
+
+    console.log('shelterId filter:', filters['shelterId']);
+    console.log('shelter opts:', shelters.map(s => String(s.id)));
 
     if (selected) {
         return (
