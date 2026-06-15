@@ -1,4 +1,4 @@
-/* ── Теми ── */
+/* Теми */
 :root {
     --bg:           #FFFCEB;
     /*--bg:           #f5f5f5;*/
@@ -12,7 +12,7 @@
     --text-btn: #666666;
 
     --filter-sel: #eaf6c6;
-    --filter-hover: #f8f8f8;
+    --filter-hover: #f8eded;
     --input-bg:     #ffffff;
     --btn-hover:    #f5f5f5;
     --badge-border: #B5C56D;
@@ -64,7 +64,7 @@
     content: url('src/images/logodark.png');
 }
 
-/* ── Reset ── */
+/* --- */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
@@ -79,7 +79,7 @@ body {
     transition: background .2s, color .2s;
 }
 
-/* ── Layout ── */
+/* layout */
 .app { display: flex; flex-direction: column; height: 100vh; }
 
 .tab-btn {
@@ -107,7 +107,7 @@ body {
     align-items: flex-start;
 }
 
-/*MAIN*/
+/* MAIN */
 
 .main {
     flex: 4;

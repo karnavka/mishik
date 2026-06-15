@@ -22,12 +22,11 @@ public interface AnimalRepository extends JpaRepository<Animal, Long> {
 
     List<Animal> findByShelterId(Long shelterId);
 
-
     @Query("SELECT a FROM Animal a WHERE " +
             "(:shelterId IS NULL OR a.shelter.id = :shelterId) AND " +
             "(:sex IS NULL OR a.sex = :sex) AND " +
             "(:typeId IS NULL OR a.animalType.id = :typeId) AND" +
-            "(:city IS NULL OR a.shelter.address.city = :city)")
+            "(:city IS NULL OR a.shelter.address.city = :city) ORDER BY a.id DESC")
     List<Animal> findFiltered(
             @Param("shelterId") Long shelterId,
             @Param("sex") Sex sex,
