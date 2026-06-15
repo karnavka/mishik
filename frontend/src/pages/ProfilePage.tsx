@@ -675,6 +675,7 @@ const UserFavoritesTab = ({ favAnimals, favorites, onToggleFavorite, loading, on
 const ShelterEventsTab = () => {
     const [events, setEvents] = useState<Event[]>([]);
     const [showAdd, setShowAdd] = useState(false);
+    const [noPhone, setNoPhone] = useState(false);
 
     const [form, setForm] = useState({
         name: '',
@@ -705,13 +706,21 @@ const ShelterEventsTab = () => {
             },
         };
 
-        const res = await authFetch(
-            'http://localhost:8080/api/volunteering',
-            {
-                method: 'POST',
-                body: JSON.stringify(payload),
-            }
-        );
+    const res = await authFetch(
+        'http://localhost:8080/api/volunteering',
+        {
+            method: 'POST',
+            body: JSON.stringify(payload),
+        }
+    );
+
+    if (res.status === 403) {
+        const err = await res.json();
+        if (err.error === 'phone_required') {
+            alert('Вкажіть номер телефону у профілі перед створенням події');
+        }
+        return;
+    }
 
         const data = await res.json();
 
@@ -729,20 +738,59 @@ const ShelterEventsTab = () => {
 
             setShowAdd(false);
         }
+
+    };
+     const handleShowAdd = async () => {
+        try {
+            // спробуємо shelter спочатку
+            const res = await authFetch('http://localhost:8080/api/shelters/me');
+            if (res.ok) {
+                const data = await res.json();
+                if (!data.phoneNumber) { setNoPhone(true); return; }
+                setNoPhone(false);
+                setShowAdd(true);
+                return;
+            }
+        } catch {}
+
+        try {
+            const res = await authFetch('http://localhost:8080/users/api/me');
+            if (res.ok) {
+                const data = await res.json();
+                if (!data.phoneNumber) { setNoPhone(true); return; }
+                setNoPhone(false);
+                setShowAdd(true);
+            }
+        } catch {}
     };
 
+
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {!showAdd && (
                 <button
                     className="btn-primary"
                     style={{ alignSelf: 'flex-start' }}
-                    onClick={() => setShowAdd(true)}
+                    onClick={handleShowAdd} 
                 >
                     ➕ Додати подію
                 </button>
             )}
-
+            {noPhone && (
+                <div style={{
+                    padding: '12px 16px', borderRadius: 10,
+                    background: '#f39c1215', border: '1px solid #f39c1240',
+                    display: 'flex', alignItems: 'center', gap: 10,
+                }}>
+                    <span style={{ fontSize: 25 }}>☏</span>
+                    <div>
+                        <div style={{ fontSize: 13, fontWeight: 600, color: '#f39c12' }}>Потрібен телефон</div>
+                        <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
+                            Вкажіть номер телефону у профілі перед створенням події.
+                        </div>
+                    </div>
+                </div>
+            )}
             {showAdd && (
                 <div style={section}>
                     <div style={fieldRow}>
