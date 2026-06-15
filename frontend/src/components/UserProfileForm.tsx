@@ -29,7 +29,6 @@ export const UserProfileForm = ({ form, setForm, onSave, onCancel }: Props) => {
   return (
     <FormCard title="⛏︎" onSave={onSave} onCancel={onCancel} saveLabel="Зберегти зміни">
 
-      {/* Name row */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 14 }}>
         {NAME_FIELDS.map(({ key, label }) => (
           <FormField key={key} label={label}>
@@ -38,7 +37,6 @@ export const UserProfileForm = ({ form, setForm, onSave, onCancel }: Props) => {
         ))}
       </div>
 
-      {/* Sex */}
       <FormField label="Стать">
         <select
           value={form.sex}
@@ -56,7 +54,6 @@ export const UserProfileForm = ({ form, setForm, onSave, onCancel }: Props) => {
         </select>
       </FormField>
 
-      {/* Phone */}
       <FormField label="Номер телефону" hint="необов'язково, але потрібен для усиновлення">
         <FInput
           value={form.phoneNumber}

@@ -4,15 +4,12 @@ import { inp, onFocus, onBlur, lbl, fieldRow } from '../utils/Profilestyles';
 
 type BaseProps = {
   label: string;
-  /** Muted hint appended after the label */
   hint?: string;
-  /** Extra header content (e.g. a badge) placed right-aligned next to the label */
   headerRight?: ReactNode;
   style?: React.CSSProperties;
 };
 
 type ReadonlyProps = BaseProps & {
-  /** Read-only mode: renders a disabled input with reduced opacity */
   disabled: true;
   value: string;
   children?: never;
@@ -21,7 +18,6 @@ type ReadonlyProps = BaseProps & {
 type EditableProps = BaseProps & {
   disabled?: false;
   value?: never;
-  /** Provide the actual <input>, <select>, or <textarea> as a child */
   children: ReactNode;
 };
 

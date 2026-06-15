@@ -19,7 +19,6 @@ type Props = {
 
 export const Sidebar = ({filters, onToggle, filterGroups, addLabel, onAdd}: Props) => (
     <aside className="sidebar">
-        {/*<span className="sidebar-title">Фільтри</span>*/}
 
         {filterGroups.map(fg => (
             fg.type === 'select'
