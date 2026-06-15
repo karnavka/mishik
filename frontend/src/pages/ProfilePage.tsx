@@ -606,6 +606,10 @@ const ShelterEventsTab = () => {
         name: '',
         description: '',
         dateOfEvent: '',
+        city: '',
+        region: '',
+        street: '',
+
     });
 
     useEffect(() => {
