@@ -29,13 +29,15 @@ export const LoginModal = ({ onClose }: Props) => {
   const [shelterRegion,  setShelterRegion]  = useState('');
   const [shelterStreet,  setShelterStreet]  = useState('');
   const [adoptionConditions,setAdoptionConditions]= useState('');
-  const [socialLinks,       setSocialLinks]       = useState('');
+  const [shelterInstagram, setShelterInstagram] = useState('');
+ const [shelterFacebook,  setShelterFacebook]  = useState('');
+ const [shelterTelegram,  setShelterTelegram]  = useState('');
 
   const reset = () => {
     setUsername(''); setPassword(''); setConfirmPassword(''); setError('');
     setFirstName(''); setLastName(''); setPatronymic(''); setSex('UNKNOWN'); setUserPhone('');
     setShelterName(''); setShelterPhone(''); setShelterCity(''); setShelterRegion(''); setShelterStreet('');
-    setAdoptionConditions(''); setSocialLinks('');
+    setAdoptionConditions(''); setShelterInstagram(''); setShelterFacebook(''); setShelterTelegram('');
   };
 
   const switchTab = (t: Tab) => { setTab(t); reset(); };
@@ -85,7 +87,7 @@ export const LoginModal = ({ onClose }: Props) => {
         street: shelterStreet || undefined,
       },
             adoptionConditions: adoptionConditions || undefined,
-            socialLinks: socialLinks || undefined,
+            socialLinks: [shelterInstagram, shelterFacebook, shelterTelegram].filter(Boolean).join('|') || undefined,
             };
 
 
@@ -220,8 +222,14 @@ export const LoginModal = ({ onClose }: Props) => {
         <textarea style={{ ...inp, minHeight:72, resize:'vertical' }}
          placeholder="Умови усиновлення" value={adoptionConditions}
          onChange={e => setAdoptionConditions(e.target.value)} />
-        <input style={inp} placeholder="Соціальні мережі / посилання" value={socialLinks}
-         onChange={e => setSocialLinks(e.target.value)} />
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
+  <input style={inp} placeholder="Instagram" value={shelterInstagram}
+    onChange={e => setShelterInstagram(e.target.value)} />
+  <input style={inp} placeholder="Facebook" value={shelterFacebook}
+    onChange={e => setShelterFacebook(e.target.value)} />
+</div>
+<input style={inp} placeholder="Telegram (https://t.me/...)" value={shelterTelegram}
+  onChange={e => setShelterTelegram(e.target.value)} />
         </>
       )}
           </>

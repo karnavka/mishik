@@ -1,7 +1,7 @@
 import type { Organization } from "../types";
 import { useNavigate } from 'react-router-dom';
 import { isLoggedIn } from '../utils/auth';
-import {BadgeWithIcon, CancelIcon} from "../styles/elements.tsx";
+import { BadgeWithIcon, CancelIcon } from "../styles/elements.tsx";
 
 type Props = {
     org: Organization;
@@ -12,9 +12,14 @@ type Props = {
 export const ShelterDetail = ({ org, onBack, onLoginRequest }: Props) => {
     const navigate = useNavigate();
 
-    const addressQuery = [org.street, org.city, org.region]
-        .filter(Boolean)
-        .join(', ');
+    const [instagram, facebook, telegram] = (() => {
+        if (!org.socialLinks) return [null, null, null];
+        const parts = org.socialLinks.split('|');
+        return [parts[0] || null, parts[1] || null, parts[2] || null];
+    })();
+
+    const addressParts = [org.street, org.city, org.region].filter(Boolean);
+    const addressQuery = addressParts.join(', ');
 
     const mapSrc = addressQuery
         ? `https://maps.google.com/maps?q=${encodeURIComponent(addressQuery)}&output=embed&z=15`
@@ -31,13 +36,17 @@ export const ShelterDetail = ({ org, onBack, onLoginRequest }: Props) => {
         });
     };
 
+    const handleCall = () => {
+        if (org.phoneNumber) window.location.href = `tel:${org.phoneNumber}`;
+    };
+
     return (
         <div className="detail-page">
             <button className="detail-back" onClick={onBack}><CancelIcon/></button>
 
             <div className="detail-card">
 
-                {/* LEFT*/}
+                {/* LEFT */}
                 <div className="detail-left shelter-map-col">
                     {mapSrc ? (
                         <iframe
@@ -57,10 +66,9 @@ export const ShelterDetail = ({ org, onBack, onLoginRequest }: Props) => {
                     )}
                 </div>
 
-                {/* RIGHT*/}
+                {/* RIGHT */}
                 <div className="detail-body">
 
-                    {/* header: logo + name + address */}
                     <div className="shelter-header">
                         <div className="shelter-logo">
                             {org.imageUrl
@@ -70,58 +78,56 @@ export const ShelterDetail = ({ org, onBack, onLoginRequest }: Props) => {
                         </div>
                         <div className="shelter-header-text">
                             <h2 className="detail-name" style={{ marginBottom: 4 }}>{org.name}</h2>
-                            {addressQuery && (
-                                <BadgeWithIcon
-                                imgsrc= {"/images/location.png"}
-                                label = {org.city}
-                                />
-
+                            {addressParts.length > 0 && (
+                                <BadgeWithIcon imgsrc="/images/location.png" label={addressParts[0]} />
                             )}
                         </div>
                     </div>
 
-
                     <div className="detail-general">
                         <div className="detail-general-row">
                             <span className="detail-general-label">Адреса</span>
-                            <span>
-                                {org.region} {org.city? org.city : '-'} {org.street}
-                            </span>
+                            <span>{addressQuery || '—'}</span>
                         </div>
                         <div className="detail-general-row">
                             <span className="detail-general-label">Тел.</span>
-                            <span>{org.phoneNumber? org.phoneNumber : '-'}</span>
+                            <span>{org.phoneNumber || '—'}</span>
                         </div>
                     </div>
 
                     {org.adoptionConditions && (
                         <p className="detail-description">{org.adoptionConditions}</p>
                     )}
-                    {/*/!* badges *!/*/}
-                    {/*<div className="badges">*/}
-                    {/*    {org.type   && <span className="badge">{org.type}</span>}*/}
-                    {/*    {org.city   && <span className="badge">{org.city}</span>}*/}
-                    {/*    {org.region && <span className="badge">{org.region}</span>}*/}
-                    {/*</div>*/}
+                    {(instagram || facebook || telegram) && (
+                        <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginTop: 8 }}>
+                            {instagram && (
+                                <a href={instagram} target="_blank" rel="noopener noreferrer"
+                                    style={{ fontSize: 26, textDecoration: 'none', lineHeight: 1 }}
+                                    title="Instagram">інст</a>
+                            )}
+                            {facebook && (
+                                <a href={facebook} target="_blank" rel="noopener noreferrer"
+                                    style={{ fontSize: 26, textDecoration: 'none', lineHeight: 1 }}
+                                    title="Facebook">фейсбук</a>
+                            )}
+                            {telegram && (
+                                <a href={telegram} target="_blank" rel="noopener noreferrer"
+                                    style={{ fontSize: 26, textDecoration: 'none', lineHeight: 1 }}
+                                    title="Telegram">тг</a>
+                            )}
+                        </div>
+                    )}
 
-                    {/*/!* info rows *!/*/}
-                    {/*<div className="detail-fields">*/}
-
-                    {/*    {org.phoneNumber        && <Row label="Тел."      value={org.phoneNumber} />}*/}
-                    {/*    {org.adoptionConditions && <Row label="Умови"     value={org.adoptionConditions} />}*/}
-                    {/*    {org.donationDetails?.recipientName && (*/}
-                    {/*        <Row label="Отримувач" value={org.donationDetails.recipientName} />*/}
-                    {/*    )}*/}
-                    {/*    {org.donationDetails?.iban && (*/}
-                    {/*        <Row label="IBAN" value={org.donationDetails.iban} />*/}
-                    {/*    )}*/}
-                    {/*</div>*/}
-
-                    {/* buttons */}
+                    {/* Кнопки дій */}
                     <div className="card-actions" style={{ marginTop: 'auto', paddingTop: 16 }}>
                         <button className="btn-ghost" onClick={handleViewAnimals}>
                             🐾 Переглянути тварин
                         </button>
+                        {org.phoneNumber && (
+                            <button className="btn-ghost" onClick={handleCall}>
+                                ☏ Зателефонувати
+                            </button>
+                        )}
                         <button className="btn-primary" onClick={handleDonate}>
                             Задонатити
                         </button>
@@ -131,10 +137,3 @@ export const ShelterDetail = ({ org, onBack, onLoginRequest }: Props) => {
         </div>
     );
 };
-
-const Row = ({ label, value }: { label: string; value: string }) => (
-    <div className="card-field">
-        <span>{label}</span>{value}
-    </div>
-);
-

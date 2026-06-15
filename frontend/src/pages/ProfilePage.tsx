@@ -26,7 +26,8 @@ type ShelterInfo = {
   id: number; name: string; phoneNumber: string;
   adoptionConditions: string; login: string;
   city?: string; region?: string; street?: string;
-  socialLinks?: string; phoneVerified?: boolean;
+  instagram?: string; facebook?: string; telegram?: string;
+  phoneVerified?: boolean;
 };
 type Animal = {
   id: number; name: string; age: number; height: number;
@@ -216,25 +217,38 @@ const ShelterInfoTab = () => {
   const [info, setInfo] = useState<ShelterInfo | null>(null);
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState<ShelterProfileFormState>({
-    name: '', phoneNumber: '', adoptionConditions: '', socialLinks: '',
-    address: { city: '', region: '', street: '' }, 
+    name: '', phoneNumber: '', instagram: '', facebook: '', telegram: '',
+    adoptionConditions: '',
+    address: { city: '', region: '', street: '' },
   });
   const [saved, setSaved] = useState(false);
 
-  useEffect(() => {
-    authFetch('http://localhost:8080/api/shelters/me')
-      .then(r => r.json()).then(setInfo).catch(() => {});
-  }, []);
+const parseSocialLinks = (raw: string | undefined) => {
+  if (!raw) return { instagram: '', facebook: '', telegram: '' };
+  const [instagram = '', facebook = '', telegram = ''] = raw.split('|');
+  return { instagram, facebook, telegram };
+};
 
+useEffect(() => {
+  authFetch('http://localhost:8080/api/shelters/me')
+    .then(r => r.json())
+    .then(data => {
+      const socials = parseSocialLinks(data.socialLinks);
+      setInfo({ ...data, ...socials });
+    })
+    .catch(() => {});
+}, []);
 
   const startEdit = () => {
     if (!info) return;
     setForm({
       name:               info.name               ?? '',
       phoneNumber:        info.phoneNumber        ?? '',
+      instagram:          info.instagram          ?? '',
+      facebook:           info.facebook           ?? '',
+      telegram:           info.telegram           ?? '',
       adoptionConditions: info.adoptionConditions ?? '',
-      socialLinks:        info.socialLinks        ?? '',
-      address: {                      
+      address: {
         city:   info.city   ?? '',
         region: info.region ?? '',
         street: info.street ?? '',
@@ -243,17 +257,22 @@ const ShelterInfoTab = () => {
     setEditing(true);
   };
 
- const save = async () => {
+  const save = async () => {
+    const payload = {
+      ...form,
+    socialLinks: [form.instagram, form.facebook, form.telegram].join('|'),    };
     await authFetch('http://localhost:8080/api/shelters/me', {
       method: 'PUT',
-      body: JSON.stringify(form), 
+      body: JSON.stringify(payload),
     });
     setInfo(prev => prev ? {
       ...prev,
       name:               form.name,
       phoneNumber:        form.phoneNumber,
       adoptionConditions: form.adoptionConditions,
-      socialLinks:        form.socialLinks,
+      instagram:          form.instagram,
+      facebook:           form.facebook,
+      telegram:           form.telegram,
       city:               form.address.city,
       region:             form.address.region,
       street:             form.address.street,
@@ -262,9 +281,11 @@ const ShelterInfoTab = () => {
     setTimeout(() => setSaved(false), 2500);
   };
 
-  if (!info) return <div style={{ color: 'var(--text-muted)', fontSize: 14, padding: 20, textAlign: 'center' }}>Завантаження...</div>;
-
-  const hasPhone = !!info.phoneNumber;
+  if (!info) return (
+    <div style={{ color: 'var(--text-muted)', fontSize: 14, padding: 20, textAlign: 'center' }}>
+      Завантаження...
+    </div>
+  );
 
   if (editing)
     return (
@@ -274,35 +295,35 @@ const ShelterInfoTab = () => {
       />
     );
 
+  const hasPhone = !!info.phoneNumber;
+  const addressDisplay = [info.street, info.city, info.region].filter(Boolean).join(', ');
+
   return (
     <div style={section}>
-      {!hasPhone && <PhoneRequiredNotice message="Для додавання тварин у базу необхідно вказати номер телефону притулку." />}
+      {!hasPhone && (
+        <PhoneRequiredNotice message="Для додавання тварин у базу необхідно вказати номер телефону притулку." />
+      )}
 
-      {/* Row 1: login + location */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
         <FormField label="Логін" disabled value={info.login} />
-        {(info.city || info.region) && (
-          <FormField label="Місто / Регіон" disabled value={[info.city, info.region].filter(Boolean).join(', ')} />
-        )}
       </div>
 
-      {/* Name */}
       <FormField label="Назва притулку" disabled value={info.name ?? '—'} />
 
-      {/* Row 2: phone + social */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
         <FormField label="Телефон" disabled value={info.phoneNumber || '—'} />
-        <FormField label="Соц. мережі" disabled value={info.socialLinks || '—'} />
       </div>
 
-      {/* Address */}
-      <FormField label="Адреса" disabled value={info.city && info.region && info.street ? [info.city, info.region, info.street].filter(Boolean).join(', ') : '—'} />
+      <FormField label="Адреса" disabled value={addressDisplay || '—'} />
 
-      {/* Adoption conditions */}
       <div style={fieldRow}>
         <span style={lbl}>Умови усиновлення</span>
         <FTextarea value={info.adoptionConditions ?? '—'} disabled minHeight={80} resize="none" />
       </div>
+
+      <FormField label="Instagram" disabled value={info.instagram || '—'} />
+      <FormField label="Facebook"  disabled value={info.facebook  || '—'} />
+      <FormField label="Telegram"  disabled value={info.telegram  || '—'} />
 
       <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
         <button className="btn-ghost" style={{ alignSelf: 'flex-start' }} onClick={startEdit}>⛏︎</button>
