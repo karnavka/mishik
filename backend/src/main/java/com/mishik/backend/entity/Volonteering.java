@@ -16,7 +16,7 @@ import jakarta.persistence.ManyToOne;
 public class Volonteering {
     @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
     private String name;
     private String description;
 
@@ -25,15 +25,15 @@ public class Volonteering {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "by_user", nullable = false)
-    private User user;
+    private Account account;
 
-     private LocalDate dateOfEvent;
+    private LocalDate dateOfEvent;
 
-    public Long getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -61,12 +61,12 @@ public class Volonteering {
         this.description = description;
     }
 
-    public User getUser() {
-        return user;
+    public Account getAccount() {
+        return account;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setAccount(Account account) {
+        this.account = account;
     }
 
     public LocalDate getDateOfEvent() {

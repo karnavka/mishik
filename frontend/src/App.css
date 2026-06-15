@@ -18,8 +18,10 @@
     --badge-border: #B5C56D;
     --badge-text:   #666666;
     --btn-ghost-text: #555555;
-
     --card-avatar-bg: #faf2f5;
+    /*--bg-image: url('/Users/viravoznuk/mishik/frontend/public/images/aaa.jpg');*/
+
+
 
     --pink-dark: #874f5f;
     --pink-primary: #E8A4B5;
@@ -67,6 +69,11 @@
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+/*    background-image: var(--bg-image);*/
+/*background-size: contain;*/
+/*    background-position: center;*/
+/*background-repeat: repeat;*/
     background: var(--bg);
     color: var(--text);
     transition: background .2s, color .2s;

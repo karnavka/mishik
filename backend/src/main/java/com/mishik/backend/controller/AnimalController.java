@@ -83,10 +83,9 @@ public class AnimalController {
                 .map(this::toMap)
                 .toList();
     }
-
-    //просто допоміжний метод для конвертації сутності в Map
-    private Map<String, Object> toMap(Animal a) {
-        Map<String, Object> m = new HashMap<>();
+//просто допоміжний метод для конвертації сутності в Map
+private Map<String, Object> toMap(Animal a) {
+    Map<String, Object> m = new HashMap<>();
 
         m.put("id", a.getId());
         m.put("name", a.getName());
@@ -106,8 +105,8 @@ public class AnimalController {
         m.put("shelterDonationDetails", s != null ? toMap(s.getDonationDetails()) : null);
         m.put("city", s != null && s.getAddress() != null ? s.getAddress().getCity() : null);
 
-        return m;
-    }
+    return m;
+}
 
     //тварина за id
     private Map<String, Object> toMap(DonationDetails d) {
@@ -142,6 +141,7 @@ public class AnimalController {
         result.put("url", "/images/" + filename);
         return result;
     }
+
 
 
 }
