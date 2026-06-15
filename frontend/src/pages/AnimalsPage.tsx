@@ -1,5 +1,5 @@
 import {useState, useMemo, useEffect} from 'react';
-import type {Animal} from '../types';
+import type {Animal, Organization} from '../types';
 import {useFetch} from '../api/fetch';
 import {AnimalCard} from '../components/animalCard';
 import {Sidebar} from '../components/Sidebar';
@@ -8,6 +8,7 @@ import {useLocation} from "react-router-dom";
 import {Footer} from "../components/Footer.tsx";
 import {TYPE_ALIASES} from "../types";
 import { useAuth } from '../api/useAuth';
+import {authFetch} from "../utils/api.ts";
 
 type Props = { onLoginRequest: () => void };
 
