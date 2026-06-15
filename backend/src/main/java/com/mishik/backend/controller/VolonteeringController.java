@@ -1,6 +1,8 @@
 package com.mishik.backend.controller;
 
+import com.mishik.backend.entity.Account;
 import com.mishik.backend.entity.Volonteering;
+import com.mishik.backend.repository.AccountRepository;
 import com.mishik.backend.repository.VolonteeringRepository;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -15,9 +17,11 @@ import java.util.Map;
 public class VolonteeringController {
 
     private final VolonteeringRepository repository;
+    private final AccountRepository accountRepository;
 
-    public VolonteeringController(VolonteeringRepository repository) {
+    public VolonteeringController(VolonteeringRepository repository, AccountRepository accountRepository) {
         this.repository = repository;
+        this.accountRepository = accountRepository;
     }
 
     // -------------------------------
@@ -51,6 +55,16 @@ public class VolonteeringController {
                 .toList();
     }
 
+    @GetMapping("/me")
+    public List<Map<String, Object>> getMine(Authentication auth) {
+        Account account = resolveAccount(auth);
+
+        return repository.findByAccount_Id(account.getId())
+                .stream()
+                .map(this::toMap)
+                .toList();
+    }
+
   
     // просто допоміжний метод для конвертації сутності в Map
     private Map<String, Object> toMap(Volonteering v) {
@@ -62,9 +76,10 @@ public class VolonteeringController {
         m.put("description", v.getDescription());
         m.put("dateOfEvent", v.getDateOfEvent());
 
-        if (v.getUser() != null) {
-            m.put("userId", v.getUser().getId());
-            m.put("userName", v.getUser().getFirstName());
+        if (v.getAccount() != null) {
+            m.put("accountId", v.getAccount().getId());
+            m.put("organizerName", v.getAccount().getLogin());
+            m.put("organizerRole", v.getAccount().getRole());
         }
 
         if (v.getAddress() != null) {
@@ -82,9 +97,22 @@ public class VolonteeringController {
     @PostMapping
     public Map<String, Object> create(@RequestBody Volonteering v, Authentication auth) {
 
-        v.setId(null);
-        repository.save(v);
+        System.out.println("name = " + v.getName());
+        System.out.println("description = " + v.getDescription());
+        System.out.println("date = " + v.getDateOfEvent());
 
-        return Map.of("status", "created");
+        Account account = resolveAccount(auth);
+
+        v.setId(null);
+        v.setAccount(account);
+
+        Volonteering saved = repository.save(v);
+
+        return Map.of("status", "created", "event", toMap(saved));
+    }
+
+    private Account resolveAccount(Authentication auth) {
+        return accountRepository.findByLogin(auth.getName())
+                .orElseThrow(() -> new RuntimeException("Account not found"));
     }
 }

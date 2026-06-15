@@ -43,6 +43,9 @@ public class SecurityConfig {
                         .requestMatchers("/images/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
 
+                        .requestMatchers(HttpMethod.GET, "/api/volunteering/me")
+                        .hasAnyRole("USER", "SHELTER")
+
                         // ========================
                         // PUBLIC READ ONLY
                         // ========================
@@ -55,6 +58,7 @@ public class SecurityConfig {
                                 "/api/clinics/**",
                                 "/api/animal-types",
                                 "/api/animal-types/**",
+                                "/api/volunteering",
                                 "/images/**"
                         ).permitAll()
 
@@ -63,9 +67,11 @@ public class SecurityConfig {
                         // ========================
                         .requestMatchers(HttpMethod.POST,
                                 "/api/adoption-requests/**",
-                                "/api/volunteering/**",
                                 "/api/donations/**"
                         ).hasRole("USER")
+
+                        .requestMatchers(HttpMethod.POST, "/api/volunteering/**")
+                        .hasAnyRole("USER", "SHELTER")
 
                         .requestMatchers(HttpMethod.DELETE,
                                 "/api/adoption-requests/**",

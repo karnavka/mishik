@@ -7,13 +7,14 @@ import { authFetch } from '../utils/api';
 import { AnimalCard } from '../components/animalCard';
 import { inp, section, fieldRow, lbl, STATUS } from '../utils/Profilestyles';
 import type { StatusKey } from '../utils/Profilestyles';
-import { FormField, FTextarea } from '../components/FormField';
+import {FInput, FormField, FTextarea } from '../components/FormField';
 import { AnimalForm, EMPTY_ANIMAL_FORM } from '../components/AnimalForm';
 import type { AnimalFormState, AnimalTypeOption } from '../components/AnimalForm';
 import { UserProfileForm }    from '../components/UserProfileForm';
 import type { UserProfileFormState } from '../components/UserProfileForm';
 import { ShelterProfileForm } from '../components/ShelterProfileForm';
 import type { ShelterProfileFormState } from '../components/ShelterProfileForm';
+
 
 type UserInfo = {
   id: number; firstName: string; lastName: string;
@@ -39,6 +40,19 @@ type Request = {
 type FavAnimal = {
   id: number; name: string; animalType: string; shelterId: number;
   sex: string; age?: number; description?: string; shelterName?: string;
+};
+type Event = {
+    id: number;
+    name: string;
+    description: string;
+    dateOfEvent: string;
+    city?: string;
+    organizerName?: string;
+};
+const EMPTY_EVENT = {
+    name: '',
+    description: '',
+    dateOfEvent: '',
 };
 
 const PhoneRequiredNotice = ({ message }: { message: string }) => (
@@ -584,7 +598,167 @@ const UserFavoritesTab = ({ favAnimals, favorites, onToggleFavorite, loading }: 
     </Grid2>
   );
 };
+const ShelterEventsTab = () => {
+    const [events, setEvents] = useState<Event[]>([]);
+    const [showAdd, setShowAdd] = useState(false);
 
+    const [form, setForm] = useState({
+        name: '',
+        description: '',
+        dateOfEvent: '',
+    });
+
+    useEffect(() => {
+        authFetch('http://localhost:8080/api/volunteering/me')
+            .then(r => r.json())
+            .then(data => setEvents(Array.isArray(data) ? data : []))
+            .catch(() => {});
+    }, []);
+
+    const addEvent = async () => {
+        const res = await authFetch(
+            'http://localhost:8080/api/volunteering',
+            {
+                method: 'POST',
+                body: JSON.stringify(form),
+            }
+        );
+
+        const data = await res.json();
+
+        if (data.event) {
+            setEvents(prev => [...prev, data.event]);
+
+            setForm({
+                name: '',
+                description: '',
+                dateOfEvent: '',
+            });
+
+            setShowAdd(false);
+        }
+    };
+
+    return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {!showAdd && (
+                <button
+                    className="btn-primary"
+                    style={{ alignSelf: 'flex-start' }}
+                    onClick={() => setShowAdd(true)}
+                >
+                    ➕ Додати подію
+                </button>
+            )}
+
+            {showAdd && (
+                <div style={section}>
+                    <div style={fieldRow}>
+                        <span style={lbl}>Назва</span>
+                        <FInput
+                            value={form.name}
+                            onChange={e =>
+                                setForm({
+                                    ...form,
+                                    name: e.target.value,
+                                })
+                            }
+                        />
+                    </div>
+                    <div style={fieldRow}>
+                        <span style={lbl}>Дата</span>
+                        <FInput
+                            type="date"
+                            value={form.dateOfEvent}
+                            onChange={e =>
+                                setForm({
+                                    ...form,
+                                    dateOfEvent: e.target.value,
+                                })
+                            }
+                        />
+                    </div>
+
+                    <div style={fieldRow}>
+                        <span style={lbl}>Опис</span>
+                        <FTextarea
+                            value={form.description}
+                            onChange={e =>
+                                setForm({
+                                    ...form,
+                                    description: e.target.value,
+                                })
+                            }
+                        />
+                    </div>
+
+                    <div style={{ display: 'flex', gap: 8 }}>
+                        <button
+                            className="btn-primary"
+                            onClick={addEvent}
+                        >
+                            Зберегти
+                        </button>
+
+                        <button
+                            className="btn-ghost"
+                            onClick={() => setShowAdd(false)}
+                        >
+                            Скасувати
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {events.length === 0 && !showAdd && (
+                <div
+                    style={{
+                        textAlign: 'center',
+                        padding: '40px 20px',
+                        color: 'var(--text-muted)',
+                    }}
+                >
+                    Немає створених подій
+                </div>
+            )}
+
+            <Grid2>
+                {events.map(ev => (
+                    <div
+                        key={ev.id}
+                        style={{
+                            border: '1px solid var(--border)',
+                            borderRadius: 12,
+                            padding: 16,
+                            background: 'var(--surface)',
+                        }}
+                    >
+                        <div
+                            style={{
+                                fontWeight: 600,
+                                marginBottom: 8,
+                            }}
+                        >
+                            📅 {ev.name}
+                        </div>
+
+                        <div
+                            style={{
+                                fontSize: 13,
+                                color: 'var(--text-muted)',
+                                marginBottom: 8,
+                            }}
+                        >
+                            {new Date(ev.dateOfEvent).toLocaleDateString('uk-UA')}
+                        </div>
+
+                        <div>{ev.description}</div>
+                    </div>
+                ))}
+            </Grid2>
+        </div>
+    );
+};
 const ROLE_META: Record<string, { text: string; color: string }> = {
   ROLE_ADMIN: { text: '👑 Адміністратор', color: '#9b59b6' },
   MODERATOR:  { text: '🛡️ Модератор',     color: '#3498db' },
@@ -660,8 +834,8 @@ export const ProfilePage = () => {
 
   const isShelter = role === 'ROLE_SHELTER';
   const tabs = isShelter
-    ? [{ label: 'Про притулок', icon: '🏠' }, { label: 'Заявки', icon: '📬' }, { label: 'Тварини', icon: '🐾' }]
-    : [{ label: 'Про мене', icon: '👤' }, { label: 'Уподобані', icon: '♡' }, { label: 'Мої заявки', icon: '📋' }];
+    ? [{ label: 'Про притулок', icon: '🏠' }, { label: 'Заявки', icon: '📬' }, { label: 'Тварини', icon: '🐾' }, { label: 'Мої події', icon: '📅' }]
+    : [{ label: 'Про мене', icon: '👤' }, { label: 'Уподобані', icon: '♡' }, { label: 'Мої заявки', icon: '📋' },  { label: 'Мої події', icon: '📅' }] ;
 
   const rl = role ? ROLE_META[role] : null;
 
@@ -769,7 +943,8 @@ export const ProfilePage = () => {
         )}
 
         {!isShelter && tab === 2 && <UserRequestsTab />}
-
+          {isShelter && tab === 3 && <ShelterEventsTab />}
+          {!isShelter && tab === 3 && <ShelterEventsTab />}
         {isShelter && tab === 0 && <ShelterInfoTab />}
         {isShelter && tab === 1 && <ShelterRequestsTab />}
         {isShelter && tab === 2 && <ShelterAnimalsTab />}
