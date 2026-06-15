@@ -55,6 +55,17 @@
 }
 .filter-opt:hover:not(.selected) { background: var(--filter-hover); }
 
+@media (max-width: 700px) {
+
+    .animal-filter{
+        min-width: 200px !important;
+    }
+
+    .filter-opts-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
+
 /*.add-btn {*/
 /*    margin-top: auto;*/
 /*    padding: 8px 12px;*/

@@ -12,14 +12,16 @@
     --text-btn: #666666;
 
     --filter-sel: #eaf6c6;
-    --filter-hover: #faeaed;
+    --filter-hover: #f8f8f8;
     --input-bg:     #ffffff;
     --btn-hover:    #f5f5f5;
     --badge-border: #B5C56D;
     --badge-text:   #666666;
     --btn-ghost-text: #555555;
-    --card-avatar-bg: #f0f0f0;
-    --bg-image: url('/Users/viravoznuk/mishik/frontend/public/images/aaa.jpg');
+    --card-avatar-bg: #faf2f5;
+    /*--bg-image: url('/Users/viravoznuk/mishik/frontend/public/images/aaa.jpg');*/
+
+
 
     --pink-dark: #874f5f;
     --pink-primary: #E8A4B5;
@@ -36,21 +38,20 @@
 [data-theme="dark"] {
     --bg:           #1a1a1a;
     --surface:      #242424;
-    --border:       #333333;
-    --border-hover: #555555;
+    --border: #313522;
+    --border-hover: #495034;
     --text:         #eeeeee;
     --text-sub:     #999999;
     --text-muted:   #666666;
     --text-btn:     #aaaaaa;
-    --filter-sel:   #2e2e2e;
-    --filter-hover: #2a2a2a;
+    --filter-sel: #3c2e32;
+    --filter-hover: #292122;
     --input-bg:     #2e2e2e;
     --btn-hover:    #2e2e2e;
     --badge-border: #444444;
     --badge-text:   #999999;
     --btn-ghost-text: #aaaaaa;
     --card-avatar-bg: #2e2e2e;
-    --bg-image: url('/Users/viravoznuk/mishik/frontend/public/images/bbb.jpg');
     --pink-primary: #874f5f;
     --pink-soft: #977a81;
 }
@@ -69,10 +70,11 @@
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 
-    background-image: var(--bg-image);
-background-size: contain;
-    background-position: center;
-background-repeat: repeat;
+/*    background-image: var(--bg-image);*/
+/*background-size: contain;*/
+/*    background-position: center;*/
+/*background-repeat: repeat;*/
+    background: var(--bg);
     color: var(--text);
     transition: background .2s, color .2s;
 }
@@ -241,99 +243,7 @@ background-repeat: repeat;
 }
 .btn-ghost:hover { background: var(--btn-hover); border-color: var(--border-hover); }
 
-/* Detail page */
-.detail-page {
-    padding: 24px 32px;
-    max-width: 3000px;
-    margin: 0 auto;
-}
 
-.detail-back {
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--color-text-muted, #666);
-    margin-bottom: 20px;
-    padding: 0;
-}
-
-.detail-back:hover { color: #111; }
-
-.detail-card {
-    display: flex;
-    flex-direction: column;
-    gap: 32px;
-    background: var(--color-card-bg, #e8f5e9);
-    border-radius: 20px;
-    overflow: hidden;
-    padding: 0;
-}
-
-.detail-photo {
-    width: 400px;
-    padding : 20px;
-    flex-shrink: 0;
-    min-height: 320px;
-    background: var(--color-photo-bg, #2e7d32);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.detail-photo img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.detail-photo-placeholder { font-size: 80px; }
-
-.detail-body {
-    padding: 28px 28px 28px 28px;
-    flex: 1;
-}
-
-.detail-name {
-    font-size: 26px;
-    font-weight: 800;
-    margin-bottom: 4px;
-}
-
-.detail-sub {
-    font-size: 14px;
-    color: #666;
-    margin-bottom: 12px;
-}
-
-.detail-fields {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    margin-bottom: 20px;
-}
-
-.detail-shelter {
-    background: rgba(46,125,50,0.1);
-    border-radius: 12px;
-    padding: 12px 16px;
-    margin-bottom: 8px;
-}
-
-.detail-shelter-title {
-    font-size: 11px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: #666;
-    margin-bottom: 4px;
-}
-
-.detail-shelter-name {
-    font-size: 15px;
-    font-weight: 700;
-}
 
 .donate-link {
     border-color: var(--border);
@@ -467,6 +377,19 @@ background-repeat: repeat;
     }
 
     .donate-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+.animal-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    align-content: start;
+}
+
+@media (max-width: 700px) {
+    .animal-grid {
         grid-template-columns: 1fr;
     }
 }

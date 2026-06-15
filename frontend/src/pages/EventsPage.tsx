@@ -71,6 +71,7 @@ export const EventsPage = ({ onLoginRequest }: Props) => {
 
     return (
         <div className="body">
+            <div className="animal-filter" style = {{padding:'16px 10px 10px 10px'}}>
             <Sidebar
                 filters={filters}
                 onToggle={toggle}
@@ -78,9 +79,10 @@ export const EventsPage = ({ onLoginRequest }: Props) => {
                 addLabel="+ Додати подію"
                 onAdd={onLoginRequest}
             />
+            </div>
 
             <div className="main">
-                <div className="search-bar">
+                <div className="search-bar" style = {{padding:'16px 40px 0 20px'}}>
                     <input
                         type="text"
                         placeholder="Пошук подій..."

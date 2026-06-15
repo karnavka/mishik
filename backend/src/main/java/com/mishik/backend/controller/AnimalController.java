@@ -28,10 +28,10 @@ public class AnimalController {
         this.repository = repository;
     }
 
- // -------------------------------
+    // -------------------------------
     // Приклад : GET /animals/shelter/1
     // Знаходження всіх тварин, які знаходяться в конкретному притулку
- // -------------------------------
+    // -------------------------------
     @GetMapping("/shelter/{id}")
     public List<Map<String, Object>> getByShelter(@PathVariable Long id) {
 
@@ -83,25 +83,27 @@ public class AnimalController {
                 .map(this::toMap)
                 .toList();
     }
-//просто допоміжний метод для конвертації сутності в Map 
+//просто допоміжний метод для конвертації сутності в Map
 private Map<String, Object> toMap(Animal a) {
     Map<String, Object> m = new HashMap<>();
 
-    m.put("id", a.getId());
-    m.put("name", a.getName());
-    m.put("age", a.getAge());
-    m.put("height", a.getHeight());
-    m.put("sex", a.getSex());
-    m.put("description", a.getDescription());
-    m.put("imageUrl", a.getImageUrl());
-    m.put("animalTypeId", a.getAnimalType() != null ? a.getAnimalType().getId() : null);
-    m.put("animalType", a.getAnimalType() != null ? a.getAnimalType().getUsefulInfo() : null);
+        m.put("id", a.getId());
+        m.put("name", a.getName());
+        m.put("age", a.getAge());
+        m.put("height", a.getHeight());
+        m.put("sex", a.getSex());
+        m.put("description", a.getDescription());
+        m.put("imageUrl", a.getImageUrl());
+        m.put("imageUrl2", a.getImageUrl2());
+        m.put("imageUrl3", a.getImageUrl3());
+        m.put("animalTypeId", a.getAnimalType() != null ? a.getAnimalType().getId() : null);
+        m.put("animalType", a.getAnimalType() != null ? a.getAnimalType().getUsefulInfo() : null);
 
-    Shelter s = a.getShelter();
-    m.put("shelterId", s != null ? s.getId() : null);
-    m.put("shelterName", s != null ? s.getName() : null);
-    m.put("shelterDonationDetails", s != null ? toMap(s.getDonationDetails()) : null);
-    m.put("city", s != null && s.getAddress() != null ? s.getAddress().getCity() : null);
+        Shelter s = a.getShelter();
+        m.put("shelterId", s != null ? s.getId() : null);
+        m.put("shelterName", s != null ? s.getName() : null);
+        m.put("shelterDonationDetails", s != null ? toMap(s.getDonationDetails()) : null);
+        m.put("city", s != null && s.getAddress() != null ? s.getAddress().getCity() : null);
 
     return m;
 }

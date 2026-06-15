@@ -5,9 +5,10 @@ import { RoleGuard } from './RoleGuard';
 import { authFetch } from '../utils/api';
 
 const EMOJI: Record<string, string> = {
-    кіт: '🐱', cat: '🐱',
-    пес: '🐶', dog: '🐶',
-    rabbit: '🐰', parrot: '🦜',
+    кіт: '🐱', cat: '🐱', кітик:'🐱',
+    пес: '🐶', dog: '🐶', песик: '🐶',
+    rabbit: '🐰', кролик: '🐰', кріль: '🐰',
+    parrot: '🦜',папужка: '🦜',
 };
 const animalEmoji = (s: string) => EMOJI[s?.toLowerCase()] ?? '🐾';
 
@@ -17,7 +18,7 @@ type Props = {
     onClick?: () => void;
     isFavorited?: boolean;
     onToggleFavorite?: (id: number) => void;
-    // режим кабінету притулку
+    requestedIds?: Set<number>;
     shelterMode?: boolean;
     onEdit?: () => void;
     onDelete?: () => void;
@@ -29,14 +30,17 @@ export const AnimalCard = ({
     onClick,
     isFavorited = false,
     onToggleFavorite,
+    requestedIds,
     shelterMode = false,
     onEdit,
     onDelete,
 }: Props) => {
     const [hovered,    setHovered]    = useState(false);
     const [requesting, setRequesting] = useState(false);
-    const [requested,  setRequested]  = useState(false);
+    const [justRequested, setJustRequested] = useState(false);
     const [error,      setError]      = useState<string | null>(null);
+
+    const requested = justRequested || (requestedIds?.has(animal.id) ?? false);
 
     const handleAdopt = async (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -51,9 +55,9 @@ export const AnimalCard = ({
             const text = await res.text();
             const data = text ? JSON.parse(text) : {};
             if (res.status === 403) { setError(data.message ?? 'Потрібен телефон'); return; }
-            if (res.status === 409) { setRequested(true); return; }
+            if (res.status === 409) { setJustRequested(true); return; }
             if (!res.ok)            { setError(data.message ?? 'Помилка сервера'); return; }
-            setRequested(true);
+            setJustRequested(true);
         } catch {
             setError('Помилка з\'єднання. Спробуйте ще раз.');
         } finally {
@@ -76,10 +80,6 @@ export const AnimalCard = ({
 
             <div className="card-body">
                 <div className="card-title">{animal.name}</div>
-
-                {/*<div className="card-sub">*/}
-                {/*    {[animal.animalType, animal.shelterName].filter(Boolean).join(' · ')}*/}
-                {/*</div>*/}
 
                 <div className="badges">
                     <span className="badge">{animal.animalType}</span>
@@ -142,6 +142,7 @@ export const AnimalCard = ({
                                     </button>
                                 }
                             >
+                                <RoleGuard roles={['ROLE_USER']}>
                                 <button
                                     className="btn-primary"
                                     onClick={handleAdopt}
@@ -155,9 +156,10 @@ export const AnimalCard = ({
                                 >
                                     {requesting ? 'Надсилання...' : requested ? '✓ Заявку подано' : 'Подати заявку'}
                                 </button>
+                              </RoleGuard>
                             </RoleGuard>
 
-                            <RoleGuard requireAuth>
+                            <RoleGuard requireAuth roles={['ROLE_USER']}>
                                 <button
                                     className="btn-ghost"
                                     onClick={(e) => { e.stopPropagation(); onToggleFavorite?.(animal.id); }}

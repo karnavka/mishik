@@ -1,111 +1,139 @@
-import type {Organization} from "../types";
+import type { Organization } from "../types";
 import { useNavigate } from 'react-router-dom';
 import { isLoggedIn } from '../utils/auth';
+import { BadgeWithIcon, CancelIcon } from "../styles/elements.tsx";
 
 type Props = {
     org: Organization;
     onBack: () => void;
     onLoginRequest?: () => void;
-
 };
 
-export const ShelterDetail = ({org,onBack,onLoginRequest}:Props) => {
+export const ShelterDetail = ({ org, onBack, onLoginRequest }: Props) => {
+    const navigate = useNavigate();
 
-    const addressQuery = [org.street, org.city, org.region]
-        .filter(Boolean)
-        .join(', ');
+    const [instagram, facebook, telegram] = (() => {
+        if (!org.socialLinks) return [null, null, null];
+        const parts = org.socialLinks.split('|');
+        return [parts[0] || null, parts[1] || null, parts[2] || null];
+    })();
+
+    const addressParts = [org.street, org.city, org.region].filter(Boolean);
+    const addressQuery = addressParts.join(', ');
 
     const mapSrc = addressQuery
         ? `https://maps.google.com/maps?q=${encodeURIComponent(addressQuery)}&output=embed&z=15`
         : null;
-
-    const navigate = useNavigate();
 
     const handleViewAnimals = () => {
         navigate('/', { state: { shelterId: String(org.id) } });
     };
 
     const handleDonate = () => {
-        if (!isLoggedIn()) {
-            onLoginRequest?.();
-            return;
-        }
-
+        if (!isLoggedIn()) { onLoginRequest?.(); return; }
         navigate('/donate', {
-            state: {
-                from: '/shelters',
-                shelterId: org.id,
-                shelterName: org.name,
-            },
+            state: { from: '/shelters', shelterId: org.id, shelterName: org.name },
         });
     };
 
-    return (
+    const handleCall = () => {
+        if (org.phoneNumber) window.location.href = `tel:${org.phoneNumber}`;
+    };
 
+    return (
         <div className="detail-page">
-            <button className="detail-back" onClick={onBack}>
-                ←
-            </button>
+            <button className="detail-back" onClick={onBack}><CancelIcon/></button>
 
             <div className="detail-card">
 
-                <div className="detail-photo">
-                    {
-                        org.imageUrl ? <img src={org.imageUrl}/> : <span className="detail-photo-placeholder"> 🏠 </span>
-                    }
-                </div>
-
-                <button className="btn-ghost" onClick={handleViewAnimals}>
-                    🐾 Переглянути тварин
-                </button>
-                <button className="btn-primary" onClick={handleDonate}>
-                    Задонатити притулку
-                </button>
-
-                <div className="detail-body">
-                    <h2 className="detail-name">{org.name}</h2>
-
-                    <div className="badges" style={{marginBottom: '12px'}}>
-                        {org.type && <span className="badge">{org.type}</span>}
-                        {org.city && <span className="badge">{org.city}</span>}
-                        {org.region && <span className="badge">{org.region}</span>}
-                    </div>
-
-                    <div className="detail-fields">
-                        {org.phoneNumber && <Row label="Тел." value={org.phoneNumber}/>}
-                        {org.street && <Row label="Адреса" value={[org.street, org.city].filter(Boolean).join(', ')}/>}
-                        {org.adoptionConditions && <Row label="Умови" value={org.adoptionConditions}/>}
-                        {org.donationDetails?.recipientName && <Row label="Отримувач" value={org.donationDetails.recipientName}/>}
-                        {org.donationDetails?.iban && <Row label="IBAN" value={org.donationDetails.iban}/>}
-                    </div>
-
-                    {/* Map */}
-                    {mapSrc && (
-                        <div className="detail-map">
-                            <div className="detail-shelter-title">📍 На мапі</div>
-                            <iframe
-                                src={mapSrc}
-                                width="100%"
-                                height="260"
-                                style={{ border: 'none', borderRadius: '12px', marginTop: '8px' }}
-                                loading="lazy"
-                                referrerPolicy="no-referrer-when-downgrade"
-                                title={`Карта: ${org.name}`}
-                            />
+                {/* LEFT */}
+                <div className="detail-left shelter-map-col">
+                    {mapSrc ? (
+                        <iframe
+                            src={mapSrc}
+                            style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
+                            loading="lazy"
+                            referrerPolicy="no-referrer-when-downgrade"
+                            title={`Карта: ${org.name}`}
+                        />
+                    ) : (
+                        <div className="shelter-no-map">
+                            <span style={{ fontSize: 48 }}>📍</span>
+                            <span style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 8 }}>
+                                Адреса не вказана
+                            </span>
                         </div>
                     )}
+                </div>
 
+                {/* RIGHT */}
+                <div className="detail-body">
+
+                    <div className="shelter-header">
+                        <div className="shelter-logo">
+                            {org.imageUrl
+                                ? <img src={org.imageUrl} alt={org.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 12 }} />
+                                : <img src='\images\shelters.png' alt={org.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 12 }}/>
+                            }
+                        </div>
+                        <div className="shelter-header-text">
+                            <h2 className="detail-name" style={{ marginBottom: 4 }}>{org.name}</h2>
+                            {addressParts.length > 0 && (
+                                <BadgeWithIcon imgsrc="/images/location.png" label={addressParts[0]} />
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="detail-general">
+                        <div className="detail-general-row">
+                            <span className="detail-general-label">Адреса</span>
+                            <span>{addressQuery || '—'}</span>
+                        </div>
+                        <div className="detail-general-row">
+                            <span className="detail-general-label">Тел.</span>
+                            <span>{org.phoneNumber || '—'}</span>
+                        </div>
+                    </div>
+
+                    {org.adoptionConditions && (
+                        <p className="detail-description">{org.adoptionConditions}</p>
+                    )}
+                   {(instagram || facebook || telegram) && (
+                <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginTop: 8 }}>
+                {instagram && (
+                    <a href={instagram} target="_blank" rel="noopener noreferrer" title="Instagram">
+                        <img src="src/assets/free-icon-instagram-717392.png" alt="Instagram" style={{ width: 28, height: 28, objectFit: 'contain' }} />
+                    </a>
+                )}
+                {facebook && (
+                    <a href={facebook} target="_blank" rel="noopener noreferrer" title="Facebook">
+                        <img src="src/assets/free-icon-facebook-circular-logo-20673.png" alt="Facebook" style={{ width: 28, height: 28, objectFit: 'contain' }} />
+                    </a>
+                )}
+                {telegram && (
+                    <a href={telegram} target="_blank" rel="noopener noreferrer" title="Telegram">
+                        <img src="src/assets/free-icon-telegram-4701496.png" alt="Telegram" style={{ width: 28, height: 28, objectFit: 'contain' }} />
+                    </a>
+                )}
+            </div>
+)}
+
+                    {/* Кнопки дій */}
+                    <div className="card-actions" style={{ marginTop: 'auto', paddingTop: 16 }}>
+                        <button className="btn-ghost" onClick={handleViewAnimals}>
+                            🐾 Переглянути тварин
+                        </button>
+                        {org.phoneNumber && (
+                            <button className="btn-ghost" onClick={handleCall}>
+                                ☏ Зателефонувати
+                            </button>
+                        )}
+                        <button className="btn-primary" onClick={handleDonate}>
+                            Задонатити
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
-
-
     );
 };
-
-const Row = ({ label, value }: { label: string; value: string }) => (
-    <div className="card-field">
-        <span>{label}</span>{value}
-    </div>
-);
-
