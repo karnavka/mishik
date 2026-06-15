@@ -184,7 +184,6 @@
     color: var(--text);
 }
 
-/* ── Shelter specific ── */
 .shelter-map-col {
     width: 45%;
     flex-shrink: 0;

@@ -177,7 +177,6 @@ export const RequestDetailPage = () => {
           </div>
         </Card>
 
-        {/* ── Вигляд для ЮЗЕРА: інфо про притулок + зв'язок ── */}
         {isUserView && (
           <Card title="🏠 Притулок">
             <InfoRow label="Назва" value={animal.shelterName} />
@@ -186,7 +185,6 @@ export const RequestDetailPage = () => {
           </Card>
         )}
 
-        {/* ── Вигляд для ПРИТУЛКУ: інфо про заявника + зв'язок ── */}
         {!isUserView && (
           <Card title="👤 Заявник">
             <InfoRow label="Логін"      value={user.login} />
@@ -196,7 +194,6 @@ export const RequestDetailPage = () => {
           </Card>
         )}
 
-        {/* Кнопки рішення — тільки для притулку і тільки PENDING */}
         {!isUserView && isShelter && status === 'PENDING' && (
           <Card title="⚖️ Рішення по заявці">
             <div style={{ display: 'flex', gap: 12 }}>
