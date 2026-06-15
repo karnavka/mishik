@@ -323,21 +323,25 @@ useEffect(() => {
       </div>
 
       <FormField label="Назва притулку" disabled value={info.name ?? '—'} />
+      
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
         <FormField label="Телефон" disabled value={info.phoneNumber || '—'} />
       </div>
 
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+      <FormField label="Instagram" disabled value={info.instagram || '—'} />
+      <FormField label="Facebook"  disabled value={info.facebook  || '—'} />
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+      <FormField label="Telegram"  disabled value={info.telegram  || '—'} />
+      </div>
       <FormField label="Адреса" disabled value={addressDisplay || '—'} />
 
       <div style={fieldRow}>
         <span style={lbl}>Умови усиновлення</span>
         <FTextarea value={info.adoptionConditions ?? '—'} disabled minHeight={80} resize="none" />
       </div>
-
-      <FormField label="Instagram" disabled value={info.instagram || '—'} />
-      <FormField label="Facebook"  disabled value={info.facebook  || '—'} />
-      <FormField label="Telegram"  disabled value={info.telegram  || '—'} />
 
       <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
         <button className="btn-ghost" style={{ alignSelf: 'flex-start' }} onClick={startEdit}>⛏︎</button>

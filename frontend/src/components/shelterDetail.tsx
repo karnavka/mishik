@@ -98,25 +98,25 @@ export const ShelterDetail = ({ org, onBack, onLoginRequest }: Props) => {
                     {org.adoptionConditions && (
                         <p className="detail-description">{org.adoptionConditions}</p>
                     )}
-                    {(instagram || facebook || telegram) && (
-                        <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginTop: 8 }}>
-                            {instagram && (
-                                <a href={instagram} target="_blank" rel="noopener noreferrer"
-                                    style={{ fontSize: 26, textDecoration: 'none', lineHeight: 1 }}
-                                    title="Instagram">інст</a>
-                            )}
-                            {facebook && (
-                                <a href={facebook} target="_blank" rel="noopener noreferrer"
-                                    style={{ fontSize: 26, textDecoration: 'none', lineHeight: 1 }}
-                                    title="Facebook">фейсбук</a>
-                            )}
-                            {telegram && (
-                                <a href={telegram} target="_blank" rel="noopener noreferrer"
-                                    style={{ fontSize: 26, textDecoration: 'none', lineHeight: 1 }}
-                                    title="Telegram">тг</a>
-                            )}
-                        </div>
-                    )}
+                   {(instagram || facebook || telegram) && (
+                <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginTop: 8 }}>
+                {instagram && (
+                    <a href={instagram} target="_blank" rel="noopener noreferrer" title="Instagram">
+                        <img src="src/assets/free-icon-instagram-717392.png" alt="Instagram" style={{ width: 28, height: 28, objectFit: 'contain' }} />
+                    </a>
+                )}
+                {facebook && (
+                    <a href={facebook} target="_blank" rel="noopener noreferrer" title="Facebook">
+                        <img src="src/assets/free-icon-facebook-circular-logo-20673.png" alt="Facebook" style={{ width: 28, height: 28, objectFit: 'contain' }} />
+                    </a>
+                )}
+                {telegram && (
+                    <a href={telegram} target="_blank" rel="noopener noreferrer" title="Telegram">
+                        <img src="src/assets/free-icon-telegram-4701496.png" alt="Telegram" style={{ width: 28, height: 28, objectFit: 'contain' }} />
+                    </a>
+                )}
+            </div>
+)}
 
                     {/* Кнопки дій */}
                     <div className="card-actions" style={{ marginTop: 'auto', paddingTop: 16 }}>
