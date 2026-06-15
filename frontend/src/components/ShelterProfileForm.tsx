@@ -13,6 +13,7 @@ export type ShelterProfileFormState = {
     region: string;
     street: string;
   };
+  imageUrl: string;
 };
 
 type Props = {
@@ -76,7 +77,31 @@ export const ShelterProfileForm = ({ form, setForm, onSave, onCancel }: Props) =
             onChange={e => setAddr('street', e.target.value)} />
         </FormField>
       </div>
+        <FormField label="Image URL" hint="optional">
+            <FInput
+                type="url"
+                value={form.imageUrl}
+                placeholder="https://example.com/photo.jpg"
+                onChange={e => set('imageUrl', e.target.value)}
+            />
+        </FormField>
 
+        {form.imageUrl && (
+            <div style={{
+                width: 120,
+                height: 120,
+                borderRadius: 12,
+                overflow: 'hidden',
+                border: '1px solid var(--border)',
+                background: 'var(--bg)',
+            }}>
+                <img
+                    src={form.imageUrl}
+                    alt=""
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                />
+            </div>
+        )}
       <FormField label="Умови усиновлення">
         <FTextarea value={form.adoptionConditions} minHeight={100} resize="vertical"
           onChange={e => set('adoptionConditions', e.target.value)} />

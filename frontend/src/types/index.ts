@@ -35,8 +35,9 @@ export interface Organization {
     street?: string;
     latitude?: number;
     longitude?: number;
-    imageUrl: string;
+    imageUrl?: string;
     hoursOfOperation?: string;
+    socialLinks?: string;
     donationDetails?: DonationDetails | null;
 }
 

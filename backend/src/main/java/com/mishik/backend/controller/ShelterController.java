@@ -115,7 +115,7 @@ public class ShelterController {
         shelter.setPhoneNumber((String) req.get("phoneNumber"));
         shelter.setAdoptionConditions((String) req.get("adoptionConditions"));
         shelter.setSocialLinks((String) req.get("socialLinks"));
-
+        shelter.setImageUrl(normalizeImageUrl(getString(req, "imageUrl", "imageURL", "image_url", "image")));
         Object addressObj = req.get("address");
         if (addressObj instanceof Map<?, ?> addressMap) {
             Address address = shelter.getAddress() != null ? shelter.getAddress() : new Address();
@@ -134,8 +134,8 @@ public class ShelterController {
             shelter.setDonationDetails(toDonationDetails(donationMap));
         }
 
-        repository.save(shelter);
-        return Map.of("status", "updated");
+        Shelter saved = repository.save(shelter);
+        return toMap(saved);
     }
 
     //отримати своїх тварин
@@ -365,6 +365,17 @@ public class ShelterController {
         }
 
         return imageUrl.trim();
+    }
+
+    private String getString(Map<String, Object> req, String... keys) {
+        for (String key : keys) {
+            Object value = req.get(key);
+            if (value instanceof String s) {
+                return s;
+            }
+        }
+
+        return null;
     }
 
     private Map<String, Object> toMap(Request r) {
